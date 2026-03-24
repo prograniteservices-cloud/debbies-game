@@ -20,6 +20,9 @@
 -   [x] Expand math game with Addition module for levels > 10 (2026-03-23)
 -   [x] Implement 3-4 letter word spelling logic (drag & drop) (2026-03-23)
 -   [x] Refine spelling logic: exact letters only and add TTS clue reading (2026-03-23)
+-   [x] Expand spelling word list to 20 words, 4-letter words at levels 5-10 and 15-20 (2026-03-23)
+-   [x] Show actual word as hint/TTS for levels 1-10, descriptive hints for levels 11-20 (2026-03-23)
+-   [x] Fix unicorn asset checkered background with CSS mix-blend-mode (2026-03-23)
 
 ### ✨ Phase 3: Visuals & Rewards
 -   [x] Create Unicorn animations and skins (2026-03-23)

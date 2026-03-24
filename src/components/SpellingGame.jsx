@@ -9,12 +9,33 @@ import {
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
+// Levels 1-10 (index 0-9): TTS reads and displays the actual WORD
+// Levels 11-20 (index 10-19): TTS reads and displays a descriptive HINT
 const WORDS = [
-  { word: "CAT", hint: "A furry pet" },
-  { word: "DOG", hint: "Man's best friend" },
-  { word: "SUN", hint: "Shines in the sky" },
-  { word: "STAR", hint: "Twinkles at night" },
-  { word: "MOON", hint: "Glowing in the night sky" }
+  // --- 3-letter words: levels 1-4 ---
+  { word: "CAT",  hint: "A furry pet that says meow" },
+  { word: "DOG",  hint: "Man's best friend, loves to fetch" },
+  { word: "SUN",  hint: "Shines bright in the sky" },
+  { word: "BEE",  hint: "A buzzing insect that makes honey" },
+  // --- 4-letter words: levels 5-10 ---
+  { word: "STAR", hint: "Twinkles at night in the sky" },
+  { word: "FROG", hint: "A green jumper that loves ponds" },
+  { word: "CAKE", hint: "Sweet treat for birthdays" },
+  { word: "BIRD", hint: "Has wings and can fly" },
+  { word: "FISH", hint: "Swims underwater and has fins" },
+  { word: "DUCK", hint: "A bird that says quack" },
+  // --- 3-letter words: levels 11-14 (hints only) ---
+  { word: "COW",  hint: "Gives milk on the farm" },
+  { word: "HAT",  hint: "You wear it on your head" },
+  { word: "HEN",  hint: "A bird that lays eggs" },
+  { word: "PIG",  hint: "A pink farm animal that oinks" },
+  // --- 4-letter words: levels 15-20 (hints only) ---
+  { word: "LEAF", hint: "Falls from trees in autumn" },
+  { word: "BEAR", hint: "A big furry creature in the woods" },
+  { word: "JUMP", hint: "What you do to get off the ground" },
+  { word: "BLUE", hint: "The color of the sky and ocean" },
+  { word: "RAIN", hint: "Falls from clouds on a wet day" },
+  { word: "KITE", hint: "You fly it in the wind on a string" },
 ];
 
 function DraggableLetter({ id, letter, disabled }) {
@@ -73,9 +94,15 @@ export default function SpellingGame({ onBack }) {
   const [placedLetters, setPlacedLetters] = useState({});
   const [lettersPool, setLettersPool] = useState([]);
   const [showReward, setShowReward] = useState(false);
-  
+
   const currentLevel = WORDS[currentWordIndex];
-  
+  // Levels 1-10 (index 0-9): show/speak the actual word
+  const isEarlyLevel = currentWordIndex < 10;
+  const spokenText = isEarlyLevel ? currentLevel.word.toLowerCase() : currentLevel.hint;
+  const displayText = isEarlyLevel
+    ? `The word is: ${currentLevel.word}`
+    : `Hint: ${currentLevel.hint}`;
+
   // Initialize the level
   useEffect(() => {
     initLevel();
@@ -84,10 +111,15 @@ export default function SpellingGame({ onBack }) {
 
   const playClueAudio = () => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop any pending speech
-      const utterance = new SpeechSynthesisUtterance(currentLevel.hint);
+      window.speechSynthesis.cancel();
+      const text = WORDS[currentWordIndex]
+        ? (currentWordIndex < 10
+            ? WORDS[currentWordIndex].word.toLowerCase()
+            : WORDS[currentWordIndex].hint)
+        : '';
+      const utterance = new SpeechSynthesisUtterance(text);
       utterance.pitch = 1.2;
-      utterance.rate = 0.9;
+      utterance.rate = 0.85;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -95,8 +127,6 @@ export default function SpellingGame({ onBack }) {
   const initLevel = () => {
     const word = WORDS[currentWordIndex].word;
     const scrambled = [...word].sort(() => Math.random() - 0.5);
-    
-    // Create unique IDs for draggable items
     const pool = scrambled.map((char, index) => ({ id: `pool-${char}-${index}`, letter: char }));
     setLettersPool(pool);
     setPlacedLetters({});
@@ -105,36 +135,30 @@ export default function SpellingGame({ onBack }) {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    if (!over) return; // Dropped outside
+    if (!over) return;
 
     const draggedLetter = active.data.current.letter;
     const expectedLetter = over.data.current.expectedLetter;
     const slotId = over.id;
 
     if (draggedLetter === expectedLetter && !placedLetters[slotId]) {
-      // Correct placement
       setPlacedLetters(prev => {
         const next = { ...prev, [slotId]: draggedLetter };
         checkWinCondition(next);
         return next;
       });
-      // Remove from pool
       setLettersPool(prev => prev.filter(item => item.id !== active.id));
-    } else {
-      // Incorrect, could play an error sound here
     }
   };
 
   const checkWinCondition = (currentPlaced) => {
     const word = WORDS[currentWordIndex].word;
     if (Object.keys(currentPlaced).length === word.length) {
-      // Won the level! Show reward
       setShowReward(true);
       setTimeout(() => {
         if (currentWordIndex < WORDS.length - 1) {
           setCurrentWordIndex(prev => prev + 1);
         } else {
-          // Finished all words
           onBack();
         }
       }, 3000);
@@ -144,17 +168,22 @@ export default function SpellingGame({ onBack }) {
   return (
     <div className="flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden bg-gradient-to-b from-purple-200 to-indigo-300 dark:from-slate-800 dark:to-indigo-950">
       <MagicalEffects isCelebrating={showReward} />
-      
+
       {/* Top Bar */}
       <div className="w-full max-w-4xl flex justify-between items-center bg-white/40 dark:bg-black/20 backdrop-blur-md p-4 rounded-3xl z-20">
-        <button 
+        <button
           onClick={onBack}
           className="p-3 bg-white/80 dark:bg-slate-800 rounded-full hover:bg-white transition-colors shadow-sm cursor-pointer"
         >
           <ArrowLeft className="w-6 h-6 text-slate-700 dark:text-slate-300" />
         </button>
         <div className="flex items-center gap-4">
-          <img src="/assets/unicorn_queen.png" alt="Unicorn Queen" className="w-12 h-12 rounded-full object-cover shrink-0 filter drop-shadow-md bg-white border-2 border-pink-400" />
+          <img
+            src="/assets/unicorn_queen.png"
+            alt="Unicorn Queen"
+            className="w-12 h-12 object-contain shrink-0 drop-shadow-lg"
+            style={{ mixBlendMode: 'multiply' }}
+          />
           <div>
             <h2 className="text-xl font-bold text-indigo-900 dark:text-indigo-100">Spelling Quest</h2>
             <p className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">Level {currentWordIndex + 1}/{WORDS.length}</p>
@@ -169,7 +198,7 @@ export default function SpellingGame({ onBack }) {
       <DndContext onDragEnd={handleDragEnd}>
         {/* Game Area */}
         <div className="flex flex-col items-center justify-center flex-1 w-full relative z-10">
-          
+
           <AnimatePresence>
             {showReward && (
               <motion.div
@@ -181,7 +210,12 @@ export default function SpellingGame({ onBack }) {
               >
                 <div className="bg-white/90 backdrop-blur-md p-8 rounded-[3rem] shadow-2xl border-4 border-yellow-400 flex flex-col items-center">
                   <h3 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-6 drop-shadow-sm">MAGICAL!</h3>
-                  <img src="/assets/flying_unicorn_rainbow.png" alt="Flying Unicorn" className="w-64 h-64 object-contain animate-bounce" />
+                  <img
+                    src="/assets/flying_unicorn_rainbow.png"
+                    alt="Flying Unicorn"
+                    className="w-64 h-64 object-contain animate-bounce"
+                    style={{ mixBlendMode: 'multiply' }}
+                  />
                   <div className="flex mt-8 gap-2">
                     {[1,2,3].map(i => (
                       <Sparkles key={i} className="w-10 h-10 text-yellow-400 animate-spin-slow" style={{ animationDelay: `${i * 0.2}s`}} />
@@ -192,17 +226,19 @@ export default function SpellingGame({ onBack }) {
             )}
           </AnimatePresence>
 
-          {/* Hint */}
-          <motion.div 
+          {/* Hint / Word Display */}
+          <motion.div
             key={`hint-${currentWordIndex}`}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 text-2xl sm:text-3xl text-indigo-900 dark:text-indigo-100 font-bold mb-12 bg-white/30 dark:bg-black/30 px-8 py-4 rounded-full shadow-inner"
+            className="flex items-center gap-4 mb-12 bg-white/30 dark:bg-black/30 px-8 py-4 rounded-full shadow-inner"
           >
-            <span>Hint: {currentLevel.hint}</span>
-            <button 
+            <span className={`font-bold text-indigo-900 dark:text-indigo-100 ${isEarlyLevel ? 'text-4xl sm:text-5xl tracking-wider' : 'text-xl sm:text-2xl'}`}>
+              {displayText}
+            </span>
+            <button
               onClick={playClueAudio}
-              className="p-2 bg-white/50 dark:bg-slate-700/50 rounded-full hover:bg-white transition-colors cursor-pointer"
+              className="p-2 bg-white/50 dark:bg-slate-700/50 rounded-full hover:bg-white transition-colors cursor-pointer shrink-0"
               title="Hear Hint"
             >
               <Volume2 className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600 dark:text-indigo-400" />
@@ -212,10 +248,10 @@ export default function SpellingGame({ onBack }) {
           {/* Target Slots */}
           <div className="flex gap-4 mb-16">
             {currentLevel.word.split('').map((letter, index) => (
-              <DroppableSlot 
-                key={`slot-${index}`} 
-                id={`slot-${index}`} 
-                letter={letter} 
+              <DroppableSlot
+                key={`slot-${index}`}
+                id={`slot-${index}`}
+                letter={letter}
                 isFilled={placedLetters[`slot-${index}`] === letter}
               />
             ))}
@@ -224,10 +260,10 @@ export default function SpellingGame({ onBack }) {
           {/* Letter Pool */}
           <div className="w-full max-w-3xl flex flex-wrap justify-center gap-4 bg-white/20 dark:bg-black/20 backdrop-blur-sm p-8 rounded-3xl shadow-lg border-2 border-white/30">
             {lettersPool.map((item) => (
-              <DraggableLetter 
-                key={item.id} 
-                id={item.id} 
-                letter={item.letter} 
+              <DraggableLetter
+                key={item.id}
+                id={item.id}
+                letter={item.letter}
                 disabled={showReward}
               />
             ))}
@@ -235,7 +271,7 @@ export default function SpellingGame({ onBack }) {
 
         </div>
       </DndContext>
-      
+
       {/* Decorative background elements */}
       <div className="absolute top-1/4 left-10 w-32 h-32 bg-pink-400/20 border border-pink-300 blur-2xl rounded-full" />
       <div className="absolute bottom-1/4 right-10 w-48 h-48 bg-purple-400/20 border border-purple-300 blur-2xl rounded-full" />
