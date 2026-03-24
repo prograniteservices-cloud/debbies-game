@@ -6,6 +6,9 @@ import {
   DndContext,
   useDraggable,
   useDroppable,
+  PointerSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -147,6 +150,14 @@ function DroppableSlot({ id, letter, isFilled, hasSelection, onPlace }) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function SpellingGame({ onBack, theme }) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Requires minimum 5px movement before drag starts, letting clicks fire
+      },
+    })
+  );
+
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [placedLetters, setPlacedLetters] = useState({});
   const [lettersPool, setLettersPool] = useState([]);
@@ -277,7 +288,7 @@ export default function SpellingGame({ onBack, theme }) {
         </div>
       </div>
 
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
         <div className="flex flex-col items-center justify-center flex-1 w-full relative z-10">
 
           {/* Win Reward overlay */}
