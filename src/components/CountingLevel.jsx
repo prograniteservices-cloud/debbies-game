@@ -1,26 +1,19 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Apple, Star, Heart, Moon, Sun } from 'lucide-react';
+import { Star, ArrowLeft } from 'lucide-react';
 import ItemGrid from './ItemGrid';
 import NumberButton from './NumberButton';
 import MagicalEffects from './MagicalEffects';
 import SummaryScreen from './SummaryScreen';
 
-const ICON_SETS = [
-  { icon: Apple, color: "text-red-500 fill-red-500" },
-  { icon: Star, color: "text-yellow-400 fill-yellow-400" },
-  { icon: Heart, color: "text-pink-500 fill-pink-500" },
-  { icon: Moon, color: "text-indigo-400 fill-indigo-200" },
-  { icon: Sun, color: "text-orange-400 fill-yellow-200" }
-];
-
-export default function CountingLevel({ levelInfo, onLevelComplete }) {
+export default function CountingLevel({ levelInfo, onLevelComplete, onBack, theme }) {
+  const ICON_SETS = theme?.iconSets || [];
   const [targetCount, setTargetCount] = useState(0);
   const [addends, setAddends] = useState(null);
   const [choices, setChoices] = useState([]);
   const [wrongAnswers, setWrongAnswers] = useState(new Set());
   const [showSuccess, setShowSuccess] = useState(false);
-  const [currentIconSet, setCurrentIconSet] = useState(ICON_SETS[0]);
+  const [currentIconSet, setCurrentIconSet] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
 
@@ -59,8 +52,9 @@ export default function CountingLevel({ levelInfo, onLevelComplete }) {
     setTargetCount(target);
     setAddends(newAddends);
     
-    // Pick random icon set
-    const nextIconSet = ICON_SETS[Math.floor(Math.random() * ICON_SETS.length)];
+    // Pick random icon set from theme
+    const sets = theme?.iconSets || ICON_SETS;
+    const nextIconSet = sets[Math.floor(Math.random() * sets.length)];
     setCurrentIconSet(nextIconSet);
     
     // Generate choices within range
@@ -139,7 +133,10 @@ export default function CountingLevel({ levelInfo, onLevelComplete }) {
         )}
       </AnimatePresence>
       <MagicalEffects isCelebrating={showSuccess} />
-      <div className="py-6 w-full flex shrink-0 justify-between px-8 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm z-20">
+      <div className="py-6 w-full flex shrink-0 justify-between items-center px-8 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm z-20">
+        <button onClick={onBack} className="p-2 bg-white/60 dark:bg-slate-700/60 rounded-full hover:bg-white transition-colors cursor-pointer">
+          <ArrowLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+        </button>
         <div className="text-2xl font-black text-slate-700 dark:text-slate-200 drop-shadow-sm">
           Level {levelInfo.level}
         </div>
@@ -157,7 +154,7 @@ export default function CountingLevel({ levelInfo, onLevelComplete }) {
             className="absolute z-50 flex items-center justify-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
           >
             <div className="bg-green-400 text-white text-4xl sm:text-6xl font-black px-12 py-8 rounded-full shadow-[0_0_100px_rgba(74,222,128,0.8)] border-8 border-white animate-bounce whitespace-nowrap">
-              Great Job! ✨
+              {theme?.id === 'werecat' ? 'WARRIOR MODE! ⚡' : 'Great Job! ✨'}
             </div>
           </motion.div>
         )}
@@ -171,14 +168,14 @@ export default function CountingLevel({ levelInfo, onLevelComplete }) {
               <span className="text-2xl sm:text-4xl font-black text-slate-700 dark:text-slate-200 mt-2">{addends.a1}</span>
             </div>
             
-            <span className="text-4xl sm:text-6xl font-black text-purple-500 mx-1 sm:mx-2 drop-shadow-md">+</span>
+            <span className={`text-4xl sm:text-6xl font-black mx-1 sm:mx-2 drop-shadow-md ${theme?.id === 'werecat' ? 'text-orange-400' : 'text-purple-500'}`}>+</span>
             
             <div className="flex flex-col items-center bg-white/30 dark:bg-slate-800/30 p-4 rounded-[2rem] shadow-sm transform transition-transform hover:scale-105">
               <ItemGrid count={addends.a2} itemIcon={addends.set2.icon} itemColor={addends.set2.color} />
               <span className="text-2xl sm:text-4xl font-black text-slate-700 dark:text-slate-200 mt-2">{addends.a2}</span>
             </div>
             
-            <span className="text-4xl sm:text-6xl font-black text-pink-500 mx-1 sm:mx-2 drop-shadow-md">=</span>
+            <span className={`text-4xl sm:text-6xl font-black mx-1 sm:mx-2 drop-shadow-md ${theme?.id === 'werecat' ? 'text-teal-400' : 'text-pink-500'}`}>=</span>
             
             <div className="hidden sm:flex flex-col items-center justify-center bg-black/10 dark:bg-white/10 p-4 rounded-[2rem] border-4 border-dashed border-slate-400 dark:border-slate-500 h-full min-h-[100px] min-w-[80px]">
               <span className="text-3xl text-slate-400 dark:text-slate-500 opacity-50 font-black">?</span>
