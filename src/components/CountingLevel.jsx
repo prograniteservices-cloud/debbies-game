@@ -13,7 +13,7 @@ export default function CountingLevel({ levelInfo, onLevelComplete, onBack, them
   const [choices, setChoices] = useState([]);
   const [wrongAnswers, setWrongAnswers] = useState(new Set());
   const [showSuccess, setShowSuccess] = useState(false);
-  const [currentIconSet, setCurrentIconSet] = useState(null);
+  const [currentIconSet, setCurrentIconSet] = useState(() => theme?.iconSets?.[0] || null);
   const [showSummary, setShowSummary] = useState(false);
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
 
@@ -53,9 +53,11 @@ export default function CountingLevel({ levelInfo, onLevelComplete, onBack, them
     setAddends(newAddends);
     
     // Pick random icon set from theme
-    const sets = theme?.iconSets || ICON_SETS;
-    const nextIconSet = sets[Math.floor(Math.random() * sets.length)];
-    setCurrentIconSet(nextIconSet);
+    const sets = theme?.iconSets || [];
+    if (sets.length > 0) {
+      const nextIconSet = sets[Math.floor(Math.random() * sets.length)];
+      setCurrentIconSet(nextIconSet);
+    }
     
     // Generate choices within range
     const opts = new Set();
@@ -183,7 +185,9 @@ export default function CountingLevel({ levelInfo, onLevelComplete, onBack, them
           </div>
         ) : (
           <div className="min-h-[50vh] flex items-center justify-center">
-            <ItemGrid count={targetCount} itemIcon={currentIconSet.icon} itemColor={currentIconSet.color} />
+            {currentIconSet && (
+              <ItemGrid count={targetCount} itemIcon={currentIconSet.icon} itemColor={currentIconSet.color} />
+            )}
           </div>
         )}
       </div>
