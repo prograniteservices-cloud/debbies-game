@@ -70,7 +70,7 @@ function speakText(text) {
 }
 
 // ─── Draggable Letter (also handles click-select) ───────────────────────────
-function DraggableLetter({ id, letter, disabled, isSelected, onSelect }) {
+function DraggableLetter({ id, letter, disabled, isSelected, onSelect, letterBorder, letterGradient, selectedGradient }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id,
     data: { letter },
@@ -83,6 +83,11 @@ function DraggableLetter({ id, letter, disabled, isSelected, onSelect }) {
     cursor: disabled ? 'default' : 'grab',
   };
 
+  const border = letterBorder || 'border-pink-400 dark:border-pink-600';
+  const gradient = isSelected
+    ? (selectedGradient || 'from-orange-500 to-yellow-600')
+    : (letterGradient || 'from-purple-500 to-pink-500');
+
   return (
     <motion.div
       ref={setNodeRef}
@@ -93,11 +98,11 @@ function DraggableLetter({ id, letter, disabled, isSelected, onSelect }) {
       className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-black shadow-xl border-b-4 select-none z-10 transition-all
         ${isSelected
           ? 'bg-yellow-300 border-yellow-500 scale-110 ring-4 ring-yellow-400 ring-offset-2'
-          : `bg-white/90 dark:bg-slate-800/90 ${theme?.letterBorder || 'border-pink-400'} hover:-translate-y-1 active:scale-95`}
+          : `bg-white/90 dark:bg-slate-800/90 ${border} hover:-translate-y-1 active:scale-95`}
         ${disabled ? 'opacity-50 grayscale' : ''}
       `}
     >
-      <span className={`bg-clip-text text-transparent bg-gradient-to-r ${isSelected ? (theme?.selectedGradient || 'from-orange-500 to-yellow-600') : (theme?.letterGradient || 'from-purple-500 to-pink-500')}`}>
+      <span className={`bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
         {letter}
       </span>
       {isDragging && (
@@ -346,6 +351,9 @@ export default function SpellingGame({ onBack, theme }) {
                 disabled={showReward}
                 isSelected={selectedLetter?.id === item.id}
                 onSelect={handleSelectLetter}
+                letterBorder={theme?.letterBorder}
+                letterGradient={theme?.letterGradient}
+                selectedGradient={theme?.selectedGradient}
               />
             ))}
           </div>
