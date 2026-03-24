@@ -27,3 +27,4 @@ dist-ssr
 .agent/
 .vercel/
 *.local
+.env*.local
