@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ArrowLeft, Trophy, Volume2 } from 'lucide-react';
 import MagicalEffects from './MagicalEffects';
+import { playSound } from '../audio/soundEngine';
 import {
   DndContext,
   useDraggable,
@@ -12,33 +13,61 @@ import {
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
-// Levels 1-10 (index 0-9): TTS reads and displays the actual WORD
-// Levels 11-20 (index 10-19): TTS reads and displays a descriptive HINT
-const WORDS = [
-  // --- 3-letter words: levels 1-4 ---
-  { word: "CAT",  hint: "A furry pet that says meow" },
-  { word: "DOG",  hint: "Man's best friend, loves to fetch" },
-  { word: "SUN",  hint: "Shines bright in the sky" },
-  { word: "BEE",  hint: "A buzzing insect that makes honey" },
-  // --- 4-letter words: levels 5-10 ---
-  { word: "STAR", hint: "Twinkles at night in the sky" },
-  { word: "FROG", hint: "A green jumper that loves ponds" },
-  { word: "CAKE", hint: "Sweet treat for birthdays" },
-  { word: "BIRD", hint: "Has wings and can fly" },
-  { word: "FISH", hint: "Swims underwater and has fins" },
-  { word: "DUCK", hint: "A bird that says quack" },
-  // --- 3-letter words: levels 11-14 (hints only) ---
-  { word: "COW",  hint: "Gives milk on the farm" },
-  { word: "HAT",  hint: "You wear it on your head" },
-  { word: "HEN",  hint: "A bird that lays eggs" },
-  { word: "PIG",  hint: "A pink farm animal that oinks" },
-  // --- 4-letter words: levels 15-20 (hints only) ---
-  { word: "LEAF", hint: "Falls from trees in autumn" },
-  { word: "BEAR", hint: "A big furry creature in the woods" },
-  { word: "JUMP", hint: "What you do to get off the ground" },
-  { word: "BLUE", hint: "The color of the sky and ocean" },
-  { word: "RAIN", hint: "Falls from clouds on a wet day" },
-  { word: "KITE", hint: "You fly it in the wind on a string" },
+const WORD_TIERS = [
+  // Tier 1: Levels 1-5 (3-letter, hint visible)
+  [
+    { word: "CAT", hint: "A furry pet that says meow" }, { word: "DOG", hint: "Man's best friend" },
+    { word: "SUN", hint: "Shines bright in the sky" }, { word: "BEE", hint: "Makes honey" },
+    { word: "CAR", hint: "Has four wheels" }, { word: "HAT", hint: "Worn on the head" },
+    { word: "BAT", hint: "Flies at night" }, { word: "COW", hint: "Gives milk" },
+    { word: "PIG", hint: "Says oink" }, { word: "BOX", hint: "You put things in it" },
+    { word: "CUP", hint: "You drink from it" }, { word: "BUS", hint: "Takes you to school" }
+  ],
+  // Tier 2: Levels 6-10 (4-letter, hint visible)
+  [
+    { word: "STAR", hint: "Twinkles at night" }, { word: "FROG", hint: "Jumps and says ribbit" },
+    { word: "CAKE", hint: "Sweet treat" }, { word: "BIRD", hint: "Sings in the trees" },
+    { word: "FISH", hint: "Swims in water" }, { word: "DUCK", hint: "Says quack" },
+    { word: "MOON", hint: "Shines at night" }, { word: "BEAR", hint: "Big animal in the woods" },
+    { word: "TREE", hint: "Has leaves and branches" }, { word: "BOAT", hint: "Floats on water" },
+    { word: "DOOR", hint: "You open to go in" }, { word: "SHOE", hint: "Worn on your foot" }
+  ],
+  // Tier 3: Levels 11-15 (3-letter, hint only)
+  [
+    { word: "HEN", hint: "Lays eggs" }, { word: "FOX", hint: "A sly animal" },
+    { word: "BUG", hint: "Small insect" }, { word: "PEN", hint: "Used to write" },
+    { word: "ANT", hint: "Tiny strong bug" }, { word: "BED", hint: "Where you sleep" },
+    { word: "OWL", hint: "Says hoot" }, { word: "MUG", hint: "Holds hot cocoa" },
+    { word: "VAN", hint: "A large car" }, { word: "MAP", hint: "Shows you where to go" },
+    { word: "KEY", hint: "Unlocks a door" }, { word: "EGG", hint: "Birds hatch from it" }
+  ],
+  // Tier 4: Levels 16-20 (4-letter, hint only)
+  [
+    { word: "LEAF", hint: "Falls in autumn" }, { word: "JUMP", hint: "Spring into the air" },
+    { word: "BLUE", hint: "Color of the sky" }, { word: "RAIN", hint: "Water from clouds" },
+    { word: "KITE", hint: "Flies on a string" }, { word: "SNOW", hint: "White and cold" },
+    { word: "FIRE", hint: "Hot and bright" }, { word: "WIND", hint: "Blows the trees" },
+    { word: "SAND", hint: "Found at the beach" }, { word: "ROCK", hint: "A hard stone" },
+    { word: "SOUP", hint: "Hot liquid food" }, { word: "MILK", hint: "White drink" }
+  ],
+  // Tier 5: Levels 21-25 (5-letter, hint only)
+  [
+    { word: "APPLE", hint: "A red or green fruit" }, { word: "TRAIN", hint: "Runs on tracks" },
+    { word: "MOUSE", hint: "Eats cheese" }, { word: "CLOCK", hint: "Tells the time" },
+    { word: "SMILE", hint: "Shows you are happy" }, { word: "WATER", hint: "Clear liquid to drink" },
+    { word: "HOUSE", hint: "Where you live" }, { word: "CHAIR", hint: "What you sit on" },
+    { word: "HORSE", hint: "Animal you can ride" }, { word: "PUPPY", hint: "A baby dog" },
+    { word: "GRASS", hint: "Green plant on lawns" }, { word: "BREAD", hint: "Used to make a sandwich" }
+  ],
+  // Tier 6: Levels 26-30 (6-letter, hint only)
+  [
+    { word: "PLANET", hint: "Earth is one" }, { word: "MONKEY", hint: "Swings from trees" },
+    { word: "FLOWER", hint: "Blooms in the garden" }, { word: "PENCIL", hint: "Used for drawing" },
+    { word: "RABBIT", hint: "Has long ears" }, { word: "WINDOW", hint: "You look out of it" },
+    { word: "DRAGON", hint: "Breathes fire" }, { word: "CASTLE", hint: "Where a king lives" },
+    { word: "ORANGE", hint: "A color and a fruit" }, { word: "SCHOOL", hint: "Where you go to learn" },
+    { word: "CIRCLE", hint: "A round shape" }, { word: "SPIDER", hint: "Has eight legs" }
+  ]
 ];
 
 // ─── TTS helper: picks best available voice (Google, Microsoft, or system) ───
@@ -159,6 +188,15 @@ export default function SpellingGame({ onBack, theme }) {
   );
 
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  
+  const WORDS = useMemo(() => {
+    return Array.from({ length: 30 }).map((_, i) => {
+      const tierIndex = Math.floor(i / 5);
+      const tier = WORD_TIERS[Math.min(tierIndex, WORD_TIERS.length - 1)];
+      return tier[Math.floor(Math.random() * tier.length)];
+    });
+  }, []);
+
   const [placedLetters, setPlacedLetters] = useState({});
   const [lettersPool, setLettersPool] = useState([]);
   const [showReward, setShowReward] = useState(false);
@@ -207,6 +245,7 @@ export default function SpellingGame({ onBack, theme }) {
   const checkWinCondition = useCallback((currentPlaced) => {
     const word = WORDS[currentWordIndex].word;
     if (Object.keys(currentPlaced).length === word.length) {
+      playSound('sparkle');
       setShowReward(true);
       speakText('Amazing! You spelled it!');
       setTimeout(() => {
@@ -221,9 +260,13 @@ export default function SpellingGame({ onBack, theme }) {
 
   // ─── Place a letter into a slot (shared logic for drag AND click) ─────────
   const placeLetter = useCallback((slotId, expectedLetter, draggedLetter, poolItemId) => {
-    if (draggedLetter !== expectedLetter) return;
+    if (draggedLetter !== expectedLetter) {
+      playSound('fail');
+      return;
+    }
     if (placedLetters[slotId]) return;
 
+    playSound('ding');
     setPlacedLetters(prev => {
       const next = { ...prev, [slotId]: draggedLetter };
       checkWinCondition(next);
@@ -247,6 +290,7 @@ export default function SpellingGame({ onBack, theme }) {
 
   // ─── Click-select handler ─────────────────────────────────────────────────
   const handleSelectLetter = (id, letter) => {
+    playSound('pop');
     setSelectedLetter(prev => (prev?.id === id ? null : { id, letter }));
   };
 

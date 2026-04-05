@@ -1,206 +1,76 @@
-import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ArrowLeft } from 'lucide-react';
-import ItemGrid from './ItemGrid';
-import NumberButton from './NumberButton';
-import MagicalEffects from './MagicalEffects';
-import SummaryScreen from './SummaryScreen';
+import MultiChoiceGame from './math/MultiChoiceGame';
+import NumberMagnet from './math/NumberMagnet';
+import TargetBlast from './math/TargetBlast';
+import EquationBuilder from './math/EquationBuilder';
+import { getMathMode, getZoneLabel } from '../utils/mathEngine';
 
 export default function CountingLevel({ levelInfo, onLevelComplete, onBack, theme }) {
-  const ICON_SETS = theme?.iconSets || [];
-  const [targetCount, setTargetCount] = useState(0);
-  const [addends, setAddends] = useState(null);
-  const [choices, setChoices] = useState([]);
-  const [wrongAnswers, setWrongAnswers] = useState(new Set());
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [currentIconSet, setCurrentIconSet] = useState(() => theme?.iconSets?.[0] || null);
-  const [showSummary, setShowSummary] = useState(false);
-  const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
+  const mode = getMathMode(levelInfo.level);
+  const zoneLabel = getZoneLabel(levelInfo.level);
 
-  // Max number depends on level (e.g. Level 1 -> 5, Level 2 -> 10, etc.)
-  const maxNumber = Math.min(20, levelInfo.level * 5);
-
-  const startNewRound = (forcedLevel) => {
-    const activeLevel = forcedLevel || levelInfo.level;
-    const isAddition = activeLevel > 10;
-    
-    let target = 0;
-    let newAddends = null;
-    let rangeMax = 0;
-
-    if (isAddition) {
-      const currentMax = Math.min(30, (activeLevel - 10) * 5 + 5);
-      target = Math.floor(Math.random() * (currentMax - 2)) + 2;
-      const a1 = Math.floor(Math.random() * (target - 1)) + 1;
-      const a2 = target - a1;
-      
-      // Pick two different icon sets
-      const set1 = ICON_SETS[Math.floor(Math.random() * ICON_SETS.length)];
-      let set2 = ICON_SETS[Math.floor(Math.random() * ICON_SETS.length)];
-      while (set2.icon === set1.icon) {
-        set2 = ICON_SETS[Math.floor(Math.random() * ICON_SETS.length)];
-      }
-
-      newAddends = { a1, a2, set1, set2 };
-      rangeMax = Math.max(10, currentMax + 5);
-    } else {
-      const currentMax = Math.min(20, activeLevel * 5);
-      target = Math.floor(Math.random() * currentMax) + 1;
-      rangeMax = Math.max(10, currentMax + 5);
-    }
-    
-    setTargetCount(target);
-    setAddends(newAddends);
-    
-    // Pick random icon set from theme
-    const sets = theme?.iconSets || [];
-    if (sets.length > 0) {
-      const nextIconSet = sets[Math.floor(Math.random() * sets.length)];
-      setCurrentIconSet(nextIconSet);
-    }
-    
-    // Generate choices within range
-    const opts = new Set();
-    opts.add(target);
-    
-    let attempts = 0;
-    while (opts.size < 3 && attempts < 50) {
-      attempts++;
-      let offset = Math.floor(Math.random() * 5) + 1;
-      let wrong = Math.random() > 0.5 ? target + offset : target - offset;
-      
-      if (wrong > 0 && wrong <= rangeMax && wrong !== target) {
-        opts.add(wrong);
-      }
-    }
-    
-    // Fallback if loop fails
-    if (opts.size < 3) {
-      for (let i = 1; i <= 3; i++) {
-        if (!opts.has(i) && i !== target) opts.add(i);
-        if (opts.size >= 3) break;
-      }
-    }
-    
-    const finalChoices = Array.from(opts).sort(() => Math.random() - 0.5);
-    setChoices(finalChoices);
-    setWrongAnswers(new Set());
-    setShowSuccess(false);
-    setShowSummary(false);
-  };
-
-  // Only start on mount. Subsequent rounds are triggered by handleChoice.
-  useEffect(() => {
-    startNewRound();
-  }, []);
-
-  const handleChoice = (num) => {
-    console.log(`[CountingGame] User chose: ${num}. Target was: ${targetCount}`);
-    if (num === targetCount) {
-      setShowSuccess(true);
-      setSessionStats(prev => ({ ...prev, correct: prev.correct + 1 }));
-      
-      const nextScore = levelInfo.score + 1;
-      const willLevelUp = Math.floor(nextScore / 5) > Math.floor(levelInfo.score / 5);
-
-      setTimeout(() => {
-        if (willLevelUp) {
-          setShowSummary(true);
-        } else {
-          onLevelComplete();
-          startNewRound();
-        }
-      }, 1500);
-    } else {
-      setWrongAnswers(prev => new Set(prev).add(num));
-      setSessionStats(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
-    }
-  };
-
-  const handleNextLevel = () => {
-    setSessionStats({ correct: 0, incorrect: 0 });
-    onLevelComplete();
-    startNewRound();
-  };
+  let GameComponent;
+  switch (mode) {
+    case 'magnet':
+      GameComponent = NumberMagnet;
+      break;
+    case 'blast':
+      GameComponent = TargetBlast;
+      break;
+    case 'builder':
+      GameComponent = EquationBuilder;
+      break;
+    case 'multichoice':
+    default:
+      GameComponent = MultiChoiceGame;
+      break;
+  }
 
   return (
-    <div className="flex flex-col items-center w-full h-full justify-between">
-      <AnimatePresence>
-        {showSummary && (
-          <SummaryScreen 
-            correct={sessionStats.correct} 
-            incorrect={sessionStats.incorrect} 
-            onNext={handleNextLevel}
-          />
-        )}
-      </AnimatePresence>
-      <MagicalEffects isCelebrating={showSuccess} />
-      <div className="py-6 w-full flex shrink-0 justify-between items-center px-8 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm z-20">
-        <button onClick={onBack} className="p-2 bg-white/60 dark:bg-slate-700/60 rounded-full hover:bg-white transition-colors cursor-pointer">
-          <ArrowLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+    <div className="flex flex-col items-center w-full h-full overflow-hidden bg-transparent pointer-events-auto">
+      {/* Universal Header */}
+      <div className="py-4 w-full flex shrink-0 justify-between items-center px-6 sm:px-8 bg-white/20 dark:bg-slate-800/20 backdrop-blur-md z-50 border-b border-white/30 dark:border-slate-700/50 shadow-sm relative">
+        <button onClick={onBack} className="p-2 sm:px-4 sm:py-2 bg-white/60 dark:bg-slate-700/60 rounded-full hover:bg-white transition-colors cursor-pointer flex items-center gap-2 group">
+          <ArrowLeft className="w-5 h-5 text-slate-700 dark:text-slate-300 group-hover:-translate-x-1 transition-transform" />
+          <span className="hidden sm:inline font-bold text-slate-700 dark:text-slate-300">Map</span>
         </button>
-        <div className="text-2xl font-black text-slate-700 dark:text-slate-200 drop-shadow-sm">
-          Level {levelInfo.level}
+        
+        <div className="flex flex-col items-center">
+          <div className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+            {zoneLabel}
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-slate-700 dark:text-slate-200 drop-shadow-sm">
+            Level {levelInfo.level}
+          </div>
         </div>
-        <div className="text-2xl font-black text-amber-500 drop-shadow-sm flex items-center gap-2">
-          <Star className="w-8 h-8 fill-amber-500" /> {levelInfo.score}
+
+        <div className="bg-white/60 dark:bg-slate-700/60 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+          <Star className="w-6 h-6 sm:w-8 sm:h-8 fill-amber-500 text-amber-500 animate-pulse" />
+          <span className="text-xl sm:text-2xl font-black text-amber-500 drop-shadow-sm">
+            {levelInfo.score}
+          </span>
         </div>
       </div>
 
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div 
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="absolute z-50 flex items-center justify-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      {/* Mode Content */}
+      <div className="flex-1 w-full min-h-0 relative isolate">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${levelInfo.level}-${mode}`}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="absolute inset-0"
           >
-            <div className="bg-green-400 text-white text-4xl sm:text-6xl font-black px-12 py-8 rounded-full shadow-[0_0_100px_rgba(74,222,128,0.8)] border-8 border-white animate-bounce whitespace-nowrap">
-              {theme?.id === 'werecat' ? 'WARRIOR MODE! ⚡' : 'Great Job! ✨'}
-            </div>
+            <GameComponent 
+              levelInfo={levelInfo} 
+              onLevelComplete={onLevelComplete} 
+              theme={theme} 
+            />
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex-1 w-full flex items-center justify-center -mt-8">
-        {addends ? (
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 w-full p-2">
-            <div className="flex flex-col items-center bg-white/30 dark:bg-slate-800/30 p-4 rounded-[2rem] shadow-sm transform transition-transform hover:scale-105">
-              <ItemGrid count={addends.a1} itemIcon={addends.set1.icon} itemColor={addends.set1.color} />
-              <span className="text-2xl sm:text-4xl font-black text-slate-700 dark:text-slate-200 mt-2">{addends.a1}</span>
-            </div>
-            
-            <span className={`text-4xl sm:text-6xl font-black mx-1 sm:mx-2 drop-shadow-md ${theme?.id === 'werecat' ? 'text-orange-400' : 'text-purple-500'}`}>+</span>
-            
-            <div className="flex flex-col items-center bg-white/30 dark:bg-slate-800/30 p-4 rounded-[2rem] shadow-sm transform transition-transform hover:scale-105">
-              <ItemGrid count={addends.a2} itemIcon={addends.set2.icon} itemColor={addends.set2.color} />
-              <span className="text-2xl sm:text-4xl font-black text-slate-700 dark:text-slate-200 mt-2">{addends.a2}</span>
-            </div>
-            
-            <span className={`text-4xl sm:text-6xl font-black mx-1 sm:mx-2 drop-shadow-md ${theme?.id === 'werecat' ? 'text-teal-400' : 'text-pink-500'}`}>=</span>
-            
-            <div className="hidden sm:flex flex-col items-center justify-center bg-black/10 dark:bg-white/10 p-4 rounded-[2rem] border-4 border-dashed border-slate-400 dark:border-slate-500 h-full min-h-[100px] min-w-[80px]">
-              <span className="text-3xl text-slate-400 dark:text-slate-500 opacity-50 font-black">?</span>
-            </div>
-          </div>
-        ) : (
-          <div className="min-h-[50vh] flex items-center justify-center">
-            {currentIconSet && (
-              <ItemGrid count={targetCount} itemIcon={currentIconSet.icon} itemColor={currentIconSet.color} />
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="w-full shrink-0 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border-t-8 border-white/80 dark:border-slate-700 flex justify-center items-center gap-6 sm:gap-12 py-12 px-4 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
-        {choices.map(num => (
-          <NumberButton 
-            key={num} 
-            number={num} 
-            isWrong={wrongAnswers.has(num)}
-            onClick={handleChoice} 
-          />
-        ))}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -23,11 +23,11 @@ export default function ItemGrid({ count, itemIcon: Icon = Apple, itemColor = "t
       initial="hidden"
       animate="show"
       key={count}
-      className={`flex flex-wrap items-center justify-center gap-4 sm:gap-6 p-4 w-full max-w-4xl mx-auto content-center`}
+      className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 p-2 w-full max-w-4xl mx-auto content-center`}
     >
       {Array.from({ length: count }).map((_, i) => (
         <motion.div key={i} variants={item}>
-          <Icon className={`w-16 h-16 sm:w-24 sm:h-24 ${itemColor} drop-shadow-xl`} />
+          <Icon className={`w-8 h-8 sm:w-12 sm:h-12 ${itemColor} drop-shadow-xl`} />
         </motion.div>
       ))}
     </motion.div>
