@@ -71,5 +71,17 @@
 - [ ] **TASK-29**: GitHub Actions CI pipeline (lint + build on PR)
 - [x] **TASK-30**: Final production deploy + smoke test (2026-04-05)
 
+### 🗺 Sprint 6: Future Game Modes
+- [ ] **TASK-31**: Build PatternPath.jsx (logic/sequencing)
+- [ ] **TASK-32**: Build MemoryMeadow.jsx (match-2)
+- [ ] **TASK-33**: Build TimeTravelers.jsx (clock face)
+- [ ] **TASK-34**: Add mascot hover/idle animations with Anime.js
+
+### 🏆 Sprint 7: Engagement & Analytics
+- [ ] **TASK-35**: Implement Island/Kingdom Decoration system
+- [ ] **TASK-36**: Implement Daily Sparkle Quests
+- [ ] **TASK-37**: Build "Pass the Tablet" local co-op mode
+- [ ] **TASK-38**: Implement PDF certificate generation in ParentDashboard
+
 ---
 *Updated 2026-04-05 by Antigravity*

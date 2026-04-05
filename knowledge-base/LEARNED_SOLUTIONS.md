@@ -15,3 +15,7 @@
 ## Issue: Multiple duplicate CountingLevel initializations
 **Root cause:** Multiple `useEffect` with different hooks firing on re-render.
 **Solution:** Only call `startNewRound()` on mount with `useEffect(() => {}, [])`. Subsequent rounds triggered explicitly by user action.
+
+## Issue: Production build fails with `[MISSING_EXPORT] Error: "default" is not exported by animejs`
+**Root cause:** AnimeJS v4 dropped the default export in its native ESM module. Vite's production bundler (Rolldown) adheres strictly to the ESM standard, whereas the dev server allows CommonJS fallbacks.
+**Solution:** Do not use `import anime from 'animejs'`. Use named exports instead: `import { animate, stagger } from 'animejs'`. Replace instances of `anime({ ... })` with `animate({ ... })` and `anime.stagger` with `stagger`.

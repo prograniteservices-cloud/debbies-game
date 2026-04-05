@@ -70,6 +70,12 @@ Sprint 3 (Memory + Deployment):
   [ ] Vercel deployment pipeline
   [ ] GitHub Actions CI
 
+Sprint 3 (Memory + Deployment):
+  [ ] Supabase schema + tables
+  [ ] Save/load profile progress
+  [ ] Vercel deployment pipeline
+  [ ] GitHub Actions CI
+
 Sprint 4 (Polish + Animation):
   [ ] Anime.js enhanced animations
   [ ] Visual overhaul with premium design
@@ -80,9 +86,21 @@ Sprint 5 (Extended Content):
   [ ] 5–6 letter words
   [ ] Subtraction game mode
   [ ] Achievement badges
+
+Sprint 6 (Future Game Modes):
+  [ ] Pattern Path (sequencing) mode
+  [ ] Memory Meadow (match-2) mode
+  [ ] Telling Time travelers (clock) mode
+  [ ] Interactive Mascot idle/hover animations
+
+Sprint 7 (Engagement & Rewards):
+  [ ] Island/Kingdom Decoration system
+  [ ] Daily Sparkle Quests
+  [ ] Co-op "Pass the tablet" mode
+  [ ] Printable achievement certificates (PDF)
 ```
 
 ---
 
 ## Last Updated
-2026-04-04
+2026-04-05

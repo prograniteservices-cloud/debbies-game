@@ -127,5 +127,23 @@ profiles {
 
 ---
 
+## 6. Future Roadmap (Backlog)
+
+### 🎮 New Game Modes
+- **Pattern Path (Logic/Sequencing):** Complete patterns (e.g., Red-Blue-Red-?) to build a magical bridge for the mascot. Uses Anime.js for bridge construction effects.
+- **Memory Meadow (Concentration):** Match-2 cards where kids match digits (7) to visual quantities (7 stars).
+- **Telling Time Travelers:** Interactive clock face where kids drag hands to match audio prompts (e.g., "Set the clock to 3 o'clock").
+
+### ✨ Engagement & Meta-Game
+- **Island/Kingdom Customization:** Earn "Magic Dust" or "Cat Coins" to buy decorations for the profile landing page. State persisted in Supabase.
+- **Daily Sparkle Quests:** Small daily objectives (e.g., "Play 3 math rounds") that reward unique badges.
+- **Interactive Mascots:** Mascots react to mouse hover and idle states (Anime.js/Lottie).
+
+### 👨‍👩‍👧 Parent & Social
+- **Co-op "Pass the Tablet" Mode:** Local turn-based mode for two kids to progress through a map together.
+- **Printable Certificates:** Generate a beautiful PDF in the Parent Dashboard for major milestones (Level 25/50).
+
+---
+
 ## Last Updated
-2026-04-04
+2026-04-05

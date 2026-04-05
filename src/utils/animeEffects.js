@@ -1,18 +1,18 @@
-import anime from 'animejs';
+import { animate, stagger } from 'animejs';
 
 export const popIn = (targets, delay = 0) => {
-  return anime({
+  return animate({
     targets,
     scale: [0.5, 1],
     opacity: [0, 1],
     duration: 800,
-    delay: anime.stagger(100, { start: delay }),
+    delay: stagger(100, { start: delay }),
     easing: 'spring(1, 80, 10, 0)'
   }).finished;
 };
 
 export const successShake = (target) => {
-  return anime({
+  return animate({
     targets: target,
     translateX: [
       { value: -10, duration: 100, easing: 'easeInOutQuad' },
@@ -34,7 +34,7 @@ export const successShake = (target) => {
 };
 
 export const failureShake = (target) => {
-  return anime({
+  return animate({
     targets: target,
     translateX: [
       { value: -15, duration: 100, easing: 'easeInOutQuad' },
@@ -51,7 +51,7 @@ export const failureShake = (target) => {
 };
 
 export const floatLoop = (targets, yOffset = 10, duration = 3000) => {
-  return anime({
+  return animate({
     targets,
     translateY: [
       { value: -yOffset, duration: duration / 2, easing: 'easeInOutSine' },
