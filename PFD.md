@@ -13,83 +13,55 @@
 |---------|-------|
 | Core game engine (React/Vite) | Functional |
 | Math — Counting levels 1–20 | Working |
-| Math — Addition mode (levels 11+) | Working but layout bug with answers cut off |
-| Spelling — Drag & drop mechanic | Working |
-| Spelling — Click-to-place mechanic | Working |
-| Spelling — 72-word list (3 to 6 letters) | Implemented (Task-13) |
+| Math — Addition mode (levels 11+) | Working & Layout audited |
+| Spelling — Drag & drop / Click-to-place | Working |
+| Spelling — 72-word list | Task-13 complete |
 | TTS word/hint reading | Working |
 | Level-up color theme system | Working |
-| Unicorn theme | Complete |
-| Werecat theme | Complete |
-| Cursor sparkles | Working |
-| Framer Motion animations | Basic |
-| Summary screen between levels | Working |
-| **Difficulty every 5 levels** | Working (Task-12) |
-| **Popping Level (every 5 levels)** | Working (Task-06) |
-| **Sound system (Howler.js)** | Working with Kenney SFX (Task-11) |
-| **Profile Screen (Avatar Picker)** | Working with all 4 mascots (Task-14) |
-| **Supabase persistence** | Fully connected and synced (Task-17) |
-| **Pattern Path mode** | Sequencing gameplay functional (Task-15) |
-| **Memory Meadow mode** | Match-2 gameplay functional (Task-16) |
+| Character Themes (All 4) | Complete (Debbie, Bubba, Milo, Luna) |
+| **Synthesized Sound System** | Custom Web Audio API engine (No external files) |
+| **Procedural BGM** | Unique chiptune loops for every mascot |
+| **Profile Screen** | Mobile-responsive with scroll support |
+| **Supabase persistence** | Fully connected with local fallback |
+| **Pattern Path mode** | Sequencing gameplay functional |
+| **Memory Meadow mode** | Match-2 gameplay functional |
+| **PWA / Offline support** | `vite-plugin-pwa` integrated |
+| **GitHub CI/CD** | Automated lint/build on PRs |
+| **Vercel Deployment** | Production live at debbies-game.vercel.app |
 
 ---
 
 ### 🚧 In Progress / Planned
 
-| Feature | Priority | Sprint | Notes |
-|---------|----------|--------|-------|
-| **Fix: Math answer buttons cut off screen** | CRITICAL | 1 | |
-| **PWA manifest + Service Worker** | HIGH | 5 | For offline play |
-| **GitHub CI/CD pipeline** | MEDIUM | 5 | |
-| **More math levels (21–50)** | MEDIUM | 3 | |
-| **Enhanced animations (Anime.js)** | MEDIUM | 4 | |
-| **Vercel deployment** | HIGH | 3 | |
-| **Visual overhaul (premium look)** | MEDIUM | 4 | |
-| **Subtraction mode** | LOW | 5 | |
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| **Mascot Hover SFX** | MEDIUM | Interactive procedural tones |
+| **Magic Dust Shop** | LOW | Meta-game for island decoration |
+| **Subtraction mode** | LOW | |
+| **Printable certificates**| LOW | PDF generation for milestones |
 
 ---
 
 ## Milestone Map
 
 ```
-Sprint 1 (Fixes + Core Design):
-  [x] Fix math answer overflow bug (Partially done, needs audit)
-  [x] Difficulty increases every 5 levels
-  [x] Popping Level mechanic
-  [x] Extended spelling word list (3/4 letter expansion)
+Milestone 1 (Foundations):
+  [x] Core Engine & Math/Spelling Basics
+  [x] Visual Themes & Mascots
+  [x] Supabase Integration
 
-Sprint 2 (Sound + Profiles):
-  [x] Sound system (Howler.js + Kenney SFX)
-  [x] Profile creation screen (name + avatar picker)
-  [x] Profile select on landing page
-  [x] Support for 4 mascots (Debbie, Bubba, Milo, Luna)
+Milestone 2 (Polish & Sound):
+  [x] Rewritten Audio Engine (Web Audio API)
+  [x] Mobile UX Audit & Responsive Fixes
+  [x] Achievement System (Framer Motion)
 
-Sprint 3 (Memory + Deployment):
-  [x] Supabase schema + tables
-  [x] Save/load profile progress
-  [x] Backend Recovery (Unpaused & Linked)
-  [ ] Vercel production deployment pipeline
-  [ ] GitHub Actions CI
-
-Sprint 4 (Polish + Animation):
-  [ ] Anime.js enhanced animations (Current focus)
-  [ ] Visual overhaul with premium design
-  [ ] Lottie animations for mascots
-  [ ] Responsive/tablet optimization
-
-Sprint 5 (Extended Content):
-  [x] 5–6 letter words
-  [ ] Subtraction game mode
-  [ ] Achievement badges
-
-Sprint 6 (Future Game Modes):
-  [x] Pattern Path (sequencing) mode
-  [x] Memory Meadow (match-2) mode
-  [ ] Telling Time travelers (clock) mode
-  [ ] Interactive Mascot idle/hover animations
+Milestone 3 (Live Operations):
+  [x] PWA Support (Offline play)
+  [x] CI/CD Pipeline (GitHub Actions)
+  [x] Production Deployment (Vercel)
 ```
 
 ---
 
 ## Last Updated
-2026-04-19
+2026-04-19 (Live Deployment)

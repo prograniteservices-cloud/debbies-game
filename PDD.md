@@ -65,15 +65,16 @@
 ### Profile Screen / Avatar Picker
 - Name input (free text)
 - Avatar picker: grid of 4 core character mascots (Debbie, Bubba, Milo, Luna).
+- **Mobile Optimized**: 2-column scrollable grid for all devices.
 - Theme auto-selected by mascot selection.
-- Profiles stored in Supabase.
+- Profiles stored in Supabase with localStorage backup.
 
 ---
 
 ## 3. Memory / Persistence
 
 - All progress saved to Supabase after each level.
-- `.env.local` connectivity restored and unpaused via CLI.
+- Local storage used as fallback for Parent Dashboard to ensure immediate feedback.
 - High scores and level tracking enabled per game mode.
 
 ---
@@ -82,13 +83,13 @@
 
 | Action | Sound |
 |--------|-------|
-| Correct answer | Cheerful chime + sparkle |
-| Wrong answer | Soft boing / error |
+| Correct answer | Cheerful chime (Synthesized) |
+| Wrong answer | Soft descending tone (Synthesized) |
 | Letter placed | Satisfying click/pop |
-| Item popped | Fun pop/burst |
-| Background music | Looping cheerful ambient with cross-fading |
+| Item popped | Procedural pop/burst |
+| Background music | Looping chiptune themes per character |
 
--> **Audio Engine**: Powered by **Howler.js**. Assets sourced from **Kenney UI Audio** (SFX) and **OpenGameArt** (BGM).
+-> **Audio Engine**: Powered by **Web Audio API** (Custom procedural synth). 0-byte asset footprint, fully offline compatible, high-fidelity gaming tones.
 
 ---
 
@@ -96,7 +97,8 @@
 
 - **Typography**: Outfit / Inter (Premium Fonts)
 - **Cards**: Glassmorphism with backdrop blur
-- **Animations**: GSAP / Framer Motion transitions
+- **Animations**: Framer Motion (Stable & Responsive)
+- **Mobile**: Fully responsive layouts with touch-optimized targets.
 
 ---
 
@@ -104,13 +106,9 @@
 
 ### ✨ Engagement & Meta-Game
 - **Island/Kingdom Customization**: Earn "Magic Dust" to buy decorations.
-- **Daily Sparkle Quests**: Small daily objectives.
-- **Interactive Mascots**: Mascots react to mouse hover (Anime.js).
-
-### 👨‍👩‍👧 Parent & Social
-- **Printable Certificates**: Generate a PDF for major milestones.
+- **Interactive Mascots**: Mascots react to mouse hover with procedural tones.
 
 ---
 
 ## Last Updated
-2026-04-19
+2026-04-19 (Production Release)
