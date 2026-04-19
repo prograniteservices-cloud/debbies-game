@@ -8,60 +8,43 @@
 ## Feature Registry
 
 ### ✅ Completed
-
 | Feature | Notes |
 |---------|-------|
-| Core game engine (React/Vite) | Functional |
-| Math — Counting levels 1–20 | Working |
-| Math — Addition mode (levels 11+) | Working & Layout audited |
-| Spelling — Drag & drop / Click-to-place | Working |
-| Spelling — 72-word list | Task-13 complete |
-| TTS word/hint reading | Working |
-| Level-up color theme system | Working |
-| Character Themes (All 4) | Complete (Debbie, Bubba, Milo, Luna) |
-| **Synthesized Sound System** | Custom Web Audio API engine (No external files) |
-| **Procedural BGM** | Unique chiptune loops for every mascot |
-| **Profile Screen** | Mobile-responsive with scroll support |
-| **Supabase persistence** | Fully connected with local fallback |
-| **Pattern Path mode** | Sequencing gameplay functional |
-| **Memory Meadow mode** | Match-2 gameplay functional |
-| **PWA / Offline support** | `vite-plugin-pwa` integrated |
-| **GitHub CI/CD** | Automated lint/build on PRs |
-| **Vercel Deployment** | Production live at debbies-game.vercel.app |
+| Core game engine | Functional |
+| Math / Spelling levels | Working |
+| Character Themes | Complete |
+| **Synthesized Sound System** | Custom engine active |
+| **Mobile UX Polish** | Responsive grid active |
+| **PWA / Offline support** | Integrated |
+| **GitHub CI/CD** | Automated |
+| **Vercel Deployment** | Live |
+
+---
+
+### 🚨 CRITICAL BUGS (BLOCKERS)
+| Bug | Priority | Notes |
+|-----|----------|-------|
+| **Vercel: Dashboard "Failed to fetch"** | CRITICAL | Parent Dashboard fails in production |
+| **Achievements not recording** | HIGH | Score persistence failing in production |
 
 ---
 
 ### 🚧 In Progress / Planned
-
 | Feature | Priority | Notes |
 |---------|----------|-------|
 | **Mascot Hover SFX** | MEDIUM | Interactive procedural tones |
-| **Magic Dust Shop** | LOW | Meta-game for island decoration |
-| **Subtraction mode** | LOW | |
-| **Printable certificates**| LOW | PDF generation for milestones |
+| **Magic Dust Shop** | LOW | |
 
 ---
 
 ## Milestone Map
-
 ```
-Milestone 1 (Foundations):
-  [x] Core Engine & Math/Spelling Basics
-  [x] Visual Themes & Mascots
-  [x] Supabase Integration
-
-Milestone 2 (Polish & Sound):
-  [x] Rewritten Audio Engine (Web Audio API)
-  [x] Mobile UX Audit & Responsive Fixes
-  [x] Achievement System (Framer Motion)
-
-Milestone 3 (Live Operations):
-  [x] PWA Support (Offline play)
-  [x] CI/CD Pipeline (GitHub Actions)
-  [x] Production Deployment (Vercel)
+Milestone 1 (Foundations): [x] Complete
+Milestone 2 (Polish & Sound): [x] Complete
+Milestone 3 (Live Operations): [/] In-Progress (Production Bug Hunt)
 ```
 
 ---
 
 ## Last Updated
-2026-04-19 (Live Deployment)
+2026-04-19 (Regression Alert)

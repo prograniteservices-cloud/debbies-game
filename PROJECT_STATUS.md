@@ -1,31 +1,27 @@
 # Project Status: Unicorn Island 🦄
 
-## Status: 🟢 Production Live
+## Status: 🔴 Blocker (Production Regression)
 
 ## Project Metadata
--   **Owner**: prograniteservices-cloud
 -   **Deployment**: [Vercel](https://debbies-game.vercel.app)
 -   **GitHub**: [debbies-game](https://github.com/prograniteservices-cloud/debbies-game)
--   **Storage**: [Supabase](https://supabase.com)
 
 ## Milestone Progress
--   [x] Workspace Initialization (2026-03-23)
--   [x] Core Game Engine & Math/Spelling Basics (2026-04-05)
--   [x] Parent Dashboard & Achievement UI (2026-04-05)
--   [x] Logic Level: Pattern Path (2026-04-19)
--   [x] Memory Level: Memory Meadow (2026-04-19)
--   [x] **Synthesized Audio Engine** (Custom Web Audio API) (2026-04-19)
--   [x] **Mobile UX Audit & Responsive Polish** (2026-04-19)
--   [x] **Supabase Sync & Local Fallback** (2026-04-19)
--   [x] **PWA / Offline Support** (2026-04-19)
--   [x] **GitHub CI/CD Pipeline** (2026-04-19)
--   [x] **Production Deployment (Vercel)** (2026-04-19)
+-   [x] Core Game Engine & Levels (2026-04-19)
+-   [x] Synthesized Audio Engine (2026-04-19)
+-   [x] Mobile UX Polish (2026-04-19)
+-   [x] PWA & CI/CD Setup (2026-04-19)
+-   [ ] **Fix: Production Data Sync (Dashboard/Achievements)** 🚨
 
-## Current Focus
--   🚀 Monitoring live operations and collecting user feedback.
--   🎨 Exploring procedural shader backgrounds for characters.
--   🧩 Adding new game modes (Telling Time, Subtraction).
+## 🚨 Current Blockers
+1.  **Parent Dashboard**: `TypeError: Failed to fetch` on Vercel. 
+2.  **Achievements**: Recording logic failing to persist/retrieve in production.
+
+## Next Steps
+-   [ ] Verify Vercel environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`).
+-   [ ] Audit `scores` table RLS policies.
+-   [ ] Fix Achievement recording logic in `App.jsx`.
 
 ---
 ## Last Updated
-2026-04-19 (Launch Day)
+2026-04-19 (Regression Alert)
