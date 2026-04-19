@@ -52,12 +52,13 @@ src/
 
 ## 3. Audio Guidelines
 
-- Use **Howler.js** for sound effects and background music
-- All audio requires user interaction first (browser requirement)
-- Sounds load from `/public/audio/` directory
-- Categories: `sfx/`, `music/`, `voice/`
-- Always provide a mute/volume toggle in the UI
-- Never autoplay audio before user interaction
+- Use **Howler.js** for all sound effects and background music.
+- **Asset Pipeline**: Source premium CC0 assets from **Kenney UI Audio** (SFX) and **OpenGameArt** (BGM).
+- **Note**: `fal-audio` is unavailable. Do NOT use it for generation.
+- All audio requires user interaction first (browser requirement).
+- Sounds load from `/public/assets/sounds/` (`sfx/`, `music/`).
+- Always provide a mute/volume toggle in the UI.
+- Never autoplay audio before user interaction.
 
 ---
 
@@ -83,6 +84,7 @@ src/
 ## 6. Agent Task Guidelines
 
 - **Each agent task should be completable in one focused session**
+- After EVERY task is complete (not subtask), update TASKS.md immediately so the project's current status is known.
 - Agents should update `TASKS.md` upon completion
 - Agents should add any gotchas to `knowledge-base/LEARNED_SOLUTIONS.md`
 - Do NOT refactor unrelated code while completing a task
@@ -123,4 +125,4 @@ Every PR/task must:
 ---
 
 ## Last Updated
-2026-04-04
+2026-04-19

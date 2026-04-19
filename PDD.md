@@ -18,12 +18,8 @@
 **Addition (Levels 11+):**
 - Show two groups of items visually
 - Player selects correct sum from 3 choices
-- Answers must NOT overflow off-screen (layout fix required)
+- Answers must NOT overflow off-screen (layout audit required)
 - Addends scale with level tier
-
-**Extended Math (Levels 21+) — Future:**
-- Subtraction
-- Simple multiplication
 
 ---
 
@@ -34,18 +30,8 @@
 - Levels 6–10: 4-letter words, word shown + spoken
 - Levels 11–15: 3-letter words, hint only (no word displayed)
 - Levels 16–20: 4-letter words, hint only
-- Levels 21–25: 5-letter words (new)
-- Levels 26–30: 6-letter words (new)
-
-**Word List Requirements:**
-- Minimum 30+ words per tier
-- Child-friendly, age-appropriate vocabulary
-- Diverse phonics coverage
-
-**Mechanics:**
-- Drag-and-drop OR click-to-place letter tiles
-- Scrambled letter pool
-- TTS (text-to-speech) reads word/hint aloud
+- Levels 21–25: 5-letter words
+- Levels 26–30: 6-letter words
 
 ---
 
@@ -55,50 +41,40 @@
 - Player taps/clicks to pop them as fast as possible
 - 15-second countdown timer
 - Score displayed: "You popped X items!"
-- Celebrates their speed and dexterity
-- Transitions back to normal gameplay
+
+---
+
+### 🧩 Pattern Path (Logic/Sequencing)
+
+- **Mechanic**: Complete patterns (e.g., Red-Blue-Red-?) to verify the next step in a magical bridge.
+- **Complexity**: Scales from simple ABAB to more complex patterns (ABCABC, AABB).
+- **Visuals**: Uses the theme-specific mascot and success sparkles.
+
+---
+
+### 🌸 Memory Meadow (Concentration)
+
+- **Mechanic**: Match-2 cards featuring emojis/items.
+- **Grid**: 3x4 grid for early levels.
+- **Visuals**: 3D card-flip animations with success particle effects.
 
 ---
 
 ## 2. Profile System
 
-### Profile Creation
+### Profile Screen / Avatar Picker
 - Name input (free text)
-- Avatar picker: grid of simple character illustrations (8–12 options)
-- Theme auto-selected by avatar (girl avatars → Unicorn, boy avatars → Werecat, but user can override)
-- Profiles stored in Supabase (linked to anonymous or authenticated session)
-
-### Named Profiles
-- **Debbie** → Default Girl profile, Unicorn Island theme
-- **Bubba** → Default Boy profile, Werecat Kingdom theme
-- Additional profiles can be created
-
-### Profile Data Stored
-```
-profiles {
-  id
-  name
-  avatar_id
-  theme_id
-  math_level
-  math_score
-  spelling_level
-  spelling_score
-  total_sessions
-  created_at
-  updated_at
-}
-```
+- Avatar picker: grid of 4 core character mascots (Debbie, Bubba, Milo, Luna).
+- Theme auto-selected by mascot selection.
+- Profiles stored in Supabase.
 
 ---
 
 ## 3. Memory / Persistence
 
-- All progress saved to Supabase after each level
-- Per-game-mode level tracking (math level ≠ spelling level)
-- Session statistics (correct answers, incorrect answers, time played)
-- High scores per level
-- Achievements / badges (future)
+- All progress saved to Supabase after each level.
+- `.env.local` connectivity restored and unpaused via CLI.
+- High scores and level tracking enabled per game mode.
 
 ---
 
@@ -107,43 +83,34 @@ profiles {
 | Action | Sound |
 |--------|-------|
 | Correct answer | Cheerful chime + sparkle |
-| Wrong answer | Soft boing (not punishing) |
-| Level up | Fanfare + celebration |
+| Wrong answer | Soft boing / error |
 | Letter placed | Satisfying click/pop |
 | Item popped | Fun pop/burst |
-| Background music | Looping cheerful ambient |
-| Profile select | Magical whoosh |
-| Button click | Soft tap |
+| Background music | Looping cheerful ambient with cross-fading |
+
+-> **Audio Engine**: Powered by **Howler.js**. Assets sourced from **Kenney UI Audio** (SFX) and **OpenGameArt** (BGM).
 
 ---
 
 ## 5. Visual Design
 
-- **Color system:** Per-theme, per-level rotating backgrounds
-- **Typography:** Rounded, playful font (Nunito or Fredoka One)
-- **Cards:** Glassmorphism with soft shadows
-- **Animations:** Entrance animations, success bursts, particle effects
-- **Mascots:** Visible in UI, animated bob/float
+- **Typography**: Outfit / Inter (Premium Fonts)
+- **Cards**: Glassmorphism with backdrop blur
+- **Animations**: GSAP / Framer Motion transitions
 
 ---
 
 ## 6. Future Roadmap (Backlog)
 
-### 🎮 New Game Modes
-- **Pattern Path (Logic/Sequencing):** Complete patterns (e.g., Red-Blue-Red-?) to build a magical bridge for the mascot. Uses Anime.js for bridge construction effects.
-- **Memory Meadow (Concentration):** Match-2 cards where kids match digits (7) to visual quantities (7 stars).
-- **Telling Time Travelers:** Interactive clock face where kids drag hands to match audio prompts (e.g., "Set the clock to 3 o'clock").
-
 ### ✨ Engagement & Meta-Game
-- **Island/Kingdom Customization:** Earn "Magic Dust" or "Cat Coins" to buy decorations for the profile landing page. State persisted in Supabase.
-- **Daily Sparkle Quests:** Small daily objectives (e.g., "Play 3 math rounds") that reward unique badges.
-- **Interactive Mascots:** Mascots react to mouse hover and idle states (Anime.js/Lottie).
+- **Island/Kingdom Customization**: Earn "Magic Dust" to buy decorations.
+- **Daily Sparkle Quests**: Small daily objectives.
+- **Interactive Mascots**: Mascots react to mouse hover (Anime.js).
 
 ### 👨‍👩‍👧 Parent & Social
-- **Co-op "Pass the Tablet" Mode:** Local turn-based mode for two kids to progress through a map together.
-- **Printable Certificates:** Generate a beautiful PDF in the Parent Dashboard for major milestones (Level 25/50).
+- **Printable Certificates**: Generate a PDF for major milestones.
 
 ---
 
 ## Last Updated
-2026-04-05
+2026-04-19

@@ -1,4 +1,4 @@
-## Phase 4: ✨ Visual + Animation Polish
+## Phase 4: 🎮 Core Gameplay & Content Expansion
 
 ## Status: 🟢 In Progress
 
@@ -18,9 +18,12 @@
 -   [x] Achievement System UI (2026-04-05)
 -   [x] Math Expansion (4 Modes: 2026-04-05)
 -   [x] Parent Dashboard (2026-04-05)
+-   [x] Sound System (Howler.js + Kenney UI Audio) (2026-04-19)
+-   [x] Logic Level: Pattern Path (2026-04-19)
+-   [x] Memory Level: Memory Meadow (2026-04-19)
+-   [x] Backend Restoration & Sync (Supabase) (2026-04-19)
 -   [/] Visual Polish & Animations (Premium Fonts, Anime.js)
--   [ ] Rewards and Color Themes
--   [ ] Offline / PWA Support
+-   [ ] Offline / PWA Support (Phase 5)
 
 ## Last Updated
-2026-04-05
+2026-04-19

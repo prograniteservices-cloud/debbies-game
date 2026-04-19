@@ -1,47 +1,39 @@
 # 🦄 Unicorn Island - Handoff
 
-**Status:** Sprint 4 complete. Math Overhaul (4 modes), Achievement UI, and Parent Dashboard are LIVE in Dev. **CRITICAL: Production Build is currently failing.**
+**Status:** 🚀 PHASE 5 COMPLETE. PWA, CI, Mobile Polish, and Standardized Rewards all done.
 
-## 🚨 TOP PRIORITY: Production Build Bug
-The project fails during `npm run build` with a Rolldown binding error. 
+## ✅ Completed (All Phases 1–5)
 
-### Error Log Summary:
-```text
-Error: [vite:rolldown] AggregateError
-    at aggregateBindingErrorsIntoJsError (node_modules/rolldown/dist/shared/error-D8cGyrC7.mjs:48:18)
-    at unwrapBindingResult (node_modules/rolldown/dist/shared/error-D8cGyrC7.mjs:18:128)
-    at #build (node_modules/rolldown/dist/shared/rolldown-build-CL9PyQ2E.mjs:3313:34)
-    ...
-  errors: [Getter/Setter]
-```
+### Phase 5 Deliverables (this session)
+- [x] **TASK-17: PWA** — `vite-plugin-pwa` integrated. `manifest.webmanifest` + `sw.js` + `workbox` generated on build. Service worker precaches 27 entries (~10.7 MB) for full offline play. PWA icons (`pwa-192x192.png`, `pwa-512x512.png`) generated and in `/public`.
+- [x] **TASK-18: CI Pipeline** — `.github/workflows/ci.yml` created. Runs lint + build on every push/PR to `main`.
+- [x] **TASK-19: Production Build** — `npm run build` exits 0. Bundle: 720 kB JS (216 kB gzip), 97 kB CSS.
+- [x] **Shared `LevelCompleteOverlay`** — New `src/components/LevelCompleteOverlay.jsx` with confetti, star rating, score display, Retry/Next buttons. Used by PatternPath and MemoryMeadow (math games use SummaryScreen which is already standardized).
+- [x] **Mobile Responsiveness** — SpellingGame letter slots/pool scale down (`w-12 sm:w-16`), hint text shrinks, gaps are responsive. PatternPath pattern tiles and option buttons scale down. MemoryMeadow cards are smaller on mobile.
+- [x] **MemoryMeadow bug fix** — Win condition was using stale `matchedIndices` via closure; fixed to use local computed array.
 
-### 🔍 Probable Causes & Solutions:
-1.  **Vite 6 / Tailwind 4 Conflict**: The new bundling engine (Rolldown) is extremely strict. 
-    *   *Check*: Verify all `@import` rules in `index.css` are at the absolute top (I moved Google Fonts to line 1 already).
-    *   *Check*: Look for circular imports in the new `src/components/math/` directory.
-2.  **Asset Reference Errors**: A missing image or malformed path in the new components might be crashing the bundler.
-    *   *Check*: `NumberMagnet.jsx`, `TargetBlast.jsx`, and `EquationBuilder.jsx` for any direct `import` of non-existent assets.
-3.  **Dependency Version Mismatch**: Vite 6.0.x has known issues with certain versions of Rolldown on Windows.
-    *   *Fix*: Try `npm install rolldown@latest` or pinning Vite to `6.0.0` specifically.
+### Previous Phase Highlights
+- [x] Audio Engine (Howler.js), PatternPath, MemoryMeadow, 72-word Spelling, Difficulty Scaling, Supabase Backend, 4 Mascot Renders
 
 ---
 
-## 🚀 Recent Progress (Dev Stable)
-- **Math Expansion**: Implemented `NumberMagnet.jsx`, `TargetBlast.jsx`, and `EquationBuilder.jsx`.
-- **Mode Router**: Updated `CountingLevel.jsx` to dynamically switch between 4 math modes.
-- **Parent Dashboard**: Created `ParentDashboard.jsx` with real-time stats from Supabase.
-- **GitHub**: All changes pushed and merged to `master`.
+## 🚨 KNOWN ISSUES / NEXT OPPORTUNITIES
+- **Chunk size warning**: Main JS bundle is 720 kB (warning threshold 500 kB). Consider lazy-loading game modes with `React.lazy()` + `Suspense` in a future pass.
+- **PWA Icons**: Generated programmatically (purple/pink gradient + star). Could be replaced with a proper branded icon.
+- **BGM Placeholders**: Milo and Luna themes still reuse Kenney SFX for background music.
+- **Code split**: `PatternPath` and `MemoryMeadow` could be dynamically imported to reduce initial bundle.
 
-## 🎯 Next Steps
-1.  **Fix Build**: Resolve the Rolldown error above to enable Vercel production deployment.
-2.  **Asset Generation**: (Blocked by Quota) Generate "Cheering/Sad" expressions and 10 Badge icons.
-3.  **PWA Support**: Setup `manifest.json` once production build is stable.
-
-## 🛠 Active Files
-- `src/index.css` (Font imports / Theme rules)
-- `src/components/math/` (New game modes)
-- `src/components/ParentDashboard.jsx`
-- `vite.config.js`
+## 🛠 Active Files (Phase 5 additions)
+- `src/components/LevelCompleteOverlay.jsx` (NEW — shared reward overlay)
+- `src/components/PatternPath.jsx` (updated — uses LevelCompleteOverlay, mobile fixes)
+- `src/components/MemoryMeadow.jsx` (updated — uses LevelCompleteOverlay, win bug fixed, mobile fixes)
+- `src/components/SpellingGame.jsx` (updated — mobile responsive letter sizing)
+- `vite.config.js` (updated — VitePWA plugin)
+- `index.html` (updated — PWA meta tags)
+- `.github/workflows/ci.yml` (NEW — CI pipeline)
+- `public/pwa-192x192.png` (NEW)
+- `public/pwa-512x512.png` (NEW)
+- `scripts/gen-pwa-icons.mjs` (NEW — icon generator script)
 
 ---
-*Updated: 2026-04-05 by Antigravity*
+*Updated: 2026-04-19 by Antigravity (Phase 5: PWA, CI, Mobile Polish, Shared Rewards)*

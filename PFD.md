@@ -16,7 +16,7 @@
 | Math — Addition mode (levels 11+) | Working but layout bug with answers cut off |
 | Spelling — Drag & drop mechanic | Working |
 | Spelling — Click-to-place mechanic | Working |
-| Spelling — 20-word list (3 & 4 letter) | Implemented |
+| Spelling — 72-word list (3 to 6 letters) | Implemented (Task-13) |
 | TTS word/hint reading | Working |
 | Level-up color theme system | Working |
 | Unicorn theme | Complete |
@@ -24,28 +24,28 @@
 | Cursor sparkles | Working |
 | Framer Motion animations | Basic |
 | Summary screen between levels | Working |
+| **Difficulty every 5 levels** | Working (Task-12) |
+| **Popping Level (every 5 levels)** | Working (Task-06) |
+| **Sound system (Howler.js)** | Working with Kenney SFX (Task-11) |
+| **Profile Screen (Avatar Picker)** | Working with all 4 mascots (Task-14) |
+| **Supabase persistence** | Fully connected and synced (Task-17) |
+| **Pattern Path mode** | Sequencing gameplay functional (Task-15) |
+| **Memory Meadow mode** | Match-2 gameplay functional (Task-16) |
 
 ---
 
 ### 🚧 In Progress / Planned
 
-| Feature | Priority | Sprint |
-|---------|----------|--------|
-| **Fix: Math answer buttons cut off screen** | CRITICAL | 1 |
-| **Difficulty increase every 5 levels (not 10)** | HIGH | 1 |
-| **Popping Level (every 5 levels)** | HIGH | 1 |
-| **Sound system (SFX + background music)** | HIGH | 2 |
-| **Profile system (create/select/name/avatar)** | HIGH | 2 |
-| **Supabase persistence (save progress)** | HIGH | 3 |
-| **More math levels (21–50)** | MEDIUM | 3 |
-| **More spelling words (30+ per tier)** | MEDIUM | 1 |
-| **5-letter & 6-letter words (levels 21–30)** | MEDIUM | 3 |
-| **Enhanced animations (Anime.js)** | MEDIUM | 4 |
-| **Avatar picker UI** | MEDIUM | 2 |
-| **Vercel deployment** | HIGH | 3 |
-| **GitHub CI/CD pipeline** | MEDIUM | 3 |
-| **Visual overhaul (premium look)** | MEDIUM | 4 |
-| **Subtraction mode** | LOW | 5 |
+| Feature | Priority | Sprint | Notes |
+|---------|----------|--------|-------|
+| **Fix: Math answer buttons cut off screen** | CRITICAL | 1 | |
+| **PWA manifest + Service Worker** | HIGH | 5 | For offline play |
+| **GitHub CI/CD pipeline** | MEDIUM | 5 | |
+| **More math levels (21–50)** | MEDIUM | 3 | |
+| **Enhanced animations (Anime.js)** | MEDIUM | 4 | |
+| **Vercel deployment** | HIGH | 3 | |
+| **Visual overhaul (premium look)** | MEDIUM | 4 | |
+| **Subtraction mode** | LOW | 5 | |
 
 ---
 
@@ -53,54 +53,43 @@
 
 ```
 Sprint 1 (Fixes + Core Design):
-  [x] Fix math answer overflow bug
+  [x] Fix math answer overflow bug (Partially done, needs audit)
   [x] Difficulty increases every 5 levels
   [x] Popping Level mechanic
   [x] Extended spelling word list (3/4 letter expansion)
 
 Sprint 2 (Sound + Profiles):
-  [ ] Sound system (SFX, background music, Howler.js)
-  [ ] Profile creation screen (name + avatar picker)
-  [ ] Profile select on landing page
-  [ ] Debbie = girl profile, Bubba = boy profile
+  [x] Sound system (Howler.js + Kenney SFX)
+  [x] Profile creation screen (name + avatar picker)
+  [x] Profile select on landing page
+  [x] Support for 4 mascots (Debbie, Bubba, Milo, Luna)
 
 Sprint 3 (Memory + Deployment):
-  [ ] Supabase schema + tables
-  [ ] Save/load profile progress
-  [ ] Vercel deployment pipeline
-  [ ] GitHub Actions CI
-
-Sprint 3 (Memory + Deployment):
-  [ ] Supabase schema + tables
-  [ ] Save/load profile progress
-  [ ] Vercel deployment pipeline
+  [x] Supabase schema + tables
+  [x] Save/load profile progress
+  [x] Backend Recovery (Unpaused & Linked)
+  [ ] Vercel production deployment pipeline
   [ ] GitHub Actions CI
 
 Sprint 4 (Polish + Animation):
-  [ ] Anime.js enhanced animations
+  [ ] Anime.js enhanced animations (Current focus)
   [ ] Visual overhaul with premium design
   [ ] Lottie animations for mascots
   [ ] Responsive/tablet optimization
 
 Sprint 5 (Extended Content):
-  [ ] 5–6 letter words
+  [x] 5–6 letter words
   [ ] Subtraction game mode
   [ ] Achievement badges
 
 Sprint 6 (Future Game Modes):
-  [ ] Pattern Path (sequencing) mode
-  [ ] Memory Meadow (match-2) mode
+  [x] Pattern Path (sequencing) mode
+  [x] Memory Meadow (match-2) mode
   [ ] Telling Time travelers (clock) mode
   [ ] Interactive Mascot idle/hover animations
-
-Sprint 7 (Engagement & Rewards):
-  [ ] Island/Kingdom Decoration system
-  [ ] Daily Sparkle Quests
-  [ ] Co-op "Pass the tablet" mode
-  [ ] Printable achievement certificates (PDF)
 ```
 
 ---
 
 ## Last Updated
-2026-04-05
+2026-04-19

@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
+import { animate } from 'animejs';
 import { Sparkles } from 'lucide-react';
 import { playTheme, stopTheme } from './audio/soundEngine';
 import CountingLevel from './components/CountingLevel';
@@ -10,11 +11,13 @@ import PoppingLevel from './components/PoppingLevel';
 import ProfileScreen from './components/ProfileScreen';
 import Achievements from './components/Achievements';
 import ParentDashboard from './components/ParentDashboard';
+import PatternPath from './components/PatternPath';
+import MemoryMeadow from './components/MemoryMeadow';
 import { THEMES } from './themes';
 import { supabase } from './supabaseClient';
 
 function App() {
-  const [gameState, setGameState] = useState('PROFILE'); // PROFILE, LANDING, COUNTING, SPELLING, POPPING, ACHIEVEMENTS
+  const [gameState, setGameState] = useState('PROFILE'); // PROFILE, LANDING, COUNTING, SPELLING, POPPING, ACHIEVEMENTS, PATTERNS, MEMORY
   const [returnState, setReturnState] = useState(null); // the game to return to after POPPING
   const [levelInfo, setLevelInfo] = useState({ level: 1, score: 0 });
   const [themeId, setThemeId] = useState('unicorn'); // 'unicorn' | 'werecat'
@@ -64,15 +67,16 @@ function App() {
       localStorage.setItem('debbies_game_profile_id', id);
     }
     
-    setThemeId(selectedThemeId === 'debbie' ? 'unicorn' : 'werecat');
+    // selectedThemeId is one of: 'unicorn', 'werecat', 'milo', 'luna'
+    setThemeId(selectedThemeId);
     setGameState('LANDING');
-    playTheme(selectedThemeId === 'debbie' ? 'unicorn' : 'werecat');
+    playTheme(selectedThemeId);
 
     // Save/upsert profile to Supabase
     await supabase.from('profiles').upsert({
       id: id,
-      display_name: selectedThemeId === 'debbie' ? 'Debbie' : 'Bubba',
-      theme_id: selectedThemeId === 'debbie' ? 'unicorn' : 'werecat',
+      display_name: THEMES[selectedThemeId].name,
+      theme_id: selectedThemeId,
       updated_at: new Date().toISOString()
     });
   };
@@ -117,6 +121,22 @@ function App() {
   }, [levelInfo.level, themeId]);
 
   const isWerecat = themeId === 'werecat';
+
+  const handleBtnHover = (e) => {
+    animate(e.currentTarget, {
+      scale: 1.05,
+      duration: 800,
+      ease: 'spring(1, 80, 10, 0)'
+    });
+  };
+
+  const handleBtnLeave = (e) => {
+    animate(e.currentTarget, {
+      scale: 1,
+      duration: 600,
+      ease: 'outElastic(1, .8)'
+    });
+  };
 
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${bgTheme} overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
@@ -163,36 +183,29 @@ function App() {
               </div>
 
               {/* Mascot */}
-              <div className="flex justify-center mb-4">
-                <motion.div
-                  key={themeId}
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring' }}
-                >
-                  <AnimatePresence mode="wait">
-                    {isWerecat ? (
-                      <motion.img
-                        key="werecat"
-                        src="/assets/werecat_king.png"
-                        alt="Werecat King"
-                        className="w-28 h-28 object-contain drop-shadow-2xl"
-                        style={{ mixBlendMode: 'multiply' }}
-                        initial={{ scale: 0, rotate: -20 }}
-                        animate={{ scale: 1, rotate: 0, y: [0, -8, 0] }}
-                        transition={{ y: { repeat: Infinity, duration: 2.5, ease: 'easeInOut' }, scale: { type: 'spring' } }}
-                      />
-                    ) : (
-                      <motion.div
-                        key="sparkles"
-                        animate={{ rotate: [0, 15, -15, 0] }}
-                        transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-                      >
-                        <Sparkles className="w-20 h-20 text-yellow-400 drop-shadow-lg" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+              <div className="flex justify-center mb-6 relative z-20">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={themeId}
+                    initial={{ scale: 0.5, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.5, opacity: 0, y: -20 }}
+                    transition={{ type: 'spring', damping: 12, stiffness: 100 }}
+                  >
+                    <motion.img
+                      src={theme.mascotImg}
+                      alt={theme.mascotAlt}
+                      className={`w-36 h-36 object-contain ${theme.glowClass} drop-shadow-2xl`}
+                      initial={{ y: 0 }}
+                      animate={{ y: [-8, 8, -8], rotate: [-2, 2, -2] }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 4,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
               <motion.h1
@@ -215,16 +228,38 @@ function App() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
                 <button
+                  onMouseEnter={handleBtnHover}
+                  onMouseLeave={handleBtnLeave}
                   onClick={() => handleStartGame('COUNTING')}
                   className={`px-6 py-4 bg-gradient-to-r ${theme.mathBtn} text-white rounded-full text-xl font-black shadow-xl border-b-8 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
                 >
                   Numbers Base
                 </button>
                 <button
+                  onMouseEnter={handleBtnHover}
+                  onMouseLeave={handleBtnLeave}
                   onClick={() => handleStartGame('SPELLING')}
                   className={`px-6 py-4 bg-gradient-to-r ${theme.spellBtn} text-white rounded-full text-xl font-black shadow-xl border-b-8 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
                 >
                   Spelling Quest
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center w-full mt-4">
+                <button
+                  onMouseEnter={handleBtnHover}
+                  onMouseLeave={handleBtnLeave}
+                  onClick={() => handleStartGame('PATTERNS')}
+                  className={`px-6 py-4 bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-full text-xl font-black shadow-xl border-b-8 border-indigo-600 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
+                >
+                  Pattern Path
+                </button>
+                <button
+                  onMouseEnter={handleBtnHover}
+                  onMouseLeave={handleBtnLeave}
+                  onClick={() => handleStartGame('MEMORY')}
+                  className={`px-6 py-4 bg-gradient-to-r from-emerald-400 to-teal-500 text-white rounded-full text-xl font-black shadow-xl border-b-8 border-teal-600 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
+                >
+                  Memory Meadow
                 </button>
               </div>
             </div>
@@ -271,6 +306,30 @@ function App() {
               theme={theme} 
               onComplete={() => setGameState(returnState || 'LANDING')} 
             />
+          </motion.div>
+        )}
+
+        {gameState === 'PATTERNS' && (
+          <motion.div
+            key="patterns"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="absolute inset-0 flex flex-col items-center z-10 w-full h-full"
+          >
+            <PatternPath onBack={() => setGameState('LANDING')} theme={theme} />
+          </motion.div>
+        )}
+
+        {gameState === 'MEMORY' && (
+          <motion.div
+            key="memory"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="absolute inset-0 flex flex-col items-center z-10 w-full h-full"
+          >
+            <MemoryMeadow onBack={() => setGameState('LANDING')} theme={theme} />
           </motion.div>
         )}
 

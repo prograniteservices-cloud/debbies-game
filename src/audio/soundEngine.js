@@ -1,166 +1,58 @@
 // src/audio/soundEngine.js
-// Uses Web Audio API to synthesize standard game sounds, 
-// avoiding external audio file dependencies in the initial sprint.
+import { Howl } from 'howler';
 
-let audioCtx;
-
-const getAudioContext = () => {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-  return audioCtx;
+// Using individual files instead of sprite for now, as sprite generation requires external tools.
+// The Kenney UI Audio pack wav files are used as placeholders.
+const sfx = {
+  pop: new Howl({ src: ['/assets/audio/pop.wav'], volume: 0.8 }),
+  ding: new Howl({ src: ['/assets/audio/ding.wav'], volume: 0.8 }),
+  fail: new Howl({ src: ['/assets/audio/fail.wav'], volume: 0.6 }),
+  sparkle: new Howl({ src: ['/assets/audio/sparkle.wav'], volume: 0.7 })
 };
 
 export const playSound = (type) => {
-  const ctx = getAudioContext();
-  const oscillator = ctx.createOscillator();
-  const gainNode = ctx.createGain();
-
-  oscillator.connect(gainNode);
-  gainNode.connect(ctx.destination);
-
-  const now = ctx.currentTime;
-
-  switch (type) {
-    case 'pop':
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(400, now);
-      oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-      gainNode.gain.setValueAtTime(1, now);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-      oscillator.start(now);
-      oscillator.stop(now + 0.1);
-      break;
-    case 'ding':
-      oscillator.type = 'triangle';
-      oscillator.frequency.setValueAtTime(800, now);
-      oscillator.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
-      gainNode.gain.setValueAtTime(0.5, now);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-      oscillator.start(now);
-      oscillator.stop(now + 0.3);
-      break;
-    case 'fail':
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.setValueAtTime(200, now);
-      oscillator.frequency.linearRampToValueAtTime(100, now + 0.4);
-      gainNode.gain.setValueAtTime(0.3, now);
-      gainNode.gain.linearRampToValueAtTime(0.01, now + 0.4);
-      oscillator.start(now);
-      oscillator.stop(now + 0.4);
-      break;
-    case 'sparkle':
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(2000, now);
-      oscillator.frequency.linearRampToValueAtTime(3500, now + 0.2);
-      gainNode.gain.setValueAtTime(0.2, now);
-      gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2);
-      
-      // Add a slight tremolo
-      const lfo = ctx.createOscillator();
-      lfo.type = 'sine';
-      lfo.frequency.setValueAtTime(20, now);
-      const lfoGain = ctx.createGain();
-      lfoGain.gain.setValueAtTime(0.5, now);
-      lfo.connect(lfoGain);
-      lfoGain.connect(gainNode.gain);
-      lfo.start(now);
-      lfo.stop(now + 0.2);
-      
-      oscillator.start(now);
-      oscillator.stop(now + 0.2);
-      break;
-    default:
-      oscillator.disconnect();
-      gainNode.disconnect();
-      return;
+  if (sfx[type]) {
+    sfx[type].play();
+  } else {
+    console.warn(`Sound type '${type}' not found.`);
   }
 };
 
-let currentThemeOscillators = [];
-let themeInterval = null;
+const themes = {
+  unicorn: new Howl({ src: ['/assets/audio/bgm_unicorn.wav'], loop: true, volume: 0 }),
+  werecat: new Howl({ src: ['/assets/audio/bgm_werecat.wav'], loop: true, volume: 0 })
+};
+
+let currentThemeId = null;
 
 export const playTheme = (themeId) => {
-  stopTheme(); // Ensure any existing theme is stopped
+  if (currentThemeId === themeId) return; // Already playing
 
-  const ctx = getAudioContext();
-  const now = ctx.currentTime;
-  
-  if (themeId === 'unicorn') {
-    // Magical Arpeggios (high pitched sine waves)
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-    let step = 0;
-    
-    themeInterval = setInterval(() => {
-      if (ctx.state === 'suspended') return;
-      
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      
-      oscillator.type = 'sine';
-      oscillator.frequency.value = notes[step % notes.length];
-      
-      gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.3);
-      
-      currentThemeOscillators.push(oscillator);
-      step++;
-    }, 250); 
-    
-  } else if (themeId === 'werecat') {
-    // Spooky / Groovy Bassline (sawtooth/square waves)
-    const notes = [130.81, 155.56, 130.81, 103.83]; // C3, Eb3, C3, Ab2
-    let step = 0;
-    
-    themeInterval = setInterval(() => {
-      if (ctx.state === 'suspended') return;
-      
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      
-      oscillator.type = 'square';
-      oscillator.frequency.value = notes[step % notes.length];
-      
-      gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-      
-      // Filter for a more "bass" sound
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 400;
-      
-      oscillator.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.4);
-      
-      currentThemeOscillators.push(oscillator);
-      step++;
-    }, 400);
+  // Fade out current theme
+  if (currentThemeId && themes[currentThemeId]) {
+    const prevTheme = themes[currentThemeId];
+    prevTheme.fade(prevTheme.volume(), 0, 1000);
+    setTimeout(() => prevTheme.stop(), 1000);
+  }
+
+  // Play and fade in new theme
+  if (themes[themeId]) {
+    const newTheme = themes[themeId];
+    newTheme.play();
+    newTheme.fade(0, 0.5, 1000); // Fade to 50% volume
+    currentThemeId = themeId;
   }
 };
 
 export const stopTheme = () => {
-  if (themeInterval) {
-    clearInterval(themeInterval);
-    themeInterval = null;
+  if (currentThemeId && themes[currentThemeId]) {
+    const activeTheme = themes[currentThemeId];
+    activeTheme.fade(activeTheme.volume(), 0, 500);
+    setTimeout(() => {
+      activeTheme.stop();
+      // Ensure volume is reset for next play if needed
+      activeTheme.volume(0); 
+    }, 500);
+    currentThemeId = null;
   }
-  currentThemeOscillators.forEach(osc => {
-    try {
-      osc.stop();
-      osc.disconnect();
-    } catch(e) {}
-  });
-  currentThemeOscillators = [];
 };

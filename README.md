@@ -1,16 +1,23 @@
-# React + Vite
+# Unicorn Island (Debbies Game)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An educational game platform designed for kids, featuring interactive learning modules for math, spelling, and counting.
 
-Currently, two official plugins are available:
+## Tech Stack
+- **Framework**: React 19 + Vite 6
+- **Styling**: Tailwind CSS 4, Framer Motion
+- **Animations**: Anime.js
+- **Backend/Storage**: Supabase
+- **Audio**: Howler.js
+- **Drag & Drop**: dnd-kit
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Key Features
+- **Educational Levels**: Interactive counting and spelling games.
+- **Math Expansion**: Four distinct math modes for progressive learning.
+- **Achievement System**: Visual feedback and rewards for progress.
+- **Parent Dashboard**: Progress tracking and configuration for parents.
+- **Responsive Design**: Optimized for various screen sizes.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Status
+Current Phase: Phase 4 - Visual + Animation Polish.
+**Note**: Shifting audio asset pipeline away from `fal-audio` due to token exhaustion. Researching alternative sourcing.
+See `PROJECT_STATUS.md` for detailed roadmap.

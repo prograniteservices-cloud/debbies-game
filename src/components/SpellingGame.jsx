@@ -127,7 +127,7 @@ function DraggableLetter({ id, letter, disabled, isSelected, onSelect, letterBor
       {...listeners}
       {...attributes}
       onClick={() => !disabled && onSelect(id, letter)}
-      className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-black shadow-xl border-b-4 select-none z-10 transition-all
+      className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-black shadow-xl border-b-4 select-none z-10 transition-all
         ${isSelected
           ? 'bg-yellow-300 border-yellow-500 scale-110 ring-4 ring-yellow-400 ring-offset-2'
           : `bg-white/90 dark:bg-slate-800/90 ${border} hover:-translate-y-1 active:scale-95`}
@@ -158,7 +158,7 @@ function DroppableSlot({ id, letter, isFilled, hasSelection, onPlace }) {
     <div
       ref={setNodeRef}
       onClick={() => !isFilled && hasSelection && onPlace(id, letter)}
-      className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-black transition-all
+      className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-black transition-all
         ${isFilled
           ? 'bg-gradient-to-br from-green-300 to-emerald-400 text-white shadow-inner border-4 border-white/50'
           : isOver
@@ -368,9 +368,9 @@ export default function SpellingGame({ onBack, theme }) {
             key={`hint-${currentWordIndex}`}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 mb-10 bg-white/30 dark:bg-black/30 px-8 py-4 rounded-full shadow-inner"
+            className="flex items-center gap-3 mb-6 sm:mb-10 bg-white/30 dark:bg-black/30 px-5 sm:px-8 py-3 sm:py-4 rounded-full shadow-inner max-w-full"
           >
-            <span className={`font-bold text-indigo-900 dark:text-indigo-100 ${isEarlyLevel ? 'text-4xl sm:text-5xl tracking-wider' : 'text-xl sm:text-2xl'}`}>
+            <span className={`font-bold text-indigo-900 dark:text-indigo-100 text-center ${isEarlyLevel ? 'text-2xl sm:text-4xl tracking-wider' : 'text-base sm:text-2xl'}`}>
               {displayText}
             </span>
             <button
@@ -378,12 +378,12 @@ export default function SpellingGame({ onBack, theme }) {
               className="p-2 bg-white/50 dark:bg-slate-700/50 rounded-full hover:bg-white transition-colors cursor-pointer shrink-0"
               title="Hear Hint"
             >
-              <Volume2 className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600 dark:text-indigo-400" />
+              <Volume2 className="w-5 h-5 sm:w-8 sm:h-8 text-indigo-600 dark:text-indigo-400" />
             </button>
           </motion.div>
 
           {/* Target Slots */}
-          <div className="flex gap-4 mb-12">
+          <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-12 flex-wrap justify-center">
             {currentLevel.word.split('').map((letter, index) => (
               <DroppableSlot
                 key={`slot-${index}`}
@@ -397,7 +397,7 @@ export default function SpellingGame({ onBack, theme }) {
           </div>
 
           {/* Letter Pool */}
-          <div className="w-full max-w-3xl flex flex-wrap justify-center gap-4 bg-white/20 dark:bg-black/20 backdrop-blur-sm p-8 rounded-3xl shadow-lg border-2 border-white/30">
+          <div className="w-full max-w-3xl flex flex-wrap justify-center gap-2 sm:gap-4 bg-white/20 dark:bg-black/20 backdrop-blur-sm p-4 sm:p-8 rounded-3xl shadow-lg border-2 border-white/30">
             {lettersPool.map((item) => (
               <DraggableLetter
                 key={item.id}

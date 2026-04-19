@@ -48,6 +48,7 @@ public/
 ```
 
 ## When You Finish
+- **Important**: After EVERY task is complete (not subtask), update TASKS.md immediately so the project's current status is known.
 - Update TASKS.md with completed items
 - Add any lessons learned to knowledge-base/LEARNED_SOLUTIONS.md
 - Don't leave the app in a broken state
