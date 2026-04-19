@@ -80,10 +80,26 @@ export default function Achievements({ profileId, onBack, theme }) {
         if (!error && data) {
           const scoreDict = {};
           data.forEach(s => scoreDict[s.game_mode] = s);
+          
+          // Merge with local fallback
+          const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+          Object.keys(localScores).forEach(mode => {
+            if (!scoreDict[mode] || localScores[mode].max_score > (scoreDict[mode].max_score || 0)) {
+              scoreDict[mode] = localScores[mode];
+            }
+          });
+          
           setScores(scoreDict);
+        } else if (error) {
+          console.error('Error fetching scores:', error);
+          // Pure local fallback
+          const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+          setScores(localScores);
         }
       } catch (err) {
-        console.error('Error fetching scores:', err);
+        console.error('Error in fetchScores:', err);
+        const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+        setScores(localScores);
       }
       setLoading(false);
     };

@@ -121,14 +121,27 @@ function App() {
 
       // Upsert score to Supabase
       if (profileId) {
+        const gameMode = (gameState === 'COUNTING' || returnState === 'COUNTING') ? 'counting' : 'spelling';
+        console.log(`Saving score for ${profileId} in mode ${gameMode}: Level ${newLevel}, Score ${newScore}`);
+        
         supabase.from('scores').upsert({
           profile_id: profileId,
-          game_mode: gameState === 'COUNTING' ? 'counting' : 'spelling',
+          game_mode: gameMode,
           max_level: newLevel,
           max_score: newScore,
           updated_at: new Date().toISOString()
         }, { onConflict: 'profile_id,game_mode' }).then(({ error }) => {
-          if (error) console.error("Error saving score:", error);
+          if (error) {
+            console.error("❌ Supabase Save Failed:", error);
+            // Fallback: save to localStorage for immediate UI persistence
+            const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+            localScores[gameMode] = { max_level: newLevel, max_score: newScore, updated_at: new Date().toISOString() };
+            localStorage.setItem('debbies_game_local_scores', JSON.stringify(localScores));
+          } else {
+            console.log("✅ Score saved successfully!");
+          }
+        }).catch(err => {
+          console.error("🔥 Unexpected Save Error:", err);
         });
       }
       

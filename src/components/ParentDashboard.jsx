@@ -30,6 +30,14 @@ export default function ParentDashboard({ onBack }) {
       if (profilesError) {
         console.error('Profiles error:', profilesError);
         setError(`Could not load profiles: ${profilesError.message}`);
+      } else if (!profilesData && !scoresData) {
+        // This usually means a network failure happened before the response
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        if (!supabaseUrl || supabaseUrl.includes('MISSING')) {
+          setError("⚠️ Supabase URL is missing or incorrect in Vercel. Please check your Environment Variables.");
+        } else {
+          setError("⚠️ Connection failed. Please check your internet or Supabase project status.");
+        }
       }
       if (scoresError) {
         console.error('Scores error:', scoresError);
