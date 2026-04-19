@@ -2,8 +2,8 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { animate } from 'animejs';
-import { Sparkles } from 'lucide-react';
-import { playTheme, stopTheme } from './audio/soundEngine';
+import { Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { playTheme, stopTheme, resumeAudio, playSound, setMuted, isSoundMuted } from './audio/soundEngine';
 import CountingLevel from './components/CountingLevel';
 import SpellingGame from './components/SpellingGame';
 import CursorSparkles from './components/CursorSparkles';
@@ -22,6 +22,20 @@ function App() {
   const [levelInfo, setLevelInfo] = useState({ level: 1, score: 0 });
   const [themeId, setThemeId] = useState('unicorn'); // 'unicorn' | 'werecat'
   const [profileId, setProfileId] = useState(null);
+  const [muted, setMutedState] = useState(false);
+
+  // Resume audio context on first user interaction (required by mobile browsers)
+  useEffect(() => {
+    const handleInteraction = () => {
+      resumeAudio();
+    };
+    document.addEventListener('touchstart', handleInteraction, { once: true });
+    document.addEventListener('click', handleInteraction, { once: true });
+    return () => {
+      document.removeEventListener('touchstart', handleInteraction);
+      document.removeEventListener('click', handleInteraction);
+    };
+  }, []);
 
   useEffect(() => {
     // Check if we have a saved profile ID
@@ -60,6 +74,9 @@ function App() {
   };
 
   const handleSelectProfile = async (selectedThemeId) => {
+    // Resume audio context on user action
+    resumeAudio();
+    
     let id = profileId;
     if (!id) {
       id = uuidv4();
@@ -73,12 +90,15 @@ function App() {
     playTheme(selectedThemeId);
 
     // Save/upsert profile to Supabase
-    await supabase.from('profiles').upsert({
+    const { error } = await supabase.from('profiles').upsert({
       id: id,
       display_name: THEMES[selectedThemeId].name,
       theme_id: selectedThemeId,
       updated_at: new Date().toISOString()
     });
+    if (error) {
+      console.error('Error saving profile:', error);
+    }
   };
 
   const theme = THEMES[themeId];
@@ -138,9 +158,36 @@ function App() {
     });
   };
 
+  const toggleMute = () => {
+    const newMuted = !muted;
+    setMutedState(newMuted);
+    setMuted(newMuted);
+    if (newMuted) {
+      stopTheme();
+    } else if (gameState === 'LANDING') {
+      playTheme(themeId);
+    }
+  };
+
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${bgTheme} overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
       <CursorSparkles />
+      
+      {/* Sound toggle — always visible except on profile screen */}
+      {gameState !== 'PROFILE' && gameState !== 'PARENT_DASHBOARD' && (
+        <button
+          onClick={toggleMute}
+          className="fixed top-4 right-4 z-[100] p-3 bg-white/20 dark:bg-black/20 backdrop-blur-md rounded-full hover:bg-white/40 dark:hover:bg-black/40 transition-all shadow-lg border border-white/20 cursor-pointer"
+          title={muted ? 'Unmute' : 'Mute'}
+        >
+          {muted ? (
+            <VolumeX className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          ) : (
+            <Volume2 className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          )}
+        </button>
+      )}
+
       <AnimatePresence mode="wait">
         {gameState === 'PROFILE' && (
           <ProfileScreen
@@ -339,7 +386,7 @@ function App() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
-            className="absolute inset-0 flex flex-col items-center z-10 w-full h-full bg-black/20 backdrop-blur-sm"
+            className="absolute inset-0 flex flex-col items-center z-10 w-full h-full bg-black/20 backdrop-blur-sm overflow-y-auto"
           >
             <Achievements
               profileId={profileId}

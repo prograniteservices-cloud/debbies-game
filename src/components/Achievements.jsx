@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../supabaseClient';
-import { popIn } from '../utils/animeEffects';
-import { Sparkles, Map, Star, Award, Zap, Trophy, Goal, AwardIcon } from 'lucide-react';
+import { Sparkles, Map, Star, Award, Zap, Trophy, Goal } from 'lucide-react';
 
 const ACHIEVEMENTS_DATA = [
   {
@@ -64,7 +63,6 @@ const ACHIEVEMENTS_DATA = [
 export default function Achievements({ profileId, onBack, theme }) {
   const [scores, setScores] = useState({ counting: null, spelling: null });
   const [loading, setLoading] = useState(true);
-  const gridRef = useRef(null);
 
   useEffect(() => {
     const fetchScores = async () => {
@@ -73,27 +71,25 @@ export default function Achievements({ profileId, onBack, theme }) {
         return;
       }
       
-      const { data, error } = await supabase
-        .from('scores')
-        .select('*')
-        .eq('profile_id', profileId);
-        
-      if (!error && data) {
-        const scoreDict = {};
-        data.forEach(s => scoreDict[s.game_mode] = s);
-        setScores(scoreDict);
+      try {
+        const { data, error } = await supabase
+          .from('scores')
+          .select('*')
+          .eq('profile_id', profileId);
+          
+        if (!error && data) {
+          const scoreDict = {};
+          data.forEach(s => scoreDict[s.game_mode] = s);
+          setScores(scoreDict);
+        }
+      } catch (err) {
+        console.error('Error fetching scores:', err);
       }
       setLoading(false);
     };
     
     fetchScores();
   }, [profileId]);
-
-  useEffect(() => {
-    if (!loading && gridRef.current) {
-      popIn(gridRef.current.querySelectorAll('.achievement-card'));
-    }
-  }, [loading]);
 
   const earnedAchievements = useMemo(() => {
     return ACHIEVEMENTS_DATA.filter(ach => ach.check(scores)).map(a => a.id);
@@ -104,22 +100,22 @@ export default function Achievements({ profileId, onBack, theme }) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -30 }}
-      className="flex flex-col items-center justify-start w-full h-full max-w-4xl p-6 md:p-10 z-10"
+      className="flex flex-col items-center justify-start w-full h-full max-w-4xl p-4 sm:p-6 md:p-10 z-10 overflow-y-auto"
     >
-      <div className={`w-full glass-card rounded-[3rem] p-8 md:p-12 mb-8 border-4 ${theme.cardBorder}`}>
-        <div className="flex justify-between items-center mb-10 w-full relative">
+      <div className={`w-full glass-card rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 md:p-12 mb-8 border-4 ${theme.cardBorder}`}>
+        <div className="flex justify-between items-center mb-8 sm:mb-10 w-full relative">
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-full font-bold text-slate-700 dark:text-slate-300 transition-colors shadow-sm cursor-pointer z-20"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-full font-bold text-slate-700 dark:text-slate-300 transition-colors shadow-sm cursor-pointer z-20 text-sm sm:text-base"
           >
             ← Back to Map
           </button>
           
-          <h1 className={`absolute inset-0 flex items-center justify-center text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${theme.titleGradient} tracking-tight pointer-events-none`}>
+          <h1 className={`absolute inset-0 flex items-center justify-center text-2xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${theme.titleGradient} tracking-tight pointer-events-none`}>
             Trophy Room
           </h1>
           
-          <div className="w-[124px]" /> {/* Empty spacer to balance "Back" button */}
+          <div className="w-[80px] sm:w-[124px]" /> {/* Empty spacer to balance "Back" button */}
         </div>
 
         {loading ? (
@@ -132,39 +128,47 @@ export default function Achievements({ profileId, onBack, theme }) {
             </motion.div>
           </div>
         ) : (
-          <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ACHIEVEMENTS_DATA.map((ach) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {ACHIEVEMENTS_DATA.map((ach, index) => {
               const isEarned = earnedAchievements.includes(ach.id);
               const Icon = ach.icon;
               
               return (
-                <div 
-                  key={ach.id} 
-                  className={`achievement-card opacity-0 transform-gpu relative overflow-hidden rounded-3xl p-6 border-4 flex flex-col items-center text-center transition-all duration-300
+                <motion.div 
+                  key={ach.id}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ 
+                    delay: index * 0.1,
+                    type: 'spring',
+                    stiffness: 200,
+                    damping: 15
+                  }}
+                  className={`relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-6 border-4 flex flex-col items-center text-center transition-all duration-300
                     ${isEarned 
                       ? `bg-white/90 dark:bg-slate-800/90 shadow-xl ${theme.cardBorder}` 
                       : 'bg-slate-100/50 dark:bg-slate-900/50 border-transparent achievement-locked'
                     }
                   `}
                 >
-                  <div className={`p-4 rounded-full mb-4 ${ach.bgColor}`}>
-                    <Icon className={`w-10 h-10 ${ach.color}`} />
+                  <div className={`p-3 sm:p-4 rounded-full mb-3 sm:mb-4 ${ach.bgColor}`}>
+                    <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${ach.color}`} />
                   </div>
                   
-                  <h3 className="text-xl font-bold mb-2 font-heading tracking-wide text-slate-800 dark:text-slate-100">
+                  <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2 font-heading tracking-wide text-slate-800 dark:text-slate-100">
                     {ach.title}
                   </h3>
                   
-                  <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
                     {ach.description}
                   </p>
                   
                   {isEarned && (
                     <div className="absolute top-3 right-3 text-yellow-400 drop-shadow-md">
-                      <Sparkles className="w-6 h-6" />
+                      <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
             })}
           </div>
