@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, BarChart, Clock, RefreshCw } from 'lucide-react';
+import { ArrowLeft, User, BarChart, Clock, RefreshCw, Activity } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { THEMES } from '../themes';
 
@@ -116,23 +116,29 @@ export default function ParentDashboard({ onBack }) {
   };
 
   return (
-    <div className="flex flex-col items-center w-full h-full min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 overflow-y-auto">
+    <div className="flex flex-col items-center w-full h-full min-h-screen text-slate-800 dark:text-slate-200 overflow-y-auto relative">
+      <div className="aurora-bg">
+        <div className="aurora-blob bg-blue-100 -top-20 -left-20 opacity-60" />
+        <div className="aurora-blob bg-indigo-100 top-1/2 -right-20 opacity-60" style={{ animationDelay: '-5s' }} />
+        <div className="aurora-blob bg-slate-100 -bottom-20 left-1/2 opacity-60" style={{ animationDelay: '-10s' }} />
+      </div>
+
       {/* Header */}
-      <div className="w-full bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-50">
+      <div className="w-full bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-white/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full font-bold transition-colors cursor-pointer"
+            className="clay-button !bg-slate-100 !text-slate-600 !px-4 !py-2 !text-sm !border-2"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 mr-2" />
             <span className="hidden sm:inline">Back</span>
           </button>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 font-heading tracking-tight">
             Parent Dashboard
           </h1>
           <button
             onClick={fetchData}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full font-bold transition-colors cursor-pointer"
+            className="clay-button !bg-slate-100 !text-slate-600 !px-4 !py-2 !text-sm !border-2"
             title="Refresh data"
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
@@ -164,35 +170,39 @@ export default function ParentDashboard({ onBack }) {
                   key={profile.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-md border border-slate-200 dark:border-slate-700"
+                  className="clay-card p-5 sm:p-6 bg-white/90 backdrop-blur-sm shadow-xl"
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-100 dark:border-slate-700">
-                    <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl shadow-inner ${themeColors.bg} ${themeColors.text}`}>
-                      {getThemeEmoji(profile.theme_id)}
+                  <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-100">
+                    <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full clay-card p-2 flex items-center justify-center bg-white shadow-md`}>
+                      <img 
+                        src={THEMES[profile.theme_id]?.mascotImg || THEMES.unicorn.mascotImg} 
+                        className="w-full h-full object-contain"
+                        alt="Profile mascot"
+                      />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white capitalize truncate">
+                      <h2 className="text-xl sm:text-2xl font-black text-slate-800 font-heading capitalize truncate">
                         {profile.display_name || THEMES[profile.theme_id]?.name || 'Player'}
                       </h2>
-                      <p className="text-slate-500 flex items-center gap-1 text-xs sm:text-sm font-semibold">
+                      <p className="text-slate-500 flex items-center gap-1 text-xs sm:text-sm font-bold">
                         <Clock className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" /> 
                         Last active: {profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'Unknown'}
                       </p>
                       {profile._local && (
-                        <p className="text-xs text-amber-500 font-bold mt-1">📱 Local device only</p>
+                        <p className="text-xs text-amber-500 font-bold mt-1 uppercase tracking-tighter">Local Profile</p>
                       )}
                     </div>
                   </div>
 
                   <div className="space-y-3 sm:space-y-4">
-                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex justify-between items-center border border-slate-100 dark:border-slate-800">
+                    <div className="clay-card !rounded-2xl p-3 sm:p-4 flex justify-between items-center !bg-slate-50/50">
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-500 flex items-center justify-center">
-                          <BarChart className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full clay-card p-1 bg-white text-indigo-500 flex items-center justify-center shadow-sm">
+                          <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <div>
-                          <p className="font-bold text-slate-700 dark:text-slate-300 text-sm sm:text-base">Numbers Game</p>
-                          <p className="text-xs sm:text-sm text-slate-500">Max Level: {mathScore?.max_level || 1}</p>
+                          <p className="font-black text-slate-700 text-sm sm:text-base font-heading">Numbers Game</p>
+                          <p className="text-xs sm:text-sm text-slate-500 font-bold">Level {mathScore?.max_level || 1}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -201,14 +211,14 @@ export default function ParentDashboard({ onBack }) {
                       </div>
                     </div>
 
-                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex justify-between items-center border border-slate-100 dark:border-slate-800">
+                    <div className="clay-card !rounded-2xl p-3 sm:p-4 flex justify-between items-center !bg-slate-50/50">
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500 flex items-center justify-center">
-                          <BarChart className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full clay-card p-1 bg-white text-emerald-500 flex items-center justify-center shadow-sm">
+                          <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <div>
-                          <p className="font-bold text-slate-700 dark:text-slate-300 text-sm sm:text-base">Spelling Quest</p>
-                          <p className="text-xs sm:text-sm text-slate-500">Max Level: {spellScore?.max_level || 1}</p>
+                          <p className="font-black text-slate-700 text-sm sm:text-base font-heading">Spelling Quest</p>
+                          <p className="text-xs sm:text-sm text-slate-500 font-bold">Level {spellScore?.max_level || 1}</p>
                         </div>
                       </div>
                       <div className="text-right">

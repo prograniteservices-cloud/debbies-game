@@ -13,11 +13,12 @@ export default function SummaryScreen({ correct, incorrect, onNext, onRetry }) {
   
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
     >
-      <div className="bg-white dark:bg-slate-800 rounded-[3rem] shadow-2xl border-8 border-yellow-400 p-8 sm:p-12 w-full max-w-md flex flex-col items-center text-center">
+      <div className="clay-card !bg-white/95 p-8 sm:p-12 w-full max-w-md flex flex-col items-center text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 opacity-5" />
         <motion.div
           animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
           transition={{ repeat: Infinity, duration: 4 }}
@@ -26,8 +27,8 @@ export default function SummaryScreen({ correct, incorrect, onNext, onRetry }) {
           <Trophy className="w-24 h-24 text-yellow-500 drop-shadow-lg" />
         </motion.div>
 
-        <h2 className="text-4xl font-black text-indigo-900 dark:text-indigo-100 mb-2">Well Done!</h2>
-        <p className="text-xl text-slate-500 dark:text-slate-400 mb-8 font-bold">You completed the level!</p>
+        <h2 className="text-4xl font-black text-slate-800 mb-2 font-heading tracking-tight">Well Done!</h2>
+        <p className="text-xl text-slate-500 mb-8 font-bold">You completed the level!</p>
 
         <div className="flex gap-2 mb-8">
           {[...Array(5)].map((_, i) => (
@@ -45,13 +46,13 @@ export default function SummaryScreen({ correct, incorrect, onNext, onRetry }) {
         </div>
 
         <div className="grid grid-cols-2 gap-6 w-full mb-10">
-          <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-3xl border-b-4 border-green-300 dark:border-green-800">
-            <p className="text-green-600 dark:text-green-400 font-black text-3xl">{correct}</p>
-            <p className="text-green-800 dark:text-green-200 font-bold text-sm uppercase">Correct</p>
+          <div className="clay-card !rounded-2xl !p-4 !bg-emerald-50/50 border-emerald-100/50">
+            <p className="text-emerald-500 font-black text-3xl font-heading">{correct}</p>
+            <p className="text-emerald-800 font-bold text-sm uppercase font-heading">Correct</p>
           </div>
-          <div className="bg-rose-100 dark:bg-rose-900/30 p-4 rounded-3xl border-b-4 border-rose-300 dark:border-rose-800">
-            <p className="text-rose-600 dark:text-rose-400 font-black text-3xl">{incorrect}</p>
-            <p className="text-rose-800 dark:text-rose-200 font-bold text-sm uppercase">Mistakes</p>
+          <div className="clay-card !rounded-2xl !p-4 !bg-rose-50/50 border-rose-100/50">
+            <p className="text-rose-500 font-black text-3xl font-heading">{incorrect}</p>
+            <p className="text-rose-800 font-bold text-sm uppercase font-heading">Mistakes</p>
           </div>
         </div>
 
@@ -59,16 +60,16 @@ export default function SummaryScreen({ correct, incorrect, onNext, onRetry }) {
           {onRetry && (
             <button 
               onClick={onRetry}
-              className="flex-1 px-6 py-4 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xl font-black flex items-center justify-center gap-2 hover:bg-slate-300 transition-colors shadow-sm"
+              className="clay-button flex-1 !bg-slate-100 !text-slate-600 !py-4 !text-xl !border-2"
             >
-              <RotateCcw className="w-6 h-6" /> RETRY
+              <RotateCcw className="w-6 h-6 mr-2" /> RETRY
             </button>
           )}
           <button 
             onClick={onNext}
-            className="flex-[2] px-6 py-4 bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-2xl text-xl font-black flex items-center justify-center gap-2 shadow-lg shadow-pink-200 dark:shadow-none border-b-4 border-pink-600 active:border-b-0 active:translate-y-1 transition-all"
+            className="clay-button flex-[2] !bg-pink-400 !py-4 !text-xl !border-2"
           >
-            NEXT <ArrowRight className="w-6 h-6" />
+            NEXT <ArrowRight className="w-6 h-6 ml-2" />
           </button>
         </div>
       </div>

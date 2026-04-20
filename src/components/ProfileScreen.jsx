@@ -1,5 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import { BarChart2, Check } from 'lucide-react';
 import { THEMES } from '../themes';
 
 const ProfileCard = ({ theme, onClick, index }) => {
@@ -33,32 +33,38 @@ const ProfileCard = ({ theme, onClick, index }) => {
       initial={{ opacity: 0, y: 30, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.1, type: 'spring', stiffness: 200, damping: 20 }}
-      whileHover={{ scale: 1.05, y: -10 }}
+      whileHover={{ scale: 1.05, y: -10, rotateY: 10, rotateX: -5 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => onClick(theme.id)}
-      className={`relative group cursor-pointer w-full max-w-[280px] rounded-[3rem] p-1 bg-gradient-to-br ${gradientClass} shadow-2xl overflow-hidden shrink-0`}
+      className="relative group cursor-pointer w-full max-w-[280px] shrink-0 perspective-1000"
     >
-      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-[3rem]" />
-      <div className="bg-slate-900 rounded-[2.9rem] flex flex-col items-center p-6 h-full min-h-[280px] sm:min-h-[360px]">
-        <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr ${avatarGradient} p-1.5 mb-4 sm:mb-6 shadow-inner ring-4 ${ringColor}`}>
+      <div className="clay-card h-full min-h-[280px] sm:min-h-[360px] flex flex-col items-center p-6 relative overflow-hidden group-hover:border-white transition-all">
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradientClass} opacity-5 group-hover:opacity-10 transition-opacity`} />
+        
+        <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full clay-card p-1.5 mb-4 sm:mb-6 flex items-center justify-center bg-white shadow-lg`}>
           <img
             src={theme.mascotImg}
             alt={theme.mascotAlt}
-            className={`w-full h-full object-contain ${theme.glowClass} p-2`}
+            className={`w-full h-full object-contain ${theme.glowClass} p-2 group-hover:scale-110 transition-transform`}
             onError={(e) => {
               e.target.src = '/assets/unicorn_queen.png';
               e.target.className = 'w-full h-full object-contain p-2';
             }}
           />
         </div>
-        <h2 className={`text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r ${nameGradient} mb-1 text-center group-hover:brightness-125 transition-all duration-300`}>
+        
+        <h2 className={`text-xl sm:text-2xl font-black text-slate-800 mb-1 text-center font-heading`}>
           {theme.name}
         </h2>
-        <p className="text-white/40 font-bold tracking-wide uppercase text-[10px] mb-3 sm:mb-4 text-center">
+        
+        <p className="text-slate-500 font-bold tracking-wide uppercase text-[10px] mb-3 sm:mb-4 text-center">
           {theme.tagline}
         </p>
-        <div className="mt-auto px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white/60 font-bold group-hover:bg-white group-hover:text-slate-900 transition-colors">
-          Select
+        
+        <div className="mt-auto w-full">
+          <div className="clay-button !py-2 !text-sm !shadow-md group-hover:!shadow-lg transition-all" style={{ '--button-bg': `var(--color-${theme.id}-primary, #7a5fff)` }}>
+            <Check className="w-4 h-4 mr-2" /> Select
+          </div>
         </div>
       </div>
     </motion.div>
@@ -71,14 +77,19 @@ const ProfileScreen = ({ onSelectProfile, onOpenParentDashboard }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 flex flex-col items-center bg-slate-950 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] z-50 overflow-y-auto overflow-x-hidden"
+      className="absolute inset-0 flex flex-col items-center z-50 overflow-y-auto overflow-x-hidden"
     >
+      <div className="aurora-bg">
+        <div className="aurora-blob bg-pink-100 -top-20 -left-20 opacity-60" />
+        <div className="aurora-blob bg-purple-100 top-1/2 -right-20 opacity-60" style={{ animationDelay: '-5s' }} />
+        <div className="aurora-blob bg-blue-100 -bottom-20 left-1/2 opacity-60" style={{ animationDelay: '-10s' }} />
+      </div>
       <button 
         onClick={onOpenParentDashboard}
-        className="fixed top-4 right-4 sm:top-6 sm:right-6 px-4 py-2 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white rounded-full font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2 border border-white/10 z-[60]"
+        className="clay-button fixed top-4 right-4 sm:top-6 sm:right-6 !px-4 !py-2 !bg-slate-100 !text-slate-600 !border-2 z-[60]"
       >
-        <span className="text-xl">📊</span>
-        <span className="hidden sm:inline text-xs uppercase tracking-widest">Dashboard</span>
+        <BarChart2 className="w-4 h-4" />
+        <span className="hidden sm:inline text-xs uppercase tracking-widest ml-2">Dashboard</span>
       </button>
 
       {/* Scrollable content wrapper */}
@@ -89,10 +100,10 @@ const ProfileScreen = ({ onSelectProfile, onOpenParentDashboard }) => {
           transition={{ delay: 0.1 }}
           className="text-center mb-8 sm:mb-12 pt-4"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 mb-2 font-heading tracking-tight">
             Who is Playing?
           </h1>
-          <div className="h-1.5 w-24 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 mx-auto rounded-full" />
+          <div className="h-2 w-32 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mx-auto rounded-full shadow-inner" />
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-7xl justify-items-center pb-8">

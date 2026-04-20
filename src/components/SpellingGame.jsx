@@ -115,33 +115,25 @@ function DraggableLetter({ id, letter, disabled, isSelected, onSelect, letterBor
     cursor: disabled ? 'default' : 'grab',
   };
 
-  const border = letterBorder || 'border-pink-400 dark:border-pink-600';
-  const gradient = isSelected
-    ? (selectedGradient || 'from-orange-500 to-yellow-600')
-    : (letterGradient || 'from-purple-500 to-pink-500');
-
   return (
     <motion.div
       ref={setNodeRef}
-      style={style}
+      style={{ ...style, '--button-bg': isSelected ? '#fbbf24' : '#ffffff' }}
       {...listeners}
       {...attributes}
       onClick={() => !disabled && onSelect(id, letter)}
-      className={`relative w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-black shadow-xl border-b-4 select-none z-10 transition-all
+      className={`clay-button !w-14 !h-14 sm:!w-20 sm:!h-20 !rounded-2xl !text-2xl sm:!text-4xl !shadow-lg transition-all
         ${isSelected
-          ? 'bg-yellow-300 border-yellow-500 scale-110 ring-4 ring-yellow-400 ring-offset-2'
-          : `bg-white/90 dark:bg-slate-800/90 ${border} hover:-translate-y-1 active:scale-95`}
+          ? '!bg-yellow-300 !scale-110 !shadow-2xl ring-4 ring-yellow-400'
+          : `!bg-white !text-slate-800`}
         ${disabled ? 'opacity-50 grayscale' : ''}
       `}
     >
-      <span className={`bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
+      <span className={isSelected ? 'text-white' : 'text-slate-800'}>
         {letter}
       </span>
       {isDragging && (
         <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-400 animate-pulse" />
-      )}
-      {isSelected && (
-        <Sparkles className="absolute -top-2 -right-2 w-5 h-5 text-yellow-500 animate-bounce" />
       )}
     </motion.div>
   );
@@ -158,14 +150,14 @@ function DroppableSlot({ id, letter, isFilled, hasSelection, onPlace }) {
     <div
       ref={setNodeRef}
       onClick={() => !isFilled && hasSelection && onPlace(id, letter)}
-      className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-black transition-all
+      className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-2xl sm:text-4xl font-black transition-all clay-card
         ${isFilled
-          ? 'bg-gradient-to-br from-green-300 to-emerald-400 text-white shadow-inner border-4 border-white/50'
+          ? '!bg-emerald-400 !text-white !border-4 !border-white'
           : isOver
-            ? 'bg-pink-100 border-4 border-dashed border-pink-400 dark:bg-pink-900/30'
+            ? '!bg-pink-100 !border-4 !border-dashed !border-pink-400'
             : hasSelection && !isFilled
-              ? 'bg-yellow-100 border-4 border-dashed border-yellow-400 dark:bg-yellow-900/30 cursor-pointer animate-pulse'
-              : 'bg-black/10 dark:bg-white/10 border-4 border-dashed border-slate-300 dark:border-slate-600'}
+              ? '!bg-yellow-50 !border-4 !border-dashed !border-yellow-400 cursor-pointer animate-pulse'
+              : '!bg-slate-100/30 !border-4 !border-dashed !border-slate-300'}
       `}
     >
       {isFilled && (
@@ -303,32 +295,38 @@ export default function SpellingGame({ onBack, theme }) {
   const handleReadClue = () => speakText(spokenText);
 
   return (
-    <div className={`flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden bg-gradient-to-b ${theme?.spellingBg || 'from-purple-200 to-indigo-300 dark:from-slate-800 dark:to-indigo-950'}`}>
+    <div className="flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden">
+      <div className="aurora-bg">
+        <div className="aurora-blob bg-purple-100 -top-20 -left-20 opacity-60" />
+        <div className="aurora-blob bg-pink-100 top-1/2 -right-20 opacity-60" style={{ animationDelay: '-5s' }} />
+        <div className="aurora-blob bg-indigo-100 -bottom-20 left-1/2 opacity-60" style={{ animationDelay: '-10s' }} />
+      </div>
       <MagicalEffects isCelebrating={showReward} />
 
       {/* Top Bar */}
-      <div className="w-full max-w-4xl flex justify-between items-center bg-white/40 dark:bg-black/20 backdrop-blur-md p-4 rounded-3xl z-20">
+      <div className="w-full max-w-4xl flex justify-between items-center bg-white/40 backdrop-blur-md p-4 rounded-[2.5rem] z-20 border border-white/40 shadow-sm">
         <button
           onClick={onBack}
-          className="p-3 bg-white/80 dark:bg-slate-800 rounded-full hover:bg-white transition-colors shadow-sm cursor-pointer"
+          className="clay-button !bg-slate-100 !text-slate-600 !p-3 !border-2"
         >
-          <ArrowLeft className="w-6 h-6 text-slate-700 dark:text-slate-300" />
+          <ArrowLeft className="w-6 h-6" />
         </button>
         <div className="flex items-center gap-4">
-          <img
-            src={theme?.mascotImg || '/assets/unicorn_queen.png'}
-            alt={theme?.mascotAlt || 'Mascot'}
-            className="w-12 h-12 object-contain shrink-0 drop-shadow-lg"
-            style={{ mixBlendMode: 'multiply' }}
-          />
+          <div className="w-12 h-12 clay-card p-1 bg-white">
+            <img
+              src={theme?.mascotImg || '/assets/unicorn_queen.png'}
+              alt={theme?.mascotAlt || 'Mascot'}
+              className="w-full h-full object-contain drop-shadow-lg"
+            />
+          </div>
           <div>
-            <h2 className="text-xl font-bold text-indigo-900 dark:text-indigo-100">Spelling Quest</h2>
-            <p className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">Level {currentWordIndex + 1}/{WORDS.length}</p>
+            <h2 className="text-xl font-black text-slate-800 font-heading tracking-tight">Spelling Quest</h2>
+            <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Level {currentWordIndex + 1}/{WORDS.length}</p>
           </div>
         </div>
-        <div className="flex bg-yellow-400/20 px-4 py-2 rounded-2xl items-center gap-2 border border-yellow-400/50">
-          <Trophy className="w-6 h-6 text-yellow-500" />
-          <span className="text-xl font-black text-yellow-600 dark:text-yellow-400">{Object.keys(placedLetters).length * 10}</span>
+        <div className="clay-card !rounded-2xl !px-4 !py-2 flex items-center gap-2 !bg-white/80">
+          <Trophy className="w-6 h-6 text-yellow-500 drop-shadow-sm" />
+          <span className="text-xl font-black text-slate-800 font-heading">{Object.keys(placedLetters).length * 10}</span>
         </div>
       </div>
 
@@ -345,15 +343,15 @@ export default function SpellingGame({ onBack, theme }) {
                 transition={{ type: "spring" }}
                 className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none"
               >
-                <div className="bg-white/90 backdrop-blur-md p-8 rounded-[3rem] shadow-2xl border-4 border-yellow-400 flex flex-col items-center">
-                  <h3 className={`text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r ${theme?.rewardGradient || 'from-pink-500 to-yellow-500'} mb-6 drop-shadow-sm`}>{theme?.rewardText || 'MAGICAL!'}</h3>
+                <div className="clay-card !bg-white/95 p-8 rounded-[4rem] shadow-2xl flex flex-col items-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-yellow-400 opacity-10" />
+                  <h3 className={`text-5xl font-black text-slate-800 mb-6 font-heading tracking-tight relative z-10`}>{theme?.rewardText || 'MAGICAL!'}</h3>
                   <img
                     src={theme?.rewardImg || '/assets/flying_unicorn_rainbow.png'}
                     alt={theme?.rewardAlt || 'Reward'}
-                    className="w-64 h-64 object-contain animate-bounce"
-                    style={{ mixBlendMode: 'multiply' }}
+                    className="w-64 h-64 object-contain animate-bounce relative z-10"
                   />
-                  <div className="flex mt-8 gap-2">
+                  <div className="flex mt-8 gap-2 relative z-10">
                     {[1,2,3].map(i => (
                       <Sparkles key={i} className="w-10 h-10 text-yellow-400" style={{ animationDelay: `${i * 0.2}s` }} />
                     ))}
@@ -368,17 +366,17 @@ export default function SpellingGame({ onBack, theme }) {
             key={`hint-${currentWordIndex}`}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-3 mb-6 sm:mb-10 bg-white/30 dark:bg-black/30 px-5 sm:px-8 py-3 sm:py-4 rounded-full shadow-inner max-w-full"
+            className="flex items-center gap-4 mb-6 sm:mb-10 clay-card !rounded-full !px-8 !py-4 !bg-white/80 max-w-full"
           >
-            <span className={`font-bold text-indigo-900 dark:text-indigo-100 text-center ${isEarlyLevel ? 'text-2xl sm:text-4xl tracking-wider' : 'text-base sm:text-2xl'}`}>
+            <span className={`font-black text-slate-800 text-center font-heading ${isEarlyLevel ? 'text-2xl sm:text-4xl tracking-wider' : 'text-base sm:text-2xl'}`}>
               {displayText}
             </span>
             <button
               onClick={handleReadClue}
-              className="p-2 bg-white/50 dark:bg-slate-700/50 rounded-full hover:bg-white transition-colors cursor-pointer shrink-0"
+              className="clay-button !bg-indigo-100 !text-indigo-600 !p-3 !border-2 shrink-0"
               title="Hear Hint"
             >
-              <Volume2 className="w-5 h-5 sm:w-8 sm:h-8 text-indigo-600 dark:text-indigo-400" />
+              <Volume2 className="w-6 h-6 sm:w-8 sm:h-8" />
             </button>
           </motion.div>
 
@@ -397,7 +395,7 @@ export default function SpellingGame({ onBack, theme }) {
           </div>
 
           {/* Letter Pool */}
-          <div className="w-full max-w-3xl flex flex-wrap justify-center gap-2 sm:gap-4 bg-white/20 dark:bg-black/20 backdrop-blur-sm p-4 sm:p-8 rounded-3xl shadow-lg border-2 border-white/30">
+          <div className="w-full max-w-3xl flex flex-wrap justify-center gap-2 sm:gap-4 clay-card p-4 sm:p-8 !bg-white/60">
             {lettersPool.map((item) => (
               <DraggableLetter
                 key={item.id}
@@ -406,29 +404,22 @@ export default function SpellingGame({ onBack, theme }) {
                 disabled={showReward}
                 isSelected={selectedLetter?.id === item.id}
                 onSelect={handleSelectLetter}
-                letterBorder={theme?.letterBorder}
-                letterGradient={theme?.letterGradient}
-                selectedGradient={theme?.selectedGradient}
               />
             ))}
           </div>
 
-          {/* Click-mode hint for young players */}
-          {selectedLetter && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-4 text-lg font-bold text-indigo-700 dark:text-indigo-300 bg-yellow-100/70 px-6 py-2 rounded-full"
-            >
-              Now tap a box to place the letter!
-            </motion.p>
-          )}
+      {/* Interactive indicator */}
+      {selectedLetter && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 clay-card !bg-yellow-100 !px-8 !py-3 font-black text-yellow-800 font-heading shadow-2xl"
+        >
+          Tap a box to place "{selectedLetter.letter}"
+        </motion.div>
+      )}
         </div>
       </DndContext>
-
-      {/* Decorative blobs */}
-      <div className="absolute top-1/4 left-10 w-32 h-32 bg-pink-400/20 border border-pink-300 blur-2xl rounded-full" />
-      <div className="absolute bottom-1/4 right-10 w-48 h-48 bg-purple-400/20 border border-purple-300 blur-2xl rounded-full" />
     </div>
   );
 }

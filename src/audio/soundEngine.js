@@ -175,6 +175,50 @@ function sfxClick() {
   playNoise(0.02, 0.06, 0, 5000);
 }
 
+// ─── SFX: Mascot Hover ── Theme-specific procedural sequences ────────────────
+let lastMascotSoundTime = 0;
+function sfxMascotHover(themeId) {
+  if (isMuted) return;
+  const ctx = getCtx();
+  const now = ctx.currentTime;
+  
+  // Debounce to prevent audio overlapping too much
+  if (now - lastMascotSoundTime < 0.4) return;
+  lastMascotSoundTime = now;
+
+  switch (themeId) {
+    case 'unicorn':
+      // Debbie: High twinkly C-Major arpeggio
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => 
+        playNote(f, 0.2, 'sine', 0.15, i * 0.05)
+      );
+      playNoise(0.2, 0.03, 0.05, 8000);
+      break;
+    case 'werecat':
+      // Bubba: Energetic, slightly lower "electric" tones
+      [196, 261.63, 392].forEach((f, i) => 
+        playNote(f, 0.25, 'square', 0.1, i * 0.08)
+      );
+      playNote(523.25, 0.3, 'sine', 0.15, 0.2);
+      break;
+    case 'milo':
+      // Milo: Upbeat, heroic triadic chime
+      [440, 554.37, 659.25].forEach((f, i) => 
+        playNote(f, 0.2, 'triangle', 0.15, i * 0.07)
+      );
+      break;
+    case 'luna':
+      // Luna: Ethereal, dreamy sine twinkle
+      [587.33, 783.99, 880].forEach((f, i) => 
+        playNote(f, 0.5, 'sine', 0.1, i * 0.12)
+      );
+      playNoise(0.4, 0.02, 0, 4000);
+      break;
+    default:
+      sfxPop();
+  }
+}
+
 // ─── SFX Router ─────────────────────────────────────────────────────────────
 const SFX_MAP = {
   pop: sfxPop,
@@ -185,7 +229,11 @@ const SFX_MAP = {
   click: sfxClick,
 };
 
-export const playSound = (type) => {
+export const playSound = (type, param = null) => {
+  if (type === 'mascot') {
+    sfxMascotHover(param);
+    return;
+  }
   const fn = SFX_MAP[type];
   if (fn) {
     try { fn(); } catch (e) { console.warn('Sound error:', e); }

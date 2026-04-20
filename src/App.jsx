@@ -2,7 +2,21 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { animate } from 'animejs';
-import { Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { 
+  Gamepad2, 
+  BookOpen, 
+  Trophy, 
+  Settings, 
+  Map as MapIcon, 
+  Sparkles, 
+  MousePointer2,
+  ChevronRight,
+  Volume2, 
+  VolumeX, 
+  ArrowLeft,
+  Shapes,
+  Brain
+} from 'lucide-react';
 import { playTheme, stopTheme, resumeAudio, playSound, setMuted, isSoundMuted } from './audio/soundEngine';
 import CountingLevel from './components/CountingLevel';
 import SpellingGame from './components/SpellingGame';
@@ -153,24 +167,6 @@ function App() {
     return theme.bgThemes[(levelInfo.level - 1) % theme.bgThemes.length];
   }, [levelInfo.level, themeId]);
 
-  const isWerecat = themeId === 'werecat';
-
-  const handleBtnHover = (e) => {
-    animate(e.currentTarget, {
-      scale: 1.05,
-      duration: 800,
-      ease: 'spring(1, 80, 10, 0)'
-    });
-  };
-
-  const handleBtnLeave = (e) => {
-    animate(e.currentTarget, {
-      scale: 1,
-      duration: 600,
-      ease: 'outElastic(1, .8)'
-    });
-  };
-
   const toggleMute = () => {
     const newMuted = !muted;
     setMutedState(newMuted);
@@ -183,7 +179,12 @@ function App() {
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${bgTheme} overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
+    <div className={`flex flex-col items-center justify-center min-h-screen overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
+      <div className="aurora-bg">
+        <div className="aurora-blob bg-pink-300 -top-20 -left-20" />
+        <div className="aurora-blob bg-purple-300 top-1/2 -right-20" style={{ animationDelay: '-5s' }} />
+        <div className="aurora-blob bg-blue-300 -bottom-20 left-1/2" style={{ animationDelay: '-10s' }} />
+      </div>
       <CursorSparkles />
       
       {/* Sound toggle — always visible except on profile screen */}
@@ -213,16 +214,15 @@ function App() {
         {gameState === 'LANDING' && (
           <motion.div
             key="landing"
-            initial={{ scale: 0, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 1.2, opacity: 0, filter: "blur(10px)" }}
-            transition={{ duration: 0.6, type: "spring" }}
-            className="flex flex-col items-center gap-6 z-10 w-full px-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex flex-col items-center justify-center p-6 w-full max-w-4xl z-10"
           >
-            <div className={`p-8 sm:p-12 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-[3rem] shadow-2xl border-4 ${theme.cardBorder} max-w-lg w-full`}>
-
-              {/* Profile Header */}
-              <div className="flex justify-between items-center mb-6">
+            <div className="clay-card p-8 sm:p-12 w-full flex flex-col items-center bg-white/90 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-5" />
+              
+              <div className="w-full flex justify-between items-center mb-8 relative z-20">
                 <button
                   onClick={() => {
                     localStorage.removeItem('debbies_game_profile_id');
@@ -230,97 +230,71 @@ function App() {
                     stopTheme();
                     setGameState('PROFILE');
                   }}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-full text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors shadow-sm cursor-pointer"
+                  className="clay-button !bg-slate-100 !text-slate-600 !px-4 !py-2 !text-xs !border-2"
                 >
-                  ← Switch Profile
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Switch
                 </button>
                 <button
                   onClick={() => setGameState('ACHIEVEMENTS')}
-                  className="px-4 py-2 bg-yellow-100 dark:bg-yellow-900/50 hover:bg-yellow-200 dark:hover:bg-yellow-800/50 rounded-full text-sm font-bold text-yellow-700 dark:text-yellow-400 transition-colors border border-yellow-300 dark:border-yellow-600 shadow-sm cursor-pointer"
+                  className="clay-button !bg-yellow-100 !text-yellow-600 !px-4 !py-2 !text-xs !border-2"
                 >
-                  🏆 Achievements
+                  <Trophy className="w-4 h-4 mr-2" /> Trophies
                 </button>
               </div>
 
-              {/* Mascot */}
-              <div className="flex justify-center mb-6 relative z-20">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={themeId}
-                    initial={{ scale: 0.5, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.5, opacity: 0, y: -20 }}
-                    transition={{ type: 'spring', damping: 12, stiffness: 100 }}
-                  >
-                    <motion.img
-                      src={theme.mascotImg}
-                      alt={theme.mascotAlt}
-                      className={`w-36 h-36 object-contain ${theme.glowClass} drop-shadow-2xl`}
-                      initial={{ y: 0 }}
-                      animate={{ y: [-8, 8, -8], rotate: [-2, 2, -2] }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 4,
-                        ease: "easeInOut"
-                      }}
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              <motion.h1
-                key={`title-${themeId}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${theme.titleGradient} mb-3 text-center leading-tight tracking-tight`}
+              <motion.div
+                whileHover={{ rotateY: 15, rotateX: -15 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="w-48 h-48 sm:w-64 sm:h-64 mb-8 relative perspective-1000"
               >
-                {theme.name}
-              </motion.h1>
+                <div className="clay-card !rounded-full p-6 w-full h-full bg-white shadow-2xl flex items-center justify-center">
+                  <img
+                    src={theme.mascotImg}
+                    alt={theme.mascotAlt}
+                    className={`w-full h-full object-contain ${theme.glowClass}`}
+                    onError={(e) => {
+                      e.target.src = '/assets/unicorn_queen.png';
+                      e.target.className = 'w-full h-full object-contain p-4';
+                    }}
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 bg-yellow-400 p-3 rounded-full shadow-lg border-4 border-white animate-bounce">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+              </motion.div>
 
-              <motion.p
-                key={`tag-${themeId}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-xl sm:text-2xl text-slate-600 dark:text-slate-300 font-bold text-center mb-8"
-              >
-                {theme.tagline}
-              </motion.p>
+              <h1 className="text-4xl sm:text-6xl font-black text-slate-800 mb-2 font-heading tracking-tight text-center">
+                Unicorn Island
+              </h1>
+              <p className="text-slate-500 font-bold mb-10 text-xl tracking-wide uppercase font-heading">
+                Welcome, {theme.name}!
+              </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
-                <button
-                  onMouseEnter={handleBtnHover}
-                  onMouseLeave={handleBtnLeave}
-                  onClick={() => handleStartGame('COUNTING')}
-                  className={`px-6 py-4 bg-gradient-to-r ${theme.mathBtn} text-white rounded-full text-xl font-black shadow-xl border-b-8 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
-                >
-                  Numbers Base
-                </button>
-                <button
-                  onMouseEnter={handleBtnHover}
-                  onMouseLeave={handleBtnLeave}
-                  onClick={() => handleStartGame('SPELLING')}
-                  className={`px-6 py-4 bg-gradient-to-r ${theme.spellBtn} text-white rounded-full text-xl font-black shadow-xl border-b-8 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
-                >
-                  Spelling Quest
-                </button>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center w-full mt-4">
-                <button
-                  onMouseEnter={handleBtnHover}
-                  onMouseLeave={handleBtnLeave}
-                  onClick={() => handleStartGame('PATTERNS')}
-                  className={`px-6 py-4 bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-full text-xl font-black shadow-xl border-b-8 border-indigo-600 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
-                >
-                  Pattern Path
-                </button>
-                <button
-                  onMouseEnter={handleBtnHover}
-                  onMouseLeave={handleBtnLeave}
-                  onClick={() => handleStartGame('MEMORY')}
-                  className={`px-6 py-4 bg-gradient-to-r from-emerald-400 to-teal-500 text-white rounded-full text-xl font-black shadow-xl border-b-8 border-teal-600 active:border-b-0 active:translate-y-2 transition-all cursor-pointer w-full tracking-wide`}
-                >
-                  Memory Meadow
-                </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+                <MenuButton 
+                  icon={Gamepad2} 
+                  label="Play Numbers" 
+                  onClick={() => handleStartGame('COUNTING')} 
+                  color="#7a5fff"
+                />
+                <MenuButton 
+                  icon={BookOpen} 
+                  label="Spelling Quest" 
+                  onClick={() => handleStartGame('SPELLING')} 
+                  color="#ff7eb9"
+                />
+                <MenuButton 
+                  icon={Shapes} 
+                  label="Pattern Path" 
+                  onClick={() => handleStartGame('PATTERNS')} 
+                  color="#facc15"
+                />
+                <MenuButton 
+                  icon={Brain} 
+                  label="Memory Meadow" 
+                  onClick={() => handleStartGame('MEMORY')} 
+                  color="#2dd4bf"
+                />
               </div>
             </div>
           </motion.div>
@@ -424,5 +398,43 @@ function App() {
     </div>
   );
 }
+
+const MenuButton = ({ icon: Icon, label, onClick, color }) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    setMousePos({ x: x * 0.2, y: y * 0.2 });
+  };
+
+  return (
+    <motion.button
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setMousePos({ x: 0, y: 0 });
+      }}
+      animate={{ 
+        x: mousePos.x, 
+        y: mousePos.y,
+        scale: isHovered ? 1.02 : 1
+      }}
+      transition={{ type: 'spring', stiffness: 150, damping: 15, mass: 0.1 }}
+      onClick={onClick}
+      className="clay-button group relative overflow-hidden"
+      style={{ '--button-bg': color }}
+    >
+      <div className="flex items-center justify-center w-full relative z-10">
+        <Icon className={`w-6 h-6 mr-3 ${isHovered ? 'rotate-12' : ''} transition-transform`} />
+        <span className="flex-1 text-left">{label}</span>
+        <ChevronRight className={`w-5 h-5 ml-2 ${isHovered ? 'translate-x-1' : ''} transition-transform opacity-50`} />
+      </div>
+    </motion.button>
+  );
+};
 
 export default App;
