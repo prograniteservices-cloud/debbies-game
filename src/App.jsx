@@ -178,7 +178,7 @@ function App() {
   };
 
   return (
-    <div className={`flex flex-col items-center justify-start sm:justify-center min-h-[100dvh] pt-2 sm:pt-0 overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
+    <div className={`flex flex-col items-center justify-start sm:justify-center h-[100dvh] overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
       <div className="aurora-bg">
         <div className="aurora-blob bg-pink-300 -top-20 -left-20" />
         <div className="aurora-blob bg-purple-300 top-1/2 -right-20" style={{ animationDelay: '-5s' }} />

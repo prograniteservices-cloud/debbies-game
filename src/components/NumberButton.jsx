@@ -8,7 +8,7 @@ export default function NumberButton({ number, onClick, isWrong }) {
       animate={isWrong ? { x: [-10, 10, -10, 10, 0], filter: 'grayscale(1)' } : {}}
       transition={{ type: "spring", stiffness: 300, damping: 10 }}
       onClick={() => onClick(number)}
-      className="clay-button w-24 h-24 sm:w-32 sm:h-32 !rounded-[2rem] !text-5xl !shadow-xl"
+      className="clay-button w-20 h-20 sm:w-32 sm:h-32 !rounded-[2rem] !text-4xl sm:!text-5xl !shadow-xl"
       style={{ '--button-bg': '#7a5fff' }}
     >
       {number}
