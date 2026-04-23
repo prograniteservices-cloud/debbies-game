@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart2, Check } from 'lucide-react';
 import { THEMES } from '../themes';
+import { playTheme } from '../audio/soundEngine';
 
 const ProfileCard = ({ theme, onClick, index }) => {
   const isDebbie = theme.id === 'unicorn';
@@ -79,6 +80,10 @@ const ProfileCard = ({ theme, onClick, index }) => {
 };
 
 const ProfileScreen = ({ onSelectProfile, onOpenParentDashboard }) => {
+  useEffect(() => {
+    playTheme('landing');
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

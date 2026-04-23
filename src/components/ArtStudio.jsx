@@ -71,6 +71,7 @@ export default function ArtStudio({ onBack, theme }) {
     { title: 'Bubba\'s Mischief', type: 'image', src: '/assets/character_bubba.png' },
     { title: 'Milo the Explorer', type: 'image', src: '/assets/character_milo.png' },
     { title: 'Luna\'s Galaxy', type: 'image', src: '/assets/character_luna.png' },
+    { title: 'Landing Theme', type: 'video', src: '/assets/videos/landing_theme.mp4' },
     { title: 'Unicorn Theme Music Video', type: 'video', src: '/assets/videos/unicorn_theme.mp4' },
     { title: 'Werecat Theme Music Video', type: 'video', src: '/assets/videos/werecat_theme.mp4' },
     { title: 'Milo Theme Music Video', type: 'video', src: '/assets/videos/milo_theme.mp4' },

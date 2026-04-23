@@ -109,6 +109,7 @@ export const playSound = async (type, param = null) => {
 
 // ─── Background Music (BGM) Implementation ──────────────────────────────────
 const THEME_FILES = {
+  landing: '/assets/audio/landing_theme.mp3',
   unicorn: '/assets/audio/unicorn_theme.mp3',
   werecat: '/assets/audio/werecat_theme.mp3',
   milo: '/assets/audio/milo_theme.mp3',
