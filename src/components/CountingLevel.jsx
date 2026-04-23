@@ -52,7 +52,7 @@ export default function CountingLevel({ levelInfo, onLevelComplete, onBack, them
       </div>
 
       {/* Mode Content */}
-      <div className="flex-1 w-full min-h-0 relative isolate">
+      <div className="flex-1 w-full min-h-0 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${levelInfo.level}-${mode}`}

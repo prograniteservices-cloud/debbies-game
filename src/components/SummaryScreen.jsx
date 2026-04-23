@@ -18,7 +18,7 @@ export default function SummaryScreen({ correct, incorrect, onNext, onRetry }) {
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
     >
       <div className="clay-card !bg-white/95 p-6 sm:p-8 w-full max-w-md flex flex-col items-center text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 opacity-5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 opacity-5 pointer-events-none" />
         <motion.div
           animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
           transition={{ repeat: Infinity, duration: 4 }}
