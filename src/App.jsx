@@ -218,10 +218,10 @@ function App() {
             exit={{ opacity: 0, y: -20 }}
             className="flex flex-col items-center justify-center p-2 sm:p-4 w-full max-w-4xl z-10 max-h-full"
           >
-            <div className="clay-card p-4 sm:p-8 w-full flex flex-col items-center bg-white/90 relative overflow-y-auto max-h-[92vh] sm:max-h-none">
+            <div className="clay-card !p-3 sm:!p-8 w-full flex flex-col items-center bg-white/90 relative overflow-y-auto max-h-[95vh] sm:max-h-none">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-5" />
               
-              <div className="w-full flex justify-between items-center mb-4 relative z-20">
+              <div className="w-full flex justify-between items-center mb-1 sm:mb-4 relative z-20">
                 <button
                   onClick={() => {
                     localStorage.removeItem('debbies_game_profile_id');
@@ -269,7 +269,7 @@ function App() {
                 Welcome, {theme.name}!
               </p>
 
-              <div className="grid grid-cols-2 gap-4 w-full">
+              <div className="grid grid-cols-2 gap-2 sm:gap-4 w-full">
                 <MenuButton 
                   icon={Gamepad2} 
                   label="Numbers" 

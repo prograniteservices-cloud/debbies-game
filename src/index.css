@@ -68,7 +68,7 @@ h1, h2, h3, h4, .font-heading {
 /* Claymorphism Utilities */
 .clay-card {
   background: white;
-  border-radius: 2.5rem;
+  border-radius: 2rem;
   box-shadow: 
     inset -8px -8px 16px rgba(0, 0, 0, 0.05),
     inset 8px 8px 16px rgba(255, 255, 255, 0.8),
@@ -92,7 +92,7 @@ h1, h2, h3, h4, .font-heading {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1.25rem;
 }
 
 .clay-button:hover {
