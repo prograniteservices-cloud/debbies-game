@@ -15,7 +15,8 @@ import {
   VolumeX, 
   ArrowLeft,
   Shapes,
-  Brain
+  Brain,
+  Image as ImageIcon
 } from 'lucide-react';
 import { playTheme, stopTheme, resumeAudio, playSound, setMuted, isSoundMuted } from './audio/soundEngine';
 import CountingLevel from './components/CountingLevel';
@@ -27,6 +28,7 @@ import Achievements from './components/Achievements';
 import ParentDashboard from './components/ParentDashboard';
 import PatternPath from './components/PatternPath';
 import MemoryMeadow from './components/MemoryMeadow';
+import ArtStudio from './components/ArtStudio';
 import { THEMES } from './themes';
 import { supabase } from './supabaseClient';
 
@@ -91,15 +93,17 @@ function App() {
     // Resume audio context on user action
     resumeAudio();
     
-    let id = profileId;
-    if (!id) {
-      id = uuidv4();
-      setProfileId(id);
-      localStorage.setItem('debbies_game_profile_id', id);
-    }
+    // Use the theme ID as the persistent user ID
+    const id = selectedThemeId;
+    setProfileId(id);
+    localStorage.setItem('debbies_game_profile_id', id);
     
     // selectedThemeId is one of: 'unicorn', 'werecat', 'milo', 'luna'
     setThemeId(selectedThemeId);
+    
+    // Load existing profile data if it exists
+    await loadProfileData(id);
+    
     setGameState('LANDING');
     playTheme(selectedThemeId);
 
@@ -218,8 +222,8 @@ function App() {
             exit={{ opacity: 0, y: -20 }}
             className="flex flex-col items-center justify-center p-2 sm:p-4 w-full max-w-4xl z-10 max-h-full"
           >
-            <div className="clay-card !p-3 sm:!p-8 w-full flex flex-col items-center bg-white/90 relative overflow-y-auto max-h-[95vh] sm:max-h-none">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-5" />
+            <div className="glass-card !p-3 sm:!p-8 w-full flex flex-col items-center bg-white/20 backdrop-blur-2xl relative overflow-y-auto max-h-[95vh] sm:max-h-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white/50">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-50" />
               
               <div className="w-full flex justify-between items-center mb-1 sm:mb-4 relative z-20">
                 <button
@@ -229,24 +233,24 @@ function App() {
                     stopTheme();
                     setGameState('PROFILE');
                   }}
-                  className="clay-button !bg-slate-100 !text-slate-600 !px-4 !py-2 !text-xs !border-2"
+                  className="clay-button !bg-white/50 hover:!bg-white/80 backdrop-blur-md !text-slate-600 !px-4 !py-2 !text-xs !border border-white/40 shadow-sm"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" /> Switch
                 </button>
                 <button
                   onClick={() => setGameState('ACHIEVEMENTS')}
-                  className="clay-button !bg-yellow-100 !text-yellow-600 !px-4 !py-2 !text-xs !border-2"
+                  className="clay-button !bg-yellow-100/80 hover:!bg-yellow-200 backdrop-blur-md !text-yellow-700 !px-4 !py-2 !text-xs !border border-yellow-300 shadow-sm"
                 >
                   <Trophy className="w-4 h-4 mr-2" /> Trophies
                 </button>
               </div>
 
               <motion.div
-                whileHover={{ rotateY: 15, rotateX: -15 }}
+                whileHover={{ rotateY: 15, rotateX: -15, scale: 1.05 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="w-20 h-20 sm:w-32 sm:h-32 mb-1 sm:mb-2 relative perspective-1000"
+                className="w-24 h-24 sm:w-36 sm:h-36 mb-2 sm:mb-4 relative perspective-1000 z-20"
               >
-                <div className="clay-card !rounded-full p-3 w-full h-full bg-white shadow-lg flex items-center justify-center">
+                <div className="glass-card !rounded-full p-2 w-full h-full bg-white/60 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] flex items-center justify-center border border-white/60">
                   <img
                     src={theme.mascotImg}
                     alt={theme.mascotAlt}
@@ -294,6 +298,14 @@ function App() {
                   onClick={() => handleStartGame('MEMORY')} 
                   color="#2dd4bf"
                 />
+                <div className="col-span-2 mt-2">
+                  <MenuButton 
+                    icon={ImageIcon} 
+                    label="Magic Art Studio" 
+                    onClick={() => handleStartGame('ART_STUDIO')} 
+                    color="#ec4899"
+                  />
+                </div>
               </div>
             </div>
           </motion.div>
@@ -363,6 +375,18 @@ function App() {
             className="absolute inset-0 flex flex-col items-center z-10 w-full h-full"
           >
             <MemoryMeadow onBack={() => setGameState('LANDING')} theme={theme} />
+          </motion.div>
+        )}
+
+        {gameState === 'ART_STUDIO' && (
+          <motion.div
+            key="art_studio"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="absolute inset-0 flex flex-col items-center z-10 w-full h-full bg-slate-900/5 backdrop-blur-3xl"
+          >
+            <ArtStudio onBack={() => setGameState('LANDING')} theme={theme} />
           </motion.div>
         )}
 

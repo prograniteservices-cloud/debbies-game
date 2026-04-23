@@ -22,7 +22,7 @@ export const THEMES = {
       'from-violet-100 via-fuchsia-50 to-pink-100 dark:from-indigo-950 dark:via-violet-900/20 dark:to-fuchsia-950',
     ],
     // Assets
-    mascotImg: '/assets/characters/debbie_idle.png',
+    mascotImg: '/assets/character_debbie.png',
     mascotAlt: 'Debbie the Unicorn',
     rewardText: 'MAGICAL!',
     rewardGradient: 'from-purple-500 to-pink-500',
@@ -52,7 +52,7 @@ export const THEMES = {
       'from-slate-100 via-teal-100 to-emerald-100 dark:from-slate-950 dark:via-teal-950 dark:to-emerald-950',
     ],
     // Assets
-    mascotImg: '/assets/characters/bubba_idle.png',
+    mascotImg: '/assets/character_bubba.png',
     mascotAlt: 'Bubba the Dragon-Unicorn',
     rewardText: 'EPIC!',
     rewardGradient: 'from-teal-500 to-lime-500',
@@ -76,7 +76,7 @@ export const THEMES = {
     bgThemes: [
       'from-blue-50 via-indigo-50 to-slate-100 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-950',
     ],
-    mascotImg: '/assets/characters/milo_idle.png',
+    mascotImg: '/assets/character_milo.png',
     mascotAlt: 'Milo the Explorer',
     rewardText: 'HEROIC!',
     rewardGradient: 'from-blue-500 to-indigo-500',
@@ -100,7 +100,7 @@ export const THEMES = {
     bgThemes: [
       'from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-indigo-900/20 dark:to-purple-950',
     ],
-    mascotImg: '/assets/characters/luna_idle.png',
+    mascotImg: '/assets/character_luna.png',
     mascotAlt: 'Luna the Star-Gazer',
     rewardText: 'STELLAR!',
     rewardGradient: 'from-indigo-500 to-purple-500',
