@@ -121,7 +121,7 @@ export default function PoppingLevel({ theme, onComplete }) {
             style={{ borderColor: theme?.id === 'werecat' ? '#F97316' : '#EC4899' }}
           >
             <h2 className="text-4xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-yellow-500">
-              TIME'S UP!
+              BONUS ROUND!
             </h2>
             <div className="text-2xl font-bold text-slate-700 dark:text-slate-200 mb-6">
               You popped {poppedCount} / 30 items! 🎉

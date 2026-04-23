@@ -123,44 +123,43 @@ function App() {
   };
 
   const handleLevelComplete = async () => {
-    setLevelInfo(prev => {
-      const newScore = prev.score + 1;
-      const newLevel = Math.floor(newScore / 5) + 1;
-      
-      // If the level increased, switch to POPPING state
-      if (newLevel > prev.level) {
-        setReturnState(gameState); // save current game mode (COUNTING)
-        setGameState('POPPING');
-      }
+    const prev = levelInfo;
+    const newScore = prev.score + 1;
+    const newLevel = Math.floor(newScore / 5) + 1;
+    const isLevelUp = newLevel > prev.level;
 
-      // Upsert score to Supabase
-      if (profileId) {
-        const gameMode = (gameState === 'COUNTING' || returnState === 'COUNTING') ? 'counting' : 'spelling';
-        console.log(`Saving score for ${profileId} in mode ${gameMode}: Level ${newLevel}, Score ${newScore}`);
-        
-        supabase.from('scores').upsert({
-          profile_id: profileId,
-          game_mode: gameMode,
-          max_level: newLevel,
-          max_score: newScore,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'profile_id,game_mode' }).then(({ error }) => {
-          if (error) {
-            console.error("❌ Supabase Save Failed:", error);
-            // Fallback: save to localStorage for immediate UI persistence
-            const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
-            localScores[gameMode] = { max_level: newLevel, max_score: newScore, updated_at: new Date().toISOString() };
-            localStorage.setItem('debbies_game_local_scores', JSON.stringify(localScores));
-          } else {
-            console.log("✅ Score saved successfully!");
-          }
-        }).catch(err => {
-          console.error("🔥 Unexpected Save Error:", err);
-        });
-      }
+    // Update level info
+    setLevelInfo({ ...prev, score: newScore, level: newLevel });
+
+    // Handle level up transition
+    if (isLevelUp) {
+      setReturnState(gameState);
+      setGameState('POPPING');
+    }
+
+    // Upsert score to Supabase
+    if (profileId) {
+      const gameMode = (gameState === 'COUNTING' || returnState === 'COUNTING') ? 'counting' : 'spelling';
+      console.log(`Saving score for ${profileId} in mode ${gameMode}: Level ${newLevel}, Score ${newScore}`);
       
-      return { score: newScore, level: newLevel };
-    });
+      supabase.from('scores').upsert({
+        profile_id: profileId,
+        game_mode: gameMode,
+        max_level: newLevel,
+        max_score: newScore,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'profile_id,game_mode' }).then(({ error }) => {
+        if (error) {
+          console.error("❌ Supabase Save Failed:", error);
+          // Fallback: save to localStorage
+          localStorage.setItem(`score_${profileId}_${gameMode}`, JSON.stringify({ level: newLevel, score: newScore }));
+        } else {
+          console.log("✅ Score saved successfully!");
+        }
+      }).catch(err => {
+        console.error("🔥 Unexpected Save Error:", err);
+      });
+    }
   };
 
   const bgTheme = useMemo(() => {
@@ -217,12 +216,12 @@ function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="flex flex-col items-center justify-center p-6 w-full max-w-4xl z-10"
+            className="flex flex-col items-center justify-center p-4 w-full max-w-4xl z-10"
           >
-            <div className="clay-card p-8 sm:p-12 w-full flex flex-col items-center bg-white/90 relative overflow-hidden">
+            <div className="clay-card p-6 sm:p-8 w-full flex flex-col items-center bg-white/90 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-5" />
               
-              <div className="w-full flex justify-between items-center mb-8 relative z-20">
+              <div className="w-full flex justify-between items-center mb-4 relative z-20">
                 <button
                   onClick={() => {
                     localStorage.removeItem('debbies_game_profile_id');
@@ -245,9 +244,9 @@ function App() {
               <motion.div
                 whileHover={{ rotateY: 15, rotateX: -15 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="w-48 h-48 sm:w-64 sm:h-64 mb-8 relative perspective-1000"
+                className="w-24 h-24 sm:w-32 sm:h-32 mb-2 relative perspective-1000"
               >
-                <div className="clay-card !rounded-full p-6 w-full h-full bg-white shadow-2xl flex items-center justify-center">
+                <div className="clay-card !rounded-full p-3 w-full h-full bg-white shadow-lg flex items-center justify-center">
                   <img
                     src={theme.mascotImg}
                     alt={theme.mascotAlt}
@@ -258,40 +257,40 @@ function App() {
                     }}
                   />
                 </div>
-                <div className="absolute -bottom-4 -right-4 bg-yellow-400 p-3 rounded-full shadow-lg border-4 border-white animate-bounce">
-                  <Sparkles className="w-8 h-8 text-white" />
+                <div className="absolute -bottom-1 -right-1 bg-yellow-400 p-1.5 rounded-full shadow-md border-2 border-white animate-bounce">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
               </motion.div>
 
-              <h1 className="text-4xl sm:text-6xl font-black text-slate-800 mb-2 font-heading tracking-tight text-center">
+              <h1 className="text-2xl sm:text-4xl font-black text-slate-800 mb-0.5 font-heading tracking-tight text-center">
                 Unicorn Island
               </h1>
-              <p className="text-slate-500 font-bold mb-10 text-xl tracking-wide uppercase font-heading">
+              <p className="text-slate-500 font-bold mb-4 text-base tracking-wide uppercase font-heading">
                 Welcome, {theme.name}!
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+              <div className="grid grid-cols-2 gap-4 w-full">
                 <MenuButton 
                   icon={Gamepad2} 
-                  label="Play Numbers" 
+                  label="Numbers" 
                   onClick={() => handleStartGame('COUNTING')} 
                   color="#7a5fff"
                 />
                 <MenuButton 
                   icon={BookOpen} 
-                  label="Spelling Quest" 
+                  label="Spelling" 
                   onClick={() => handleStartGame('SPELLING')} 
                   color="#ff7eb9"
                 />
                 <MenuButton 
                   icon={Shapes} 
-                  label="Pattern Path" 
+                  label="Patterns" 
                   onClick={() => handleStartGame('PATTERNS')} 
                   color="#facc15"
                 />
                 <MenuButton 
                   icon={Brain} 
-                  label="Memory Meadow" 
+                  label="Memory" 
                   onClick={() => handleStartGame('MEMORY')} 
                   color="#2dd4bf"
                 />
@@ -407,7 +406,8 @@ const MenuButton = ({ icon: Icon, label, onClick, color }) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    setMousePos({ x: x * 0.2, y: y * 0.2 });
+    // Reduced from 0.2 to 0.1 for better stability
+    setMousePos({ x: x * 0.1, y: y * 0.1 });
   };
 
   return (
@@ -421,11 +421,11 @@ const MenuButton = ({ icon: Icon, label, onClick, color }) => {
       animate={{ 
         x: mousePos.x, 
         y: mousePos.y,
-        scale: isHovered ? 1.02 : 1
+        scale: isHovered ? 1.05 : 1
       }}
-      transition={{ type: 'spring', stiffness: 150, damping: 15, mass: 0.1 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20, mass: 0.1 }}
       onClick={onClick}
-      className="clay-button group relative overflow-hidden"
+      className="clay-button group relative overflow-hidden pointer-events-auto"
       style={{ '--button-bg': color }}
     >
       <div className="flex items-center justify-center w-full relative z-10">

@@ -381,7 +381,7 @@ export default function SpellingGame({ onBack, theme }) {
           </motion.div>
 
           {/* Target Slots */}
-          <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-12 flex-wrap justify-center">
+          <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 flex-wrap justify-center">
             {currentLevel.word.split('').map((letter, index) => (
               <DroppableSlot
                 key={`slot-${index}`}
@@ -395,7 +395,7 @@ export default function SpellingGame({ onBack, theme }) {
           </div>
 
           {/* Letter Pool */}
-          <div className="w-full max-w-3xl flex flex-wrap justify-center gap-2 sm:gap-4 clay-card p-4 sm:p-8 !bg-white/60">
+          <div className="w-full max-w-3xl flex flex-wrap justify-center gap-2 sm:gap-4 clay-card p-3 sm:p-4 !bg-white/60">
             {lettersPool.map((item) => (
               <DraggableLetter
                 key={item.id}
