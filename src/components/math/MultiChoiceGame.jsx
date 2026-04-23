@@ -108,7 +108,7 @@ export default function MultiChoiceGame({ levelInfo, onLevelComplete, theme }) {
       </div>
 
       {/* Bottom Answer Bar */}
-      <div className="w-full shrink-0 bg-white/60 backdrop-blur-md border-t border-white/30 flex justify-center items-center gap-4 sm:gap-12 py-6 sm:py-10 px-4 rounded-t-[2.5rem] shadow-2xl z-20">
+      <div className="w-full shrink-0 bg-white/60 backdrop-blur-md border-t border-white/30 flex justify-center items-center gap-4 sm:gap-10 py-4 sm:py-8 px-4 rounded-t-[2rem] shadow-2xl z-20">
         {choices.map(num => (
           <NumberButton key={num} number={num} isWrong={wrongAnswers.has(num)} onClick={handleChoice} />
         ))}

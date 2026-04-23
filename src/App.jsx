@@ -178,7 +178,7 @@ function App() {
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
+    <div className={`flex flex-col items-center justify-start sm:justify-center min-h-[100dvh] pt-2 sm:pt-0 overflow-hidden relative font-sans text-slate-800 dark:text-slate-100 selection:bg-pink-300 transition-colors duration-[3000ms]`}>
       <div className="aurora-bg">
         <div className="aurora-blob bg-pink-300 -top-20 -left-20" />
         <div className="aurora-blob bg-purple-300 top-1/2 -right-20" style={{ animationDelay: '-5s' }} />
@@ -216,9 +216,9 @@ function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="flex flex-col items-center justify-center p-4 w-full max-w-4xl z-10"
+            className="flex flex-col items-center justify-center p-2 sm:p-4 w-full max-w-4xl z-10 max-h-full"
           >
-            <div className="clay-card p-6 sm:p-8 w-full flex flex-col items-center bg-white/90 relative overflow-hidden">
+            <div className="clay-card p-4 sm:p-8 w-full flex flex-col items-center bg-white/90 relative overflow-y-auto max-h-[92vh] sm:max-h-none">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-5" />
               
               <div className="w-full flex justify-between items-center mb-4 relative z-20">
@@ -244,7 +244,7 @@ function App() {
               <motion.div
                 whileHover={{ rotateY: 15, rotateX: -15 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="w-24 h-24 sm:w-32 sm:h-32 mb-2 relative perspective-1000"
+                className="w-20 h-20 sm:w-32 sm:h-32 mb-1 sm:mb-2 relative perspective-1000"
               >
                 <div className="clay-card !rounded-full p-3 w-full h-full bg-white shadow-lg flex items-center justify-center">
                   <img
@@ -262,10 +262,10 @@ function App() {
                 </div>
               </motion.div>
 
-              <h1 className="text-2xl sm:text-4xl font-black text-slate-800 mb-0.5 font-heading tracking-tight text-center">
+              <h1 className="text-xl sm:text-4xl font-black text-slate-800 mb-0 font-heading tracking-tight text-center">
                 Unicorn Island
               </h1>
-              <p className="text-slate-500 font-bold mb-4 text-base tracking-wide uppercase font-heading">
+              <p className="text-slate-500 font-bold mb-3 sm:mb-4 text-sm sm:text-base tracking-wide uppercase font-heading">
                 Welcome, {theme.name}!
               </p>
 
