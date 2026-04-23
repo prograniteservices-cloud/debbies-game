@@ -36,7 +36,13 @@ const GalleryItem = ({ title, type, src, index, theme }) => {
           style={{ transform: 'translateZ(30px)' }}
         >
           {src ? (
-            <img src={src} alt={title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+            type === 'video' ? (
+              <video src={src} controls autoPlay loop muted playsInline className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+            ) : type === 'music' ? (
+              <audio src={src} controls className="w-full px-2 mt-auto mb-4" />
+            ) : (
+              <img src={src} alt={title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+            )
           ) : (
             <div className="flex flex-col items-center text-slate-400">
               {type === 'video' ? <Play className="w-12 h-12 mb-2 opacity-50" /> : type === 'music' ? <Music className="w-12 h-12 mb-2 opacity-50" /> : <ImageIcon className="w-12 h-12 mb-2 opacity-50" />}
@@ -49,9 +55,9 @@ const GalleryItem = ({ title, type, src, index, theme }) => {
         <div className="w-full text-center" style={{ transform: 'translateZ(40px)' }}>
           <h3 className="text-sm sm:text-base font-black text-slate-800 font-heading mb-1">{title}</h3>
           <div className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wider font-bold text-slate-500">
-            {type === 'video' && <span className="bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-200">Veo Video</span>}
-            {type === 'image' && <span className="bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full border border-pink-200">Gemini Nanobana</span>}
-            {type === 'music' && <span className="bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-200">Gemini Music</span>}
+            {type === 'video' && <span className="bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-200">Video</span>}
+            {type === 'image' && <span className="bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full border border-pink-200">Image</span>}
+            {type === 'music' && <span className="bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-200">Music</span>}
           </div>
         </div>
       </div>
@@ -65,8 +71,11 @@ export default function ArtStudio({ onBack, theme }) {
     { title: 'Bubba\'s Mischief', type: 'image', src: '/assets/character_bubba.png' },
     { title: 'Milo the Explorer', type: 'image', src: '/assets/character_milo.png' },
     { title: 'Luna\'s Galaxy', type: 'image', src: '/assets/character_luna.png' },
-    { title: 'Unicorn Island Intro', type: 'video', src: null },
-    { title: 'Magical Soundtrack', type: 'music', src: null },
+    { title: 'Unicorn Theme Music Video', type: 'video', src: '/assets/videos/unicorn_theme.mp4' },
+    { title: 'Werecat Theme Music Video', type: 'video', src: '/assets/videos/werecat_theme.mp4' },
+    { title: 'Milo Theme Music Video', type: 'video', src: '/assets/videos/milo_theme.mp4' },
+    { title: 'Luna Theme Music Video', type: 'video', src: '/assets/videos/luna_theme.mp4' },
+    { title: 'Bonus Beat', type: 'video', src: '/assets/videos/bonus_theme.mp4' },
   ];
 
   return (

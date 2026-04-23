@@ -70,35 +70,13 @@ const WORD_TIERS = [
   ]
 ];
 
-// ─── TTS helper: picks best available voice (Google, Microsoft, or system) ───
-function getBestVoice() {
-  const voices = window.speechSynthesis.getVoices();
-  // Priority list: prefer child-friendly, clear English voices
-  const preferred = [
-    'Google US English',
-    'Microsoft Aria Online (Natural) - English (United States)',
-    'Microsoft Zira Desktop - English (United States)',
-    'Samantha',          // macOS
-    'Karen',             // macOS Australian
-    'en-US-Standard-C',  // Generic
-  ];
-  for (const name of preferred) {
-    const match = voices.find(v => v.name === name);
-    if (match) return match;
-  }
-  // Fallback: any en-US voice
-  return voices.find(v => v.lang === 'en-US') || voices[0] || null;
+// ─── Sound cues for game events ─────────────────────────────────────────────
+function playHintSound() {
+  playSound('click'); // Will be updated to a premium hint sound
 }
 
-function speakText(text) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = getBestVoice();
-  utterance.pitch = 1.1;
-  utterance.rate = 0.85;
-  utterance.volume = 1;
-  window.speechSynthesis.speak(utterance);
+function playWinSound() {
+  playSound('levelUp'); // Will be updated to a premium level up sound
 }
 
 // ─── Draggable Letter (also handles click-select) ───────────────────────────
@@ -206,21 +184,15 @@ export default function SpellingGame({ onBack, theme }) {
 
   // Ensure voices are loaded before first speak
   useEffect(() => {
-    const loadVoices = () => { voicesReady.current = true; };
-    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
     // Some browsers load them synchronously
     if (window.speechSynthesis.getVoices().length > 0) voicesReady.current = true;
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+    return () => {};
   }, []);
 
   useEffect(() => {
     initLevel();
-    // Small delay to allow voices to initialize
-    const timer = setTimeout(() => speakText(WORDS[currentWordIndex]
-      ? (currentWordIndex < 10
-          ? WORDS[currentWordIndex].word.toLowerCase()
-          : WORDS[currentWordIndex].hint)
-      : ''), 400);
+    // Play a hint sound when a new level starts
+    const timer = setTimeout(() => playHintSound(), 400);
     return () => clearTimeout(timer);
   }, [currentWordIndex]);
 
@@ -239,7 +211,7 @@ export default function SpellingGame({ onBack, theme }) {
     if (Object.keys(currentPlaced).length === word.length) {
       playSound('sparkle');
       setShowReward(true);
-      speakText('Amazing! You spelled it!');
+      playWinSound();
       setTimeout(() => {
         if (currentWordIndex < WORDS.length - 1) {
           setCurrentWordIndex(prev => prev + 1);
@@ -292,7 +264,7 @@ export default function SpellingGame({ onBack, theme }) {
     placeLetter(slotId, expectedLetter, selectedLetter.letter, selectedLetter.id);
   };
 
-  const handleReadClue = () => speakText(spokenText);
+  const handleReadClue = () => playHintSound();
 
   return (
     <div className="flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden">
