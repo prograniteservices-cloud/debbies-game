@@ -3,20 +3,19 @@
 import React, { useState, Suspense, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PerspectiveCamera, OrbitControls, Stars, Float, ContactShadows } from '@react-three/drei';
-import { useDrag } from '@use-gesture/react';
-import { ArrowLeft, TreePine, Sparkles, Music } from 'lucide-react';
+import { ArrowLeft, TreePine, Music } from 'lucide-react';
 import * as THREE from 'three';
 import * as Tone from 'tone';
 
-// --- Improved Water Ripple Component ---
+// --- Optimized Water Ripple Component ---
 
 function WaterRipple({ position, color, onFinish }) {
   const meshRef = useRef();
   useFrame(() => {
     if (meshRef.current) {
-      meshRef.current.scale.x += 0.15;
-      meshRef.current.scale.y += 0.15;
-      meshRef.current.material.opacity = Math.max(0, 0.6 - meshRef.current.scale.x / 12);
+      meshRef.current.scale.x += 0.18;
+      meshRef.current.scale.y += 0.18;
+      meshRef.current.material.opacity = Math.max(0, 0.6 - meshRef.current.scale.x / 14);
       if (meshRef.current.material.opacity <= 0) onFinish();
     }
   });
@@ -29,96 +28,75 @@ function WaterRipple({ position, color, onFinish }) {
   );
 }
 
-// --- Musical Frog (Drum Toggle) ---
+// --- Optimized Musical Frog ---
 
-function RhythmFrog({ position, color, beatType, isActive, onToggle, beatPulse }) {
+function RhythmFrog({ position, color, isActive, onToggle, beatPulseRef }) {
   const groupRef = useRef();
   const frogRef = useRef();
+  const lightRef = useRef();
   
   useFrame((state) => {
     if (groupRef.current) {
-      // Gentle floating on lilypad
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime + position[0]) * 0.1;
       
-      // Pulse on beat
-      const s = isActive ? 1 + beatPulse * 0.3 : 1;
-      frogRef.current.scale.set(
-        THREE.MathUtils.lerp(frogRef.current.scale.x, s, 0.2),
-        THREE.MathUtils.lerp(frogRef.current.scale.y, s, 0.2),
-        THREE.MathUtils.lerp(frogRef.current.scale.z, s, 0.2)
-      );
+      const pulse = beatPulseRef.current;
+      const targetScale = isActive ? 1 + pulse * 0.4 : 1;
+      frogRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.2);
+      
+      if (lightRef.current) {
+        lightRef.current.intensity = isActive ? 15 + pulse * 30 : 0;
+      }
     }
   });
 
   return (
     <group position={position} ref={groupRef} onClick={(e) => { e.stopPropagation(); onToggle(); }}>
-      {/* Lilypad */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.1, 0]}>
         <circleGeometry args={[1.5, 32]} />
         <meshStandardMaterial color="#065f46" roughness={1} />
       </mesh>
-      {/* Simple Frog Body */}
       <group ref={frogRef}>
         <mesh position={[0, 0, 0]} castShadow>
           <sphereGeometry args={[0.6, 16, 16]} />
           <meshStandardMaterial color={isActive ? color : "#1e293b"} emissive={isActive ? color : "#000"} emissiveIntensity={isActive ? 2 : 0} />
         </mesh>
-        <mesh position={[0.3, 0.4, 0.3]}>
-          <sphereGeometry args={[0.2, 8, 8]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-        <mesh position={[-0.3, 0.4, 0.3]}>
-          <sphereGeometry args={[0.2, 8, 8]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
+        <mesh position={[0.3, 0.4, 0.3]}><sphereGeometry args={[0.2, 8, 8]} /><meshStandardMaterial color="white" /></mesh>
+        <mesh position={[-0.3, 0.4, 0.3]}><sphereGeometry args={[0.2, 8, 8]} /><meshStandardMaterial color="white" /></mesh>
       </group>
-      <pointLight position={[0, 1, 0]} intensity={isActive ? 20 : 0} color={color} distance={10} />
+      <pointLight ref={lightRef} position={[0, 1, 0]} color={color} distance={10} />
     </group>
   );
 }
 
-// --- Musical Mushroom Component ---
+// --- High Performance Mushroom ---
 
 function Mushroom({ initialPos, color, note, synth, addRipple }) {
   const groupRef = useRef();
   const capRef = useRef();
-  const [active, setActive] = useState(false);
+  const lightRef = useRef();
+  const activeRef = useRef(0); // Using ref instead of state for 60fps visuals
 
   useFrame((state) => {
     if (groupRef.current) {
       const t = state.clock.getElapsedTime();
       groupRef.current.rotation.y = Math.sin(t + initialPos[0]) * 0.1;
-      if (active) {
-        capRef.current.scale.set(
-          THREE.MathUtils.lerp(capRef.current.scale.x, 1.4, 0.2),
-          THREE.MathUtils.lerp(capRef.current.scale.y, 0.8, 0.2),
-          THREE.MathUtils.lerp(capRef.current.scale.z, 1.4, 0.2)
-        );
-      } else {
-        capRef.current.scale.set(
-          THREE.MathUtils.lerp(capRef.current.scale.x, 1, 0.1),
-          THREE.MathUtils.lerp(capRef.current.scale.y, 1, 0.1),
-          THREE.MathUtils.lerp(capRef.current.scale.z, 1, 0.1)
-        );
-      }
+      
+      // Visual pulse decay
+      activeRef.current = Math.max(0, activeRef.current - 0.05);
+      const s = 1 + activeRef.current * 0.5;
+      capRef.current.scale.lerp(new THREE.Vector3(s, 1 - activeRef.current * 0.2, s), 0.2);
+      capRef.current.material.emissiveIntensity = 1.5 + activeRef.current * 20;
+      lightRef.current.intensity = 3 + activeRef.current * 60;
     }
   });
 
   const trigger = (e) => {
     if (e) e.stopPropagation();
+    if (Tone.context.state !== 'running') Tone.start();
     
-    // Quick resume if needed without blocking
-    if (Tone.context.state !== 'running') {
-      Tone.start();
-    }
-
-    setActive(true);
-    if (synth) {
-      // Use Tone.now() for near-zero latency scheduling
-      synth.triggerAttackRelease(note, '4n', Tone.now());
-    }
+    activeRef.current = 1.0; // Trigger visual pulse
+    if (synth) synth.triggerAttackRelease(note, '4n', Tone.now());
     addRipple(new THREE.Vector3(...initialPos), color);
-    setTimeout(() => setActive(false), 200);
   };
 
   return (
@@ -129,7 +107,7 @@ function Mushroom({ initialPos, color, note, synth, addRipple }) {
       </mesh>
       <mesh ref={capRef} position={[0, 1, 0]} castShadow onPointerDown={trigger}>
         <sphereGeometry args={[1, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={active ? 15 : 1.5} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.5} />
         {[0, 1, 2, 3, 4].map(i => (
           <mesh key={i} position={[Math.cos(i * 1.5) * 0.6, 0.5, Math.sin(i * 1.5) * 0.6]} rotation={[Math.PI/2, 0, 0]}>
             <circleGeometry args={[0.2, 8]} />
@@ -137,55 +115,7 @@ function Mushroom({ initialPos, color, note, synth, addRipple }) {
           </mesh>
         ))}
       </mesh>
-      <pointLight position={[0, 1, 0]} intensity={active ? 60 : 3} color={color} distance={10} />
-    </group>
-  );
-}
-
-// --- Fireflies & Forest Deco ---
-
-function Fireflies() {
-  const count = 40;
-  const mesh = useRef();
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  const particles = useMemo(() => {
-    const temp = [];
-    for (let i = 0; i < count; i++) {
-      temp.push({ t: Math.random() * 100, speed: 0.01 + Math.random() / 100, x: Math.random() * 40 - 20, y: Math.random() * 15, z: Math.random() * 40 - 20 });
-    }
-    return temp;
-  }, [count]);
-
-  useFrame((state) => {
-    particles.forEach((p, i) => {
-      let { t, speed, x, y, z } = p;
-      t = p.t += speed;
-      dummy.position.set(x + Math.cos(t) * 2, y + Math.sin(t * 1.5) * 1, z + Math.sin(t) * 2);
-      const s = 0.2 + Math.sin(t) * 0.1;
-      dummy.scale.set(s, s, s);
-      dummy.updateMatrix();
-      mesh.current.setMatrixAt(i, dummy.matrix);
-    });
-    mesh.current.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <instancedMesh ref={mesh} args={[null, null, count]}>
-      <sphereGeometry args={[0.2, 8, 8]} />
-      <meshStandardMaterial color="#fef08a" emissive="#fbbf24" emissiveIntensity={5} transparent opacity={0.6} />
-    </instancedMesh>
-  );
-}
-
-function ForestDeco() {
-  return (
-    <group position={[0, -1.2, 0]}>
-      {[...Array(10)].map((_, i) => (
-        <group key={i} position={[Math.cos(i) * 25, 0, Math.sin(i) * 25]}>
-          <mesh position={[0, 3, 0]}><coneGeometry args={[2, 6, 8]} /><meshStandardMaterial color="#064e3b" /></mesh>
-          <mesh position={[0, 1, 0]}><cylinderGeometry args={[0.5, 0.5, 2, 8]} /><meshStandardMaterial color="#451a03" /></mesh>
-        </group>
-      ))}
+      <pointLight ref={lightRef} position={[0, 1, 0]} intensity={3} color={color} distance={10} />
     </group>
   );
 }
@@ -195,9 +125,8 @@ function ForestDeco() {
 function Scene({ onTrigger }) {
   const [ripples, setRipples] = useState([]);
   const [synth, setSynth] = useState(null);
-  const [drumSynths, setDrumSynths] = useState({});
   const [activeBeats, setActiveBeats] = useState({ 0: false, 1: false, 2: false });
-  const [beatPulse, setBeatPulse] = useState(0);
+  const beatPulseRef = useRef(0);
   const [bgColor, setBgColor] = useState('#020617');
 
   const mushrooms = useMemo(() => [
@@ -213,64 +142,51 @@ function Scene({ onTrigger }) {
   ], []);
 
   const frogs = useMemo(() => [
-    { pos: [-12, 0, -8], color: '#3b82f6', type: 'kick' },
-    { pos: [12, 0, -8],  color: '#10b981', type: 'plink' },
-    { pos: [0, 0, 12],   color: '#fbbf24', type: 'shaker' },
+    { pos: [-12, 0, -8], color: '#3b82f6' },
+    { pos: [12, 0, -8],  color: '#10b981' },
+    { pos: [0, 0, 12],   color: '#fbbf24' },
   ], []);
 
   useEffect(() => {
-    // Setup Melodic Synth
-    const reverb = new Tone.Reverb({ decay: 4, wet: 0.5 }).toDestination();
+    const reverb = new Tone.Reverb({ decay: 4, wet: 0.4 }).toDestination();
     const delay = new Tone.FeedbackDelay("4n", 0.3).connect(reverb);
     const poly = new Tone.PolySynth(Tone.Synth, {
       maxPolyphony: 32,
-      oscillator: { type: 'fattriangle' },
-      envelope: { attack: 0.01, decay: 0.2, sustain: 0.4, release: 2 }
+      oscillator: { type: 'triangle' }, // High efficiency
+      envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 1.5 }
     }).connect(delay);
-    poly.volume.value = -4;
+    poly.volume.value = -2;
     setSynth(poly);
 
-    // Setup Drum Synths
-    const kick = new Tone.MembraneSynth({ volume: -6 }).toDestination();
+    const kick = new Tone.MembraneSynth({ volume: -4 }).toDestination();
     const plink = new Tone.MetalSynth({ volume: -20, envelope: { release: 0.1 } }).toDestination();
     const shaker = new Tone.NoiseSynth({ volume: -15, envelope: { release: 0.05 } }).toDestination();
-    setDrumSynths({ kick, plink, shaker });
 
-    // Global Transport
     Tone.Transport.bpm.value = 85;
-    
     const loop = new Tone.Sequence((time, index) => {
-      setBeatPulse(1);
-      setTimeout(() => setBeatPulse(0), 100);
-      
-      // Kick Beat (Every 1 & 3)
+      beatPulseRef.current = 1;
+      setTimeout(() => beatPulseRef.current = 0, 120);
       if (activeBeats[0] && (index === 0 || index === 8)) kick.triggerAttackRelease("C1", "8n", time);
-      
-      // Plink Beat (Syncopated)
       if (activeBeats[1] && (index % 4 === 2)) plink.triggerAttackRelease("16n", time);
-      
-      // Shaker Beat (Steady 16ths)
       if (activeBeats[2]) shaker.triggerAttackRelease("16n", time);
-      
     }, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], "16n").start(0);
 
     return () => {
-      poly.dispose(); kick.dispose(); plink.dispose(); shaker.dispose(); reverb.dispose(); delay.dispose();
-      loop.dispose();
+      poly.dispose(); kick.dispose(); plink.dispose(); shaker.dispose(); reverb.dispose(); delay.dispose(); loop.dispose();
     };
   }, [activeBeats]);
 
-  const toggleBeat = async (idx) => {
-    if (Tone.context.state !== 'running') await Tone.start();
+  const toggleBeat = (idx) => {
+    if (Tone.context.state !== 'running') Tone.start();
     Tone.Transport.start();
     setActiveBeats(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
   const addRipple = (pos, color) => {
-    const id = Math.random();
-    setRipples(prev => [...prev, { id, pos, color }]);
+    const id = Date.now(); // More stable ID
+    setRipples(prev => [...prev.slice(-10), { id, pos, color }]); // Cap at 10 ripples
     setBgColor(color);
-    setTimeout(() => setBgColor('#020617'), 600);
+    setTimeout(() => setBgColor('#020617'), 400);
     onTrigger(color);
   };
 
@@ -279,24 +195,13 @@ function Scene({ onTrigger }) {
       <color attach="background" args={[bgColor]} />
       <fog attach="fog" args={[bgColor, 15, 50]} />
       <ambientLight intensity={0.5} />
-      <pointLight position={[0, 20, 10]} intensity={1.5} color="#ffffff" />
       
-      <Fireflies />
-      <ForestDeco />
-
       {mushrooms.map((m, i) => (
         <Mushroom key={i} initialPos={m.pos} color={m.color} note={m.note} synth={synth} addRipple={addRipple} />
       ))}
 
       {frogs.map((f, i) => (
-        <RhythmFrog 
-          key={i} 
-          position={f.pos} 
-          color={f.color} 
-          isActive={activeBeats[i]} 
-          onToggle={() => toggleBeat(i)} 
-          beatPulse={beatPulse}
-        />
+        <RhythmFrog key={i} position={f.pos} color={f.color} isActive={activeBeats[i]} onToggle={() => toggleBeat(i)} beatPulseRef={beatPulseRef} />
       ))}
 
       {ripples.map(r => (
@@ -308,7 +213,7 @@ function Scene({ onTrigger }) {
         <meshStandardMaterial color={bgColor} roughness={0.1} metalness={0.8} />
       </mesh>
       
-      <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2.2} minDistance={15} maxDistance={35} autoRotate autoRotateSpeed={0.3} makeDefault />
+      <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2.2} minDistance={15} maxDistance={35} makeDefault />
     </>
   );
 }
@@ -329,17 +234,17 @@ export default function MusicalRoom({ onBack }) {
             </div>
             <div>
               <h2 className="text-white font-black tracking-[0.2em] uppercase text-sm">Magic Meadow</h2>
-              <p className="text-emerald-400/60 text-[10px] font-bold tracking-widest uppercase">Tap frogs for nature beats</p>
+              <p className="text-emerald-400/60 text-[10px] font-bold tracking-widest uppercase">High Performance Music Engine</p>
             </div>
          </div>
       </div>
 
-      <Canvas shadows camera={{ position: [0, 20, 25], fov: 45 }}>
+      <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 20, 25], fov: 45 }}>
         <Suspense fallback={null}><Scene onTrigger={setLastColor} /></Suspense>
       </Canvas>
       
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30 text-[10px] font-black tracking-[0.5em] uppercase pointer-events-none text-center">
-        Mushroom Melodies & Frog Rhythms
+        Mushrooms & Frogs Symphony
       </div>
     </div>
   );
