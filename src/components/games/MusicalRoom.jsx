@@ -165,15 +165,15 @@ function Scene({ onTrigger }) {
   const [bgColor, setBgColor] = useState('#020617');
 
   const mushrooms = useMemo(() => [
-    { pos: [-6, 0, -6], color: '#ef4444', note: 'C3' },
-    { pos: [0, 0, -7],  color: '#f59e0b', note: 'D3' },
-    { pos: [6, 0, -6],  color: '#10b981', note: 'E3' },
-    { pos: [-7, 0, 0],  color: '#3b82f6', note: 'G3' },
-    { pos: [0, 0, 0],   color: '#8b5cf6', note: 'A3' },
-    { pos: [7, 0, 0],   color: '#ec4899', note: 'C4' },
-    { pos: [-6, 0, 6],  color: '#06b6d4', note: 'D4' },
-    { pos: [0, 0, 7],   color: '#f97316', note: 'E4' },
-    { pos: [6, 0, 6],   color: '#f43f5e', note: 'G4' },
+    { pos: [-6, 0, -6], color: '#ef4444', note: 'C4' },
+    { pos: [0, 0, -7],  color: '#f59e0b', note: 'D4' },
+    { pos: [6, 0, -6],  color: '#10b981', note: 'E4' },
+    { pos: [-7, 0, 0],  color: '#3b82f6', note: 'G4' },
+    { pos: [0, 0, 0],   color: '#8b5cf6', note: 'A4' },
+    { pos: [7, 0, 0],   color: '#ec4899', note: 'C5' },
+    { pos: [-6, 0, 6],  color: '#06b6d4', note: 'D5' },
+    { pos: [0, 0, 7],   color: '#f97316', note: 'E5' },
+    { pos: [6, 0, 6],   color: '#f43f5e', note: 'G5' },
   ], []);
 
   useEffect(() => {
