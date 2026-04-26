@@ -86,9 +86,9 @@ function Sunstone({ initialPos, color, note, synth, addRipple }) {
 
   // Physics State
   const velocity = useRef(new THREE.Vector3(
-    (Math.random() - 0.5) * 0.02,
-    (Math.random() - 0.5) * 0.02,
-    (Math.random() - 0.5) * 0.02
+    (Math.random() - 0.5) * 0.04,
+    (Math.random() - 0.5) * 0.04,
+    (Math.random() - 0.5) * 0.04
   ));
   const pos = useRef(new THREE.Vector3(...initialPos));
 
@@ -97,63 +97,46 @@ function Sunstone({ initialPos, color, note, synth, addRipple }) {
     setActive(active);
     
     if (active) {
-      // Dragging
       pos.current.x = initialPos[0] + mx / aspect;
       pos.current.z = initialPos[2] + my / aspect;
-      velocity.current.set(mx / aspect / 50, 0, my / aspect / 50); // Give it some "fling"
+      velocity.current.set(mx / aspect / 30, 0, my / aspect / 30);
     } else {
-      // Fling trigger
       triggerSound();
     }
-  });
+  }, { pointerEvents: true });
 
   const triggerSound = async () => {
     if (Tone.context.state !== 'running') await Tone.start();
-    if (synth) {
-      // Shift pitch based on height (pos.y)
-      const pitchShift = pos.current.y * 2;
-      synth.triggerAttackRelease(note, '4n');
-    }
+    if (synth) synth.triggerAttackRelease(note, '4n');
     addRipple(pos.current, color);
   };
 
   useFrame((state) => {
     if (!active && meshRef.current) {
-      // Drift & Bounce
       pos.current.add(velocity.current);
-      
-      // Boundaries
-      if (Math.abs(pos.current.x) > 10) velocity.current.x *= -1;
-      if (Math.abs(pos.current.y - 2) > 4) velocity.current.y *= -1;
-      if (Math.abs(pos.current.z) > 10) velocity.current.z *= -1;
-      
-      // Slow rotation
-      meshRef.current.rotation.x += 0.005;
-      meshRef.current.rotation.y += 0.01;
-      
-      // Gentle Bobbing
-      pos.current.y += Math.sin(state.clock.elapsedTime + initialPos[0]) * 0.005;
+      if (Math.abs(pos.current.x) > 12) velocity.current.x *= -1;
+      if (Math.abs(pos.current.y - 2) > 5) velocity.current.y *= -1;
+      if (Math.abs(pos.current.z) > 12) velocity.current.z *= -1;
+      meshRef.current.rotation.x += 0.01;
+      meshRef.current.rotation.y += 0.015;
+      pos.current.y += Math.sin(state.clock.elapsedTime + initialPos[0]) * 0.01;
     }
     meshRef.current.position.copy(pos.current);
   });
 
   return (
-    <mesh ref={meshRef} {...bind()} castShadow>
-      <octahedronGeometry args={[1.5, 0]} />
-      <MeshTransmissionMaterial
-        backside
-        samples={4}
-        thickness={1}
-        chromaticAberration={0.05}
-        anisotropy={0.1}
-        distortion={0.1}
-        distortionScale={0.1}
-        temporalDistortion={0.1}
+    <mesh ref={meshRef} {...bind()}>
+      <octahedronGeometry args={[1.4, 0]} />
+      <meshStandardMaterial
         color={color}
         emissive={color}
-        emissiveIntensity={active ? 10 : 1}
+        emissiveIntensity={active ? 10 : 1.5}
+        roughness={0}
+        metalness={0.8}
+        transparent
+        opacity={0.9}
       />
-      <pointLight intensity={active ? 50 : 2} color={color} distance={10} />
+      <pointLight intensity={active ? 30 : 1} color={color} distance={10} />
     </mesh>
   );
 }
