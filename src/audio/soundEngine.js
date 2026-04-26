@@ -83,13 +83,13 @@ export const playSound = async (type, param = null) => {
   const url = SFX_FILES[type];
   if (url) {
     // Try to play from file
-    if (!sfxCache[type]) {
-      sfxCache[type] = await loadAudio(url);
+    if (!sfxCache[url]) {
+      sfxCache[url] = await loadAudio(url);
     }
     
-    if (sfxCache[type]) {
+    if (sfxCache[url]) {
       const source = ctx.createBufferSource();
-      source.buffer = sfxCache[type];
+      source.buffer = sfxCache[url];
       source.connect(masterGain);
       source.start();
       return;
@@ -104,6 +104,27 @@ export const playSound = async (type, param = null) => {
     case 'sparkle': playProceduralNote(1200, 0.5, 'sine', 0.15); break;
     case 'levelUp': playProceduralNote(440, 0.8, 'square', 0.2); break;
     default: playProceduralNote(800, 0.05, 'sine', 0.1);
+  }
+};
+
+/**
+ * Plays a TTS audio file from /assets/audio/tts/
+ * @param {string} filename - The name of the file without extension
+ */
+export const playTTS = async (filename) => {
+  if (isMuted) return;
+  const ctx = getCtx();
+  const url = `/assets/audio/tts/${filename}.mp3`;
+
+  if (!sfxCache[url]) {
+    sfxCache[url] = await loadAudio(url);
+  }
+
+  if (sfxCache[url]) {
+    const source = ctx.createBufferSource();
+    source.buffer = sfxCache[url];
+    source.connect(masterGain);
+    source.start();
   }
 };
 

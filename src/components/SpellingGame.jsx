@@ -152,10 +152,17 @@ export default function SpellingGame({ onBack, theme }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5, // Requires minimum 5px movement before drag starts, letting clicks fire
+        distance: 5,
       },
     })
   );
+
+  // Map theme id to our TTS character keys
+  const charKey = useMemo(() => {
+    if (theme?.id === 'unicorn') return 'debbie';
+    if (theme?.id === 'werecat') return 'bubba';
+    return theme?.id || 'debbie';
+  }, [theme]);
 
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   
@@ -172,8 +179,6 @@ export default function SpellingGame({ onBack, theme }) {
   const [showReward, setShowReward] = useState(false);
   // Click-to-select state: { id, letter } or null
   const [selectedLetter, setSelectedLetter] = useState(null);
-  // Load voices async (Chrome lazy-loads them)
-  const voicesReady = useRef(false);
 
   const currentLevel = WORDS[currentWordIndex];
   const isEarlyLevel = currentWordIndex < 10;
@@ -182,19 +187,25 @@ export default function SpellingGame({ onBack, theme }) {
     ? `The word is: ${currentLevel.word}`
     : `Hint: ${currentLevel.hint}`;
 
-  // Ensure voices are loaded before first speak
-  useEffect(() => {
-    // Some browsers load them synchronously
-    if (window.speechSynthesis.getVoices().length > 0) voicesReady.current = true;
-    return () => {};
-  }, []);
+  const playLevelHint = useCallback(() => {
+    if (isEarlyLevel) {
+      playTTS(`word_${currentLevel.word.toLowerCase()}`);
+    } else {
+      // Fallback to browser TTS for complex hints for now, or just play a sparkle
+      playSound('click');
+      const utterance = new SpeechSynthesisUtterance(currentLevel.hint);
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [currentLevel, isEarlyLevel]);
 
   useEffect(() => {
     initLevel();
     // Play a hint sound when a new level starts
-    const timer = setTimeout(() => playHintSound(), 400);
+    const timer = setTimeout(() => playLevelHint(), 400);
     return () => clearTimeout(timer);
-  }, [currentWordIndex]);
+  }, [currentWordIndex, playLevelHint]);
 
   const initLevel = () => {
     const word = WORDS[currentWordIndex].word;
@@ -206,26 +217,37 @@ export default function SpellingGame({ onBack, theme }) {
     setSelectedLetter(null);
   };
 
+  const playRewardPhrase = useCallback(() => {
+    const rand = Math.floor(Math.random() * 3) + 1; // We generated 3 correct phrases
+    playTTS(`${charKey}_correct_${rand}`);
+  }, [charKey]);
+
+  const playIncorrectPhrase = useCallback(() => {
+    const rand = Math.floor(Math.random() * 3) + 1; // We generated 3 incorrect phrases
+    playTTS(`${charKey}_incorrect_${rand}`);
+  }, [charKey]);
+
   const checkWinCondition = useCallback((currentPlaced) => {
     const word = WORDS[currentWordIndex].word;
     if (Object.keys(currentPlaced).length === word.length) {
       playSound('sparkle');
       setShowReward(true);
-      playWinSound();
+      playRewardPhrase();
       setTimeout(() => {
         if (currentWordIndex < WORDS.length - 1) {
           setCurrentWordIndex(prev => prev + 1);
         } else {
           onBack();
         }
-      }, 3000);
+      }, 4000); // Slightly longer for the voice phrase
     }
-  }, [currentWordIndex, onBack]);
+  }, [currentWordIndex, onBack, playRewardPhrase]);
 
   // ─── Place a letter into a slot (shared logic for drag AND click) ─────────
   const placeLetter = useCallback((slotId, expectedLetter, draggedLetter, poolItemId) => {
     if (draggedLetter !== expectedLetter) {
       playSound('fail');
+      playIncorrectPhrase();
       return;
     }
     if (placedLetters[slotId]) return;
@@ -238,7 +260,7 @@ export default function SpellingGame({ onBack, theme }) {
     });
     setLettersPool(prev => prev.filter(item => item.id !== poolItemId));
     setSelectedLetter(null);
-  }, [placedLetters, checkWinCondition]);
+  }, [placedLetters, checkWinCondition, playIncorrectPhrase]);
 
   // ─── Drag-and-drop handler ────────────────────────────────────────────────
   const handleDragEnd = (event) => {
