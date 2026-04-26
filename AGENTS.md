@@ -1,21 +1,41 @@
-# Project Starry / Project Codex - Agent Protocol
+# Project Starry / Project Codex - Agent Index 🦄
 
-## Active Ecosystem Focus
-This project is an "Ambient Companion" for kids. The following skills and tools are prioritized:
+## 🏹 Master Skill Index
+All operations in this repository are governed by the following specialized skills. Activate these via `activate_skill` before performing related tasks.
 
-- **Core Stack:** React (Vite), Three.js (R3F), Tailwind CSS, Framer Motion, Tone.js.
-- **Backend:** Supabase (Auth, DB, Realtime).
-- **Aesthetic:** Minimalist, warm, sleep-hygiene focused.
+### 🎨 Sensory Engine
+- **Path**: `.agents/skills/sensory-engine/SKILL.md`
+- **Focus**: Sleep hygiene, palettes, ambient audio dynamics.
 
-## Purged Skills
-To maintain context efficiency, the following high-clutter/non-relevant skill categories have been purged and should not be re-introduced without explicit directive:
-- Enterprise CRM/ERP (Salesforce, Zendesk, etc.)
-- E-commerce (Shopify, Stripe, etc.)
-- Infrastructure (AWS, Azure, Kubernetes, Terraform)
-- Specialized Data Science (beyond basic logic)
-- SEO & Marketing automation
+### 📖 Story Engine
+- **Path**: `.agents/skills/story-engine/SKILL.md`
+- **Focus**: Narrative sourcing (Triple Path), interaction loops.
 
-## Interaction Logic
-1. **Zero Authority:** Never give behavioral corrections or define Right vs. Wrong.
-2. **IP Shield:** Always protect copyright; generate archetypal alternatives for requests like "Frozen" or "Harry Potter".
-3. **Calm UI:** API failures must degrade gracefully without crashing or alarming the user.
+### 🛡️ IP Shield
+- **Path**: `.agents/skills/ip-shield/SKILL.md`
+- **Focus**: Copyright protection, archetypal generation.
+
+### 🌌 Saga Mode
+- **Path**: `.agents/skills/saga-mode/SKILL.md`
+- **Focus**: Persistent world memory, lore consistency.
+
+---
+
+## 🤖 Specialized Personas
+
+### Ambient Orchestrator (Primary)
+- **Role**: Coordinates between Sensory and Story engines.
+- **Tone**: Minimalist, warm, zero-authority.
+
+### Sensory Guardian
+- **Role**: Enforces "Good Night Mode" and lighting constraints.
+- **Trigger**: Any change to `src/themes.js` or `src/index.css`.
+
+---
+
+## 🛠️ File Structure (Antigravity Standard)
+- `/.agents/skills/` - Functional skill definitions.
+- `/docs/` - Product Design (PDD), Features (PFD), North Star.
+- `/src/` - Active Vite/React development.
+- `PROJECT_STATUS.md` - Live milestone tracking.
+- `HANDOFF.md` - Session state and context transfer.
