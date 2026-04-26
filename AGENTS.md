@@ -3,21 +3,14 @@
 ## 🏹 Master Skill Index
 All operations in this repository are governed by the following specialized skills. Activate these via `activate_skill` before performing related tasks.
 
-### 🎨 Sensory Engine
-- **Path**: `.agents/skills/sensory-engine/SKILL.md`
-- **Focus**: Sleep hygiene, palettes, ambient audio dynamics.
+### 🎭 Project Core Skills
+- **🎨 Sensory Engine**: `.agents/skills/sensory-engine/SKILL.md` (Sleep hygiene & palettes)
+- **📖 Story Engine**: `.agents/skills/story-engine/SKILL.md` (Narrative sourcing)
+- **🛡️ IP Shield**: `.agents/skills/ip-shield/SKILL.md` (Copyright protection)
+- **🌌 Saga Mode**: `.agents/skills/saga-mode/SKILL.md` (Persistent world memory)
 
-### 📖 Story Engine
-- **Path**: `.agents/skills/story-engine/SKILL.md`
-- **Focus**: Narrative sourcing (Triple Path), interaction loops.
-
-### 🛡️ IP Shield
-- **Path**: `.agents/skills/ip-shield/SKILL.md`
-- **Focus**: Copyright protection, archetypal generation.
-
-### 🌌 Saga Mode
-- **Path**: `.agents/skills/saga-mode/SKILL.md`
-- **Focus**: Persistent world memory, lore consistency.
+### 🧩 Ecosystem Skills (Auto-linked)
+This repository includes a comprehensive library of ~100 ecosystem skills (React, Three.js, Tone.js, etc.) located in `/.agents/skills/`.
 
 ---
 
@@ -34,8 +27,9 @@ All operations in this repository are governed by the following specialized skil
 ---
 
 ## 🛠️ File Structure (Antigravity Standard)
-- `/.agents/skills/` - Functional skill definitions.
+- `/.agents/skills/` - Master library of agent capabilities.
 - `/docs/` - Product Design (PDD), Features (PFD), North Star.
 - `/src/` - Active Vite/React development.
 - `PROJECT_STATUS.md` - Live milestone tracking.
 - `HANDOFF.md` - Session state and context transfer.
+- `gemini.md` - **Global Directives (The Absolute Source of Truth)**.

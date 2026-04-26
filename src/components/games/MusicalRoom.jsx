@@ -1,44 +1,65 @@
 'use client';
 
 import React, { useState, Suspense, useRef, useEffect, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { PerspectiveCamera, ContactShadows, OrbitControls, Stars, Float, MeshDistortMaterial } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { PerspectiveCamera, OrbitControls, Stars, Float, ContactShadows, MeshTransmissionMaterial } from '@react-three/drei';
+import { useDrag } from '@use-gesture/react';
 import { ArrowLeft, Music, Sparkles } from 'lucide-react';
 import * as THREE from 'three';
 import * as Tone from 'tone';
 
-// --- Particle System for "Stardust" ---
+// --- Ripple Component ---
+
+function Ripple({ position, color, onFinish }) {
+  const meshRef = useRef();
+  const [scale, setScale] = useState(0.1);
+  const [opacity, setOpacity] = useState(0.5);
+
+  useFrame(() => {
+    if (meshRef.current) {
+      const nextScale = meshRef.current.scale.x + 0.1;
+      const nextOpacity = Math.max(0, 0.5 - nextScale / 15);
+      meshRef.current.scale.set(nextScale, nextScale, 1);
+      meshRef.current.material.opacity = nextOpacity;
+      if (nextOpacity <= 0) onFinish();
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[position.x, -1.19, position.z]} rotation={[-Math.PI / 2, 0, 0]}>
+      <ringGeometry args={[0.9, 1.1, 32]} />
+      <meshBasicMaterial color={color} transparent opacity={opacity} />
+    </mesh>
+  );
+}
+
+// --- Stardust Particle System ---
 
 function Stardust() {
-  const count = 100;
+  const count = 120;
   const mesh = useRef();
-  
+  const dummy = useMemo(() => new THREE.Object3D(), []);
   const particles = useMemo(() => {
     const temp = [];
     for (let i = 0; i < count; i++) {
-      const time = Math.random() * 100;
-      const factor = 20 + Math.random() * 100;
-      const speed = 0.01 + Math.random() / 200;
-      const x = Math.random() * 20 - 10;
-      const y = Math.random() * 20 - 10;
-      const z = Math.random() * 20 - 10;
-      temp.push({ time, factor, speed, x, y, z });
+      temp.push({
+        t: Math.random() * 100,
+        factor: 10 + Math.random() * 50,
+        speed: 0.005 + Math.random() / 500,
+        x: Math.random() * 30 - 15,
+        y: Math.random() * 20 - 5,
+        z: Math.random() * 30 - 15,
+      });
     }
     return temp;
   }, [count]);
 
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-
-  useFrame(() => {
-    particles.forEach((particle, i) => {
-      let { time, factor, speed, x, y, z } = particle;
-      time = particle.time += speed / 2;
-      const s = Math.cos(time);
-      dummy.position.set(
-        x + Math.cos(time) * 1,
-        y + Math.sin(time) * 1,
-        z + Math.sin(time) * 1
-      );
+  useFrame((state) => {
+    particles.forEach((p, i) => {
+      let { t, factor, speed, x, y, z } = p;
+      t = p.t += speed / 1.5;
+      const s = Math.cos(t);
+      dummy.position.set(x + Math.cos(t) * 2, y + Math.sin(t) * 2, z + Math.sin(t) * 2);
       dummy.scale.set(s, s, s);
       dummy.rotation.set(s * 5, s * 5, s * 5);
       dummy.updateMatrix();
@@ -49,147 +70,174 @@ function Stardust() {
 
   return (
     <instancedMesh ref={mesh} args={[null, null, count]}>
-      <octahedronGeometry args={[0.05, 0]} />
-      <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={2} transparent opacity={0.3} />
+      <octahedronGeometry args={[0.06, 0]} />
+      <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1} transparent opacity={0.2} />
     </instancedMesh>
   );
 }
 
-// --- Glowing Crystal Pad Component ---
+// --- Interactive Sunstone (Draggable Crystal) ---
 
-function Pad({ position, color, note, synth, onTrigger }) {
-  const [active, setActive] = useState(false);
+function Sunstone({ initialPos, color, note, synth, addRipple }) {
   const meshRef = useRef();
+  const [active, setActive] = useState(false);
+  const { size, viewport } = useThree();
+  const aspect = size.width / viewport.width;
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.01;
-      meshRef.current.rotation.z += 0.005;
-      const time = state.clock.getElapsedTime();
-      meshRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.1;
+  // Physics State
+  const velocity = useRef(new THREE.Vector3(
+    (Math.random() - 0.5) * 0.02,
+    (Math.random() - 0.5) * 0.02,
+    (Math.random() - 0.5) * 0.02
+  ));
+  const pos = useRef(new THREE.Vector3(...initialPos));
+
+  const bind = useDrag(({ active, movement: [mx, my], event }) => {
+    event.stopPropagation();
+    setActive(active);
+    
+    if (active) {
+      // Dragging
+      pos.current.x = initialPos[0] + mx / aspect;
+      pos.current.z = initialPos[2] + my / aspect;
+      velocity.current.set(mx / aspect / 50, 0, my / aspect / 50); // Give it some "fling"
+    } else {
+      // Fling trigger
+      triggerSound();
     }
   });
 
-  const handleDown = async (e) => {
-    e.stopPropagation();
+  const triggerSound = async () => {
     if (Tone.context.state !== 'running') await Tone.start();
-    
-    setActive(true);
-    if (synth) synth.triggerAttackRelease(note, '4n');
-    onTrigger(color);
-    setTimeout(() => setActive(false), 300);
+    if (synth) {
+      // Shift pitch based on height (pos.y)
+      const pitchShift = pos.current.y * 2;
+      synth.triggerAttackRelease(note, '4n');
+    }
+    addRipple(pos.current, color);
   };
 
+  useFrame((state) => {
+    if (!active && meshRef.current) {
+      // Drift & Bounce
+      pos.current.add(velocity.current);
+      
+      // Boundaries
+      if (Math.abs(pos.current.x) > 10) velocity.current.x *= -1;
+      if (Math.abs(pos.current.y - 2) > 4) velocity.current.y *= -1;
+      if (Math.abs(pos.current.z) > 10) velocity.current.z *= -1;
+      
+      // Slow rotation
+      meshRef.current.rotation.x += 0.005;
+      meshRef.current.rotation.y += 0.01;
+      
+      // Gentle Bobbing
+      pos.current.y += Math.sin(state.clock.elapsedTime + initialPos[0]) * 0.005;
+    }
+    meshRef.current.position.copy(pos.current);
+  });
+
   return (
-    <group position={position}>
-      <mesh
-        ref={meshRef}
-        onPointerDown={handleDown}
-        scale={active ? [1.4, 1.4, 1.4] : [1, 1, 1]}
-      >
-        <octahedronGeometry args={[1.2, 0]} />
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={active ? 15 : 2}
-          transparent
-          opacity={0.8}
-          roughness={0}
-          metalness={1}
-        />
-      </mesh>
-      <pointLight 
-        position={[0, 0, 0]} 
-        intensity={active ? 100 : 5} 
-        color={color} 
-        distance={15}
+    <mesh ref={meshRef} {...bind()} castShadow>
+      <octahedronGeometry args={[1.5, 0]} />
+      <MeshTransmissionMaterial
+        backside
+        samples={4}
+        thickness={1}
+        chromaticAberration={0.05}
+        anisotropy={0.1}
+        distortion={0.1}
+        distortionScale={0.1}
+        temporalDistortion={0.1}
+        color={color}
+        emissive={color}
+        emissiveIntensity={active ? 10 : 1}
       />
-    </group>
+      <pointLight intensity={active ? 50 : 2} color={color} distance={10} />
+    </mesh>
   );
 }
 
-// --- Scene Setup ---
+// --- Main Scene ---
 
 function Scene({ onTrigger }) {
-  const [bgColor, setBgColor] = useState('#0a0a1a');
+  const [ripples, setRipples] = useState([]);
   const [synth, setSynth] = useState(null);
-  
-  const pads = useMemo(() => [
-    { pos: [-4, 0, -4], color: '#f43f5e', note: 'C3' },
-    { pos: [0, 0, -4],  color: '#fbbf24', note: 'D3' },
-    { pos: [4, 0, -4],  color: '#10b981', note: 'E3' },
-    { pos: [-4, 0, 0],  color: '#3b82f6', note: 'G3' },
-    { pos: [0, 0, 0],   color: '#8b5cf6', note: 'A3' },
-    { pos: [4, 0, 0],   color: '#ec4899', note: 'C4' },
-    { pos: [-4, 0, 4],  color: '#06b6d4', note: 'D4' },
-    { pos: [0, 0, 4],   color: '#f97316', note: 'E4' },
-    { pos: [4, 0, 4],   color: '#f43f5e', note: 'G4' },
+  const [bgColor, setBgColor] = useState('#05050f');
+
+  const stones = useMemo(() => [
+    { pos: [-6, 2, -6], color: '#f43f5e', note: 'C3' },
+    { pos: [0, 3, -7],  color: '#fbbf24', note: 'D3' },
+    { pos: [6, 1, -6],  color: '#10b981', note: 'E3' },
+    { pos: [-7, 4, 0],  color: '#3b82f6', note: 'G3' },
+    { pos: [0, 2, 0],   color: '#8b5cf6', note: 'A3' },
+    { pos: [7, 3, 0],   color: '#ec4899', note: 'C4' },
+    { pos: [-6, 1, 6],  color: '#06b6d4', note: 'D4' },
+    { pos: [0, 4, 7],   color: '#f97316', note: 'E4' },
+    { pos: [6, 2, 6],   color: '#f43f5e', note: 'G4' },
   ], []);
 
   useEffect(() => {
-    // Ethereal Synth Setup
-    const reverb = new Tone.Reverb({ decay: 4, wet: 0.6 }).toDestination();
-    const delay = new Tone.FeedbackDelay("8n", 0.5).connect(reverb);
-    
+    const reverb = new Tone.Reverb({ decay: 5, wet: 0.7 }).toDestination();
+    const delay = new Tone.FeedbackDelay("4n", 0.4).connect(reverb);
     const polySynth = new Tone.PolySynth(Tone.Synth, {
       oscillator: { type: 'sine' },
-      envelope: { attack: 0.2, decay: 0.1, sustain: 0.5, release: 2 }
+      envelope: { attack: 0.3, decay: 0.2, sustain: 0.6, release: 3 }
     }).connect(delay);
     
     setSynth(polySynth);
-    return () => {
-      polySynth.dispose();
-      reverb.dispose();
-      delay.dispose();
-    };
+    return () => { polySynth.dispose(); reverb.dispose(); delay.dispose(); };
   }, []);
 
-  const handleTrigger = (color) => {
-    onTrigger(color);
+  const addRipple = (pos, color) => {
+    const id = Math.random();
+    setRipples(prev => [...prev, { id, pos: { ...pos }, color }]);
     setBgColor(color);
-    setTimeout(() => setBgColor('#0a0a1a'), 600);
+    setTimeout(() => setBgColor('#05050f'), 800);
+    onTrigger(color);
   };
 
   return (
     <>
       <color attach="background" args={[bgColor]} />
-      <fog attach="fog" args={[bgColor, 5, 35]} />
-      
-      <ambientLight intensity={0.5} />
-      <pointLight position={[0, 20, 10]} intensity={1} color="#ffffff" />
-      
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+      <fog attach="fog" args={[bgColor, 10, 40]} />
+      <ambientLight intensity={0.4} />
+      <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
       <Stardust />
 
-      <group position={[0, -2, 0]}>
-        {pads.map((pad, i) => (
-          <Pad 
-            key={i} 
-            position={pad.pos} 
-            color={pad.color} 
-            note={pad.note} 
-            synth={synth}
-            onTrigger={handleTrigger}
-          />
-        ))}
-        
-        {/* Floor */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-          <planeGeometry args={[200, 200]} />
-          <meshStandardMaterial color={bgColor} roughness={1} metalness={0} />
-        </mesh>
-        
-        <gridHelper args={[60, 30, "#ffffff", "#ffffff"]} position={[0, -0.99, 0]} opacity={0.05} transparent />
-      </group>
+      {stones.map((s, i) => (
+        <Sunstone 
+          key={i} 
+          initialPos={s.pos} 
+          color={s.color} 
+          note={s.note} 
+          synth={synth} 
+          addRipple={addRipple} 
+        />
+      ))}
 
+      {ripples.map(r => (
+        <Ripple 
+          key={r.id} 
+          position={r.pos} 
+          color={r.color} 
+          onFinish={() => setRipples(prev => prev.filter(x => x.id !== r.id))} 
+        />
+      ))}
+
+      {/* Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]} receiveShadow>
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color={bgColor} roughness={1} transparent opacity={0.8} />
+      </mesh>
+      <gridHelper args={[80, 40, "#ffffff", "#ffffff"]} position={[0, -1.19, 0]} opacity={0.03} transparent />
+      
       <OrbitControls 
+        enablePan={false} 
+        maxPolarAngle={Math.PI / 2} 
+        minDistance={15} 
+        maxDistance={35} 
         makeDefault 
-        autoRotate 
-        autoRotateSpeed={0.5}
-        enablePan={false}
-        maxPolarAngle={Math.PI / 2.1}
-        minDistance={10}
-        maxDistance={25}
       />
     </>
   );
@@ -200,16 +248,6 @@ export default function MusicalRoom({ onBack }) {
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden touch-none">
-      {/* Abstract UI Overlays */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div 
-          className="absolute inset-0 transition-colors duration-1000 opacity-20"
-          style={{ 
-            background: `radial-gradient(circle at center, ${lastColor} 0%, transparent 70%)` 
-          }} 
-        />
-      </div>
-
       <button 
         onClick={onBack}
         className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 text-white p-4 rounded-full backdrop-blur-xl border border-white/10 transition-all cursor-pointer group"
@@ -220,34 +258,23 @@ export default function MusicalRoom({ onBack }) {
       <div className="absolute top-8 left-8 z-10 pointer-events-none">
          <div className="flex items-center gap-4 bg-white/5 backdrop-blur-xl rounded-full px-8 py-4 border border-white/10">
             <div className="p-2 bg-white/10 rounded-full">
-              <Music className="w-5 h-5 text-white animate-pulse" />
+              <Sparkles className="w-5 h-5 text-white animate-pulse" />
             </div>
             <div>
-              <h2 className="text-white font-black tracking-[0.2em] uppercase text-sm">Celestial Jam</h2>
-              <p className="text-white/40 text-[10px] font-bold tracking-widest uppercase">Abstract Harmony Engine</p>
+              <h2 className="text-white font-black tracking-[0.2em] uppercase text-sm">Nebula Playground</h2>
+              <p className="text-white/40 text-[10px] font-bold tracking-widest uppercase">Grab, Throw, and Listen</p>
             </div>
          </div>
       </div>
 
-      <Canvas 
-        shadows 
-        camera={{ position: [0, 15, 20], fov: 45 }}
-        gl={{ antialias: true, stencil: false, depth: true }}
-      >
+      <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 20, 25], fov: 45 }}>
         <Suspense fallback={null}>
-          <Scene onTrigger={(c) => setLastColor(c)} />
+          <Scene onTrigger={setLastColor} />
         </Suspense>
       </Canvas>
       
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30 text-[10px] font-black tracking-[0.4em] uppercase pointer-events-none text-center flex items-center gap-4">
-        <div className="w-8 h-[1px] bg-white/20" />
-        Tap the floating crystals
-        <div className="w-8 h-[1px] bg-white/20" />
-      </div>
-
-      {/* Side Decorative Sparkle icons */}
-      <div className="absolute right-8 bottom-8 z-10 opacity-20 hover:opacity-100 transition-opacity">
-        <Sparkles className="w-12 h-12 text-white blur-[2px]" />
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] font-black tracking-[0.5em] uppercase pointer-events-none text-center">
+        Fling the sunstones to ripple the universe
       </div>
     </div>
   );
