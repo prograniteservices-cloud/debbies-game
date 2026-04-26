@@ -164,6 +164,7 @@ function Scene({ onTrigger }) {
     const reverb = new Tone.Reverb({ decay: 5, wet: 0.7 }).toDestination();
     const delay = new Tone.FeedbackDelay("4n", 0.4).connect(reverb);
     const polySynth = new Tone.PolySynth(Tone.Synth, {
+      maxPolyphony: 32,
       oscillator: { type: 'sine' },
       envelope: { attack: 0.3, decay: 0.2, sustain: 0.6, release: 3 }
     }).connect(delay);
@@ -257,6 +258,12 @@ export default function MusicalRoom({ onBack }) {
       </Canvas>
       
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] font-black tracking-[0.5em] uppercase pointer-events-none text-center">
+        Fling the sunstones to ripple the universe
+      </div>
+    </div>
+  );
+}
+ottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] font-black tracking-[0.5em] uppercase pointer-events-none text-center">
         Fling the sunstones to ripple the universe
       </div>
     </div>
