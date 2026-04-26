@@ -105,9 +105,10 @@ function Scene({ onTrigger }) {
   return (
     <>
       <color attach="background" args={[bgColor]} />
+      <fog attach="fog" args={[bgColor, 5, 30]} />
       
-      <ambientLight intensity={1} />
-      <pointLight position={[10, 10, 10]} intensity={1.5} />
+      <ambientLight intensity={1.5} />
+      <pointLight position={[10, 10, 10]} intensity={2} />
       
       <group position={[0, 0, 0]}>
         {pads.map((pad, i) => (
@@ -121,14 +122,13 @@ function Scene({ onTrigger }) {
           />
         ))}
         
-        {/* Floor */}
+        {/* Floor - Now uses bgColor to match the top */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.21, 0]}>
-          <planeGeometry args={[100, 100]} />
-          <meshStandardMaterial color="#2d3748" />
+          <planeGeometry args={[200, 200]} />
+          <meshStandardMaterial color={bgColor} roughness={0.8} />
         </mesh>
         
-        {/* Grid for visual reference */}
-        <gridHelper args={[20, 10, "#ffffff", "#ffffff"]} position={[0, -0.2, 0]} opacity={0.2} transparent />
+        <gridHelper args={[40, 20, "#ffffff", "#ffffff"]} position={[0, -0.2, 0]} opacity={0.1} transparent />
       </group>
 
       <OrbitControls makeDefault />
