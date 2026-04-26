@@ -104,11 +104,19 @@ function Mushroom({ initialPos, color, note, synth, addRipple }) {
     }
   });
 
-  const trigger = async (e) => {
+  const trigger = (e) => {
     if (e) e.stopPropagation();
-    if (Tone.context.state !== 'running') await Tone.start();
+    
+    // Quick resume if needed without blocking
+    if (Tone.context.state !== 'running') {
+      Tone.start();
+    }
+
     setActive(true);
-    if (synth) synth.triggerAttackRelease(note, '4n');
+    if (synth) {
+      // Use Tone.now() for near-zero latency scheduling
+      synth.triggerAttackRelease(note, '4n', Tone.now());
+    }
     addRipple(new THREE.Vector3(...initialPos), color);
     setTimeout(() => setActive(false), 200);
   };
