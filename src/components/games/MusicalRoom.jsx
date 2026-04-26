@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense, useRef, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { RoundedBox, PerspectiveCamera, Float, ContactShadows } from '@react-three/drei';
 import { ArrowLeft } from 'lucide-react';
 import * as THREE from 'three';
@@ -13,7 +13,12 @@ function Pad({ position, color, note, synth, onTrigger }) {
   const [active, setActive] = useState(false);
   const meshRef = useRef();
 
-  const handleDown = () => {
+  const handleDown = async () => {
+    // Start audio context on first click if not already started
+    if (Tone.context.state !== 'running') {
+      await Tone.start();
+    }
+    
     setActive(true);
     if (synth) {
       synth.triggerAttackRelease(note, '8n');
@@ -35,17 +40,16 @@ function Pad({ position, color, note, synth, onTrigger }) {
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={active ? 10 : 1.5}
+          emissiveIntensity={active ? 10 : 2}
           roughness={0.1}
           metalness={0.5}
         />
       </RoundedBox>
-      {/* Light for the pad */}
       <pointLight 
         position={[0, 1, 0]} 
-        intensity={active ? 20 : 2} 
+        intensity={active ? 50 : 5} 
         color={color} 
-        distance={5}
+        distance={10}
       />
     </group>
   );
@@ -54,44 +58,37 @@ function Pad({ position, color, note, synth, onTrigger }) {
 // --- Scene Setup ---
 
 function Scene() {
-  const [bgColor, setBgColor] = useState('#1e1b4b'); // Warmer, deeper initial blue
-  const [lightColor, setLightColor] = useState('#ffffff');
+  const [bgColor, setBgColor] = useState('#1e1b4b');
   const [synth, setSynth] = useState(null);
   
   useEffect(() => {
-    // Initialize Tone.js Synth
     const duoSynth = new Tone.DuoSynth({
       vibratoAmount: 0.2,
       vibratoRate: 6,
       harmonicity: 1.5,
       voice0: {
-        volume: -12,
+        volume: -10,
         oscillator: { type: 'sine' },
         envelope: { attack: 0.05, release: 0.8 }
       },
       voice1: {
-        volume: -12,
+        volume: -10,
         oscillator: { type: 'triangle' },
         envelope: { attack: 0.05, release: 0.8 }
       }
     }).toDestination();
     
     setSynth(duoSynth);
-    
     return () => duoSynth.dispose();
   }, []);
 
   const handleTrigger = (color) => {
     setBgColor(color);
-    setLightColor(color);
-    // Longer transition for more impact
     setTimeout(() => {
       setBgColor('#1e1b4b');
-      setLightColor('#ffffff');
     }, 500);
   };
 
-  // C Major Pentatonic Scale: C, D, E, G, A
   const pads = [
     { pos: [-2.5, 0, -2.5], color: '#ff4444', note: 'C3' },
     { pos: [0, 0, -2.5],    color: '#ffbb33', note: 'D3' },
@@ -107,13 +104,13 @@ function Scene() {
   return (
     <>
       <color attach="background" args={[bgColor]} />
-      <fog attach="fog" args={[bgColor, 5, 25]} />
+      <fog attach="fog" args={[bgColor, 10, 30]} />
       
-      <ambientLight intensity={0.8} />
-      <pointLight position={[0, 10, 5]} intensity={5} color={lightColor} />
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} castShadow />
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[10, 10, 5]} intensity={2} />
+      <pointLight position={[0, 5, 0]} intensity={10} color="#ffffff" />
       
-      <group position={[0, -1.5, 0]}>
+      <group position={[0, 0, 0]}>
         {pads.map((pad, i) => (
           <Pad 
             key={i} 
@@ -125,75 +122,50 @@ function Scene() {
           />
         ))}
         
-        {/* Floor - lighter color and grid helper for depth */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, 0]} receiveShadow>
-          <planeGeometry args={[50, 50]} />
-          <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.2} />
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.21, 0]} receiveShadow>
+          <planeGeometry args={[100, 100]} />
+          <meshStandardMaterial color="#2d3748" />
         </mesh>
-        <gridHelper args={[20, 10, "#ffffff", "#ffffff"]} position={[0, -0.19, 0]} opacity={0.1} transparent />
+        <gridHelper args={[20, 10, "#4a5568", "#4a5568"]} position={[0, -0.2, 0]} />
         
         <ContactShadows 
-          position={[0, -0.15, 0]} 
-          opacity={0.6} 
+          position={[0, -0.19, 0]} 
+          opacity={0.4} 
           scale={20} 
           blur={2} 
-          far={1.5} 
+          far={1} 
         />
       </group>
 
-      <Float speed={1} rotationIntensity={0.1} floatIntensity={0.2}>
-        <PerspectiveCamera makeDefault position={[0, 8, 10]} fov={45} />
-      </Float>
+      <PerspectiveCamera makeDefault position={[0, 10, 12]} fov={50} />
     </>
   );
 }
 
 export default function MusicalRoom({ onBack }) {
-  const [started, setStarted] = useState(false);
-
-  const startAudio = async () => {
-    await Tone.start();
-    setStarted(true);
-  };
-
   return (
     <div className="relative w-full h-screen bg-slate-950 overflow-hidden touch-none">
       <button 
         onClick={onBack}
-        className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all"
+        className="absolute top-6 right-6 z-50 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all cursor-pointer"
       >
         <ArrowLeft size={24} />
       </button>
 
-      {!started && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-xl">
-          <div className="text-center p-8 bg-white/5 rounded-3xl border border-white/10 shadow-2xl">
-            <h1 className="text-4xl font-black text-white mb-4">Musical Color Room</h1>
-            <p className="text-slate-400 mb-8 max-w-xs">Tap the glowing pads to create magical music and lights.</p>
-            <button
-              onClick={startAudio}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-12 rounded-2xl transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-indigo-500/20"
-            >
-              Start Playing
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="absolute top-6 left-6 z-10">
+         <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-3 border border-white/20">
+            <span className="text-white font-bold tracking-wider uppercase text-sm">Musical Color Room</span>
+         </div>
+      </div>
 
-      <Canvas shadows dpr={[1, 2]}>
-        <Suspense fallback={null}>
+      <Canvas shadows camera={{ position: [0, 10, 12], fov: 50 }}>
+        <Suspense fallback={<div className="text-white">Loading...</div>}>
           <Scene />
         </Suspense>
       </Canvas>
-
-      <div className="absolute top-6 left-6 z-10">
-         <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-3 border border-white/20">
-            <span className="text-white font-bold tracking-wider uppercase text-sm">Pentatonic Jam</span>
-         </div>
-      </div>
       
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/20 text-xs font-bold tracking-[0.2em] uppercase pointer-events-none">
-        Touch or Click to Play
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40 text-xs font-bold tracking-[0.2em] uppercase pointer-events-none text-center">
+        Tap the glowing pads to play music
       </div>
     </div>
   );
