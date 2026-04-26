@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   Shapes,
   Brain,
+  Music,
   Image as ImageIcon
 } from 'lucide-react';
 import { playTheme, stopTheme, resumeAudio, playSound, setMuted, isSoundMuted } from './audio/soundEngine';
