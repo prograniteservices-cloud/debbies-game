@@ -259,6 +259,179 @@ function BlockyGrass({ position }) {
   );
 }
 
+// --- Animal Shapes ---
+
+function AnimalShape({ name, color }) {
+  const meshRef = useRef();
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.getElapsedTime();
+    
+    // Unique animations based on animal type
+    switch (name) {
+      case 'Fish':
+      case 'Shark':
+      case 'Whale':
+        meshRef.current.rotation.y = Math.sin(t * 2) * 0.2;
+        meshRef.current.position.x = Math.sin(t * 0.5) * 0.5;
+        break;
+      case 'Frog':
+      case 'Chicken':
+      case 'Duck':
+        meshRef.current.position.y = Math.abs(Math.sin(t * 4)) * 0.4;
+        break;
+      case 'Snake':
+      case 'Alligator':
+        meshRef.current.rotation.y = Math.sin(t * 1.5) * 0.15;
+        break;
+      default:
+        meshRef.current.position.y = Math.sin(t * 2) * 0.1;
+    }
+  });
+
+  return (
+    <group ref={meshRef}>
+      {/* Dynamic Animal Rendering */}
+      {name === 'Cow' && (
+        <group>
+          <mesh position={[0, 0.5, 0]} castShadow>
+            <boxGeometry args={[1, 0.8, 1.5]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 1.1, 0.8]} castShadow>
+            <boxGeometry args={[0.6, 0.6, 0.6]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 1.0, 1.1]} castShadow>
+            <boxGeometry args={[0.4, 0.3, 0.2]} />
+            <meshStandardMaterial color="#fbcfe8" />
+          </mesh>
+          <mesh position={[0.4, 1.4, 0.8]} castShadow>
+            <boxGeometry args={[0.1, 0.3, 0.1]} />
+            <meshStandardMaterial color="#475569" />
+          </mesh>
+          <mesh position={[-0.4, 1.4, 0.8]} castShadow>
+            <boxGeometry args={[0.1, 0.3, 0.1]} />
+            <meshStandardMaterial color="#475569" />
+          </mesh>
+        </group>
+      )}
+
+      {name === 'Pig' && (
+        <group>
+          <mesh position={[0, 0.4, 0]} castShadow>
+            <boxGeometry args={[0.8, 0.7, 1.2]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 0.8, 0.6]} castShadow>
+            <boxGeometry args={[0.5, 0.5, 0.5]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 0.75, 0.85]} castShadow>
+            <boxGeometry args={[0.25, 0.2, 0.1]} />
+            <meshStandardMaterial color="#f472b6" />
+          </mesh>
+        </group>
+      )}
+
+      {name === 'Shark' && (
+        <group>
+          <mesh position={[0, 0.5, 0]} castShadow>
+            <boxGeometry args={[0.8, 0.8, 2.5]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 1.2, -0.2]} castShadow rotation={[0.5, 0, 0]}>
+            <boxGeometry args={[0.1, 0.8, 0.6]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0.6, 0.4, 0.2]} castShadow rotation={[0, 0, -0.5]}>
+            <boxGeometry args={[0.6, 0.1, 0.4]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[-0.6, 0.4, 0.2]} castShadow rotation={[0, 0, 0.5]}>
+            <boxGeometry args={[0.6, 0.1, 0.4]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+        </group>
+      )}
+
+      {name === 'Fish' && (
+        <group>
+          <mesh position={[0, 0.5, 0]} castShadow>
+            <boxGeometry args={[0.3, 0.8, 1.2]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 0.5, -0.8]} castShadow>
+            <boxGeometry args={[0.1, 0.6, 0.6]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+        </group>
+      )}
+
+      {(name === 'Chicken' || name === 'Duck') && (
+        <group>
+          <mesh position={[0, 0.4, 0]} castShadow>
+            <boxGeometry args={[0.5, 0.6, 0.7]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 0.8, 0.3]} castShadow>
+            <boxGeometry args={[0.3, 0.3, 0.3]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 0.8, 0.5]} castShadow>
+            <boxGeometry args={[0.2, 0.1, 0.2]} />
+            <meshStandardMaterial color="#f97316" />
+          </mesh>
+        </group>
+      )}
+
+      {name === 'Frog' && (
+        <group scale={0.5}>
+          <mesh position={[0, 0.4, 0]} castShadow>
+            <boxGeometry args={[1, 0.6, 1]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0.3, 0.8, 0.3]} castShadow>
+            <sphereGeometry args={[0.2, 8, 8]} />
+            <meshStandardMaterial color="white" />
+          </mesh>
+          <mesh position={[-0.3, 0.8, 0.3]} castShadow>
+            <sphereGeometry args={[0.2, 8, 8]} />
+            <meshStandardMaterial color="white" />
+          </mesh>
+        </group>
+      )}
+
+      {/* Default/Fallback shape for others */}
+      {!['Cow', 'Pig', 'Shark', 'Fish', 'Chicken', 'Duck', 'Frog'].includes(name) && (
+        <group>
+          <mesh position={[0, 0.5, 0]} castShadow>
+            <boxGeometry args={[0.8, 0.6, 1.2]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+          <mesh position={[0, 1, 0.5]} castShadow>
+            <boxGeometry args={[0.5, 0.5, 0.5]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Universal Eyes for all animals */}
+      <group position={[0, 0.2, 0]}>
+         <mesh position={[0.15, 0.9, 0.75]}>
+            <boxGeometry args={[0.1, 0.1, 0.1]} />
+            <meshStandardMaterial color="black" />
+          </mesh>
+          <mesh position={[-0.15, 0.9, 0.75]}>
+            <boxGeometry args={[0.1, 0.1, 0.1]} />
+            <meshStandardMaterial color="black" />
+          </mesh>
+      </group>
+    </group>
+  );
+}
+
 // --- Animal Component ---
 
 function BlockyAnimal({ position, color, name, onFind, found }) {
@@ -267,48 +440,30 @@ function BlockyAnimal({ position, color, name, onFind, found }) {
   if (found) return null;
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-      <group 
-        position={position} 
-        onPointerOver={() => setHover(true)}
-        onPointerOut={() => setHover(false)}
-        onClick={() => onFind(name)}
-      >
-        {/* Body */}
-        <mesh position={[0, 0.5, 0]} castShadow>
-          <boxGeometry args={[0.8, 0.6, 1.2]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-        {/* Head */}
-        <mesh position={[0, 1, 0.5]} castShadow>
-          <boxGeometry args={[0.5, 0.5, 0.5]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-        {/* Eyes */}
-        <mesh position={[0.15, 1.1, 0.75]}>
-          <boxGeometry args={[0.1, 0.1, 0.1]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-        <mesh position={[-0.15, 1.1, 0.75]}>
-          <boxGeometry args={[0.1, 0.1, 0.1]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
+    <group 
+      position={position} 
+      onPointerOver={() => setHover(true)}
+      onPointerOut={() => setHover(false)}
+      onClick={() => onFind(name)}
+    >
+      <Float speed={3} rotationIntensity={0.2} floatIntensity={0.5}>
+        <AnimalShape name={name} color={color} />
+      </Float>
         
-        {hovered && (
-          <Text
-            position={[0, 2, 0]}
-            fontSize={0.5}
-            color="white"
-            anchorX="center"
-            anchorY="middle"
-            outlineWidth={0.05}
-            outlineColor="#000000"
-          >
-            {name}!
-          </Text>
-        )}
-      </group>
-    </Float>
+      {hovered && (
+        <Text
+          position={[0, 2.5, 0]}
+          fontSize={0.6}
+          color="white"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.05}
+          outlineColor="#000000"
+        >
+          {name}!
+        </Text>
+      )}
+    </group>
   );
 }
 
