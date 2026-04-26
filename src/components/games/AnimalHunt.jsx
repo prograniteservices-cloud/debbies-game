@@ -263,6 +263,8 @@ function BlockyGrass({ position }) {
 
 function AnimalShape({ name, color }) {
   const meshRef = useRef();
+  const wingRef1 = useRef();
+  const wingRef2 = useRef();
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -279,155 +281,205 @@ function AnimalShape({ name, color }) {
       case 'Frog':
       case 'Chicken':
       case 'Duck':
-        meshRef.current.position.y = Math.abs(Math.sin(t * 4)) * 0.4;
+      case 'Swan':
+        meshRef.current.position.y = Math.abs(Math.sin(t * 4)) * 0.3;
         break;
       case 'Snake':
       case 'Alligator':
-        meshRef.current.rotation.y = Math.sin(t * 1.5) * 0.15;
+      case 'Lizard':
+        meshRef.current.rotation.y = Math.sin(t * 2) * 0.15;
+        break;
+      case 'Dragonfly':
+        if (wingRef1.current) wingRef1.current.rotation.z = Math.sin(t * 20) * 0.5;
+        if (wingRef2.current) wingRef2.current.rotation.z = -Math.sin(t * 20) * 0.5;
+        meshRef.current.position.y = Math.sin(t * 5) * 0.2;
         break;
       default:
         meshRef.current.position.y = Math.sin(t * 2) * 0.1;
     }
   });
 
+  const Eye = ({ pos }) => (
+    <group position={pos}>
+      <mesh>
+        <sphereGeometry args={[0.12, 8, 8]} />
+        <meshStandardMaterial color="white" />
+      </mesh>
+      <mesh position={[0, 0, 0.08]}>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshStandardMaterial color="black" />
+      </mesh>
+    </group>
+  );
+
   return (
     <group ref={meshRef}>
-      {/* Dynamic Animal Rendering */}
       {name === 'Cow' && (
         <group>
-          <mesh position={[0, 0.5, 0]} castShadow>
-            <boxGeometry args={[1, 0.8, 1.5]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 1.1, 0.8]} castShadow>
-            <boxGeometry args={[0.6, 0.6, 0.6]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 1.0, 1.1]} castShadow>
-            <boxGeometry args={[0.4, 0.3, 0.2]} />
-            <meshStandardMaterial color="#fbcfe8" />
-          </mesh>
-          <mesh position={[0.4, 1.4, 0.8]} castShadow>
-            <boxGeometry args={[0.1, 0.3, 0.1]} />
-            <meshStandardMaterial color="#475569" />
-          </mesh>
-          <mesh position={[-0.4, 1.4, 0.8]} castShadow>
-            <boxGeometry args={[0.1, 0.3, 0.1]} />
-            <meshStandardMaterial color="#475569" />
-          </mesh>
+          <mesh position={[0, 0.5, 0]} castShadow><boxGeometry args={[1, 0.8, 1.6]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 1.1, 0.8]} castShadow><boxGeometry args={[0.6, 0.6, 0.6]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 1.0, 1.1]} castShadow><boxGeometry args={[0.4, 0.3, 0.2]} /><meshStandardMaterial color="#fbcfe8" /></mesh>
+          <mesh position={[0.4, 1.4, 0.8]} castShadow><boxGeometry args={[0.1, 0.3, 0.1]} /><meshStandardMaterial color="#475569" /></mesh>
+          <mesh position={[-0.4, 1.4, 0.8]} castShadow><boxGeometry args={[0.1, 0.3, 0.1]} /><meshStandardMaterial color="#475569" /></mesh>
+          <Eye pos={[0.2, 1.2, 1.1]} />
+          <Eye pos={[-0.2, 1.2, 1.1]} />
         </group>
       )}
 
       {name === 'Pig' && (
         <group>
-          <mesh position={[0, 0.4, 0]} castShadow>
-            <boxGeometry args={[0.8, 0.7, 1.2]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 0.8, 0.6]} castShadow>
-            <boxGeometry args={[0.5, 0.5, 0.5]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 0.75, 0.85]} castShadow>
-            <boxGeometry args={[0.25, 0.2, 0.1]} />
-            <meshStandardMaterial color="#f472b6" />
-          </mesh>
+          <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[0.8, 0.7, 1.2]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.8, 0.6]} castShadow><boxGeometry args={[0.5, 0.5, 0.5]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.75, 0.85]} castShadow><boxGeometry args={[0.25, 0.2, 0.1]} /><meshStandardMaterial color="#f472b6" /></mesh>
+          <Eye pos={[0.15, 0.9, 0.85]} />
+          <Eye pos={[-0.15, 0.9, 0.85]} />
+        </group>
+      )}
+
+      {name === 'Sheep' && (
+        <group>
+          <mesh position={[0, 0.5, 0]} castShadow><boxGeometry args={[1.1, 1.1, 1.4]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.9, 0.8]} castShadow><boxGeometry args={[0.5, 0.5, 0.5]} /><meshStandardMaterial color="#d1d5db" /></mesh>
+          <Eye pos={[0.15, 1.0, 1.05]} />
+          <Eye pos={[-0.15, 1.0, 1.05]} />
         </group>
       )}
 
       {name === 'Shark' && (
         <group>
-          <mesh position={[0, 0.5, 0]} castShadow>
-            <boxGeometry args={[0.8, 0.8, 2.5]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 1.2, -0.2]} castShadow rotation={[0.5, 0, 0]}>
-            <boxGeometry args={[0.1, 0.8, 0.6]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0.6, 0.4, 0.2]} castShadow rotation={[0, 0, -0.5]}>
-            <boxGeometry args={[0.6, 0.1, 0.4]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[-0.6, 0.4, 0.2]} castShadow rotation={[0, 0, 0.5]}>
-            <boxGeometry args={[0.6, 0.1, 0.4]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
+          <mesh position={[0, 0.5, 0]} castShadow><boxGeometry args={[0.8, 0.8, 2.8]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 1.2, -0.2]} castShadow rotation={[0.5, 0, 0]}><boxGeometry args={[0.1, 0.8, 0.6]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0.6, 0.4, 0.2]} castShadow rotation={[0, 0, -0.5]}><boxGeometry args={[0.6, 0.1, 0.4]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[-0.6, 0.4, 0.2]} castShadow rotation={[0, 0, 0.5]}><boxGeometry args={[0.6, 0.1, 0.4]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.3, 0.6, 1.2]} />
+          <Eye pos={[-0.3, 0.6, 1.2]} />
         </group>
       )}
 
       {name === 'Fish' && (
         <group>
-          <mesh position={[0, 0.5, 0]} castShadow>
-            <boxGeometry args={[0.3, 0.8, 1.2]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 0.5, -0.8]} castShadow>
-            <boxGeometry args={[0.1, 0.6, 0.6]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
+          <mesh position={[0, 0.5, 0]} castShadow><boxGeometry args={[0.3, 0.8, 1.2]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.5, -0.8]} castShadow><boxGeometry args={[0.1, 0.6, 0.6]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.15, 0.6, 0.4]} />
+          <Eye pos={[-0.15, 0.6, 0.4]} />
+        </group>
+      )}
+
+      {name === 'Whale' && (
+        <group>
+          <mesh position={[0, 1, 0]} castShadow><boxGeometry args={[2.5, 2, 4]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 1, -2.5]} castShadow><boxGeometry args={[3, 0.2, 1.5]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[1.3, 1.2, 1.5]} />
+          <Eye pos={[-1.3, 1.2, 1.5]} />
         </group>
       )}
 
       {(name === 'Chicken' || name === 'Duck') && (
         <group>
-          <mesh position={[0, 0.4, 0]} castShadow>
-            <boxGeometry args={[0.5, 0.6, 0.7]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 0.8, 0.3]} castShadow>
-            <boxGeometry args={[0.3, 0.3, 0.3]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 0.8, 0.5]} castShadow>
-            <boxGeometry args={[0.2, 0.1, 0.2]} />
-            <meshStandardMaterial color="#f97316" />
-          </mesh>
+          <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[0.5, 0.6, 0.7]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.8, 0.3]} castShadow><boxGeometry args={[0.3, 0.3, 0.3]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.8, 0.5]} castShadow><boxGeometry args={[0.2, 0.1, 0.2]} /><meshStandardMaterial color="#f97316" /></mesh>
+          <Eye pos={[0.15, 0.9, 0.45]} />
+          <Eye pos={[-0.15, 0.9, 0.45]} />
         </group>
       )}
 
       {name === 'Frog' && (
-        <group scale={0.5}>
-          <mesh position={[0, 0.4, 0]} castShadow>
-            <boxGeometry args={[1, 0.6, 1]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0.3, 0.8, 0.3]} castShadow>
-            <sphereGeometry args={[0.2, 8, 8]} />
-            <meshStandardMaterial color="white" />
-          </mesh>
-          <mesh position={[-0.3, 0.8, 0.3]} castShadow>
-            <sphereGeometry args={[0.2, 8, 8]} />
-            <meshStandardMaterial color="white" />
-          </mesh>
+        <group scale={0.8}>
+          <mesh position={[0, 0.3, 0]} castShadow><boxGeometry args={[1, 0.6, 1]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.3, 0.7, 0.3]} />
+          <Eye pos={[-0.3, 0.7, 0.3]} />
         </group>
       )}
 
-      {/* Default/Fallback shape for others */}
-      {!['Cow', 'Pig', 'Shark', 'Fish', 'Chicken', 'Duck', 'Frog'].includes(name) && (
+      {name === 'Snake' && (
         <group>
-          <mesh position={[0, 0.5, 0]} castShadow>
-            <boxGeometry args={[0.8, 0.6, 1.2]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
-          <mesh position={[0, 1, 0.5]} castShadow>
-            <boxGeometry args={[0.5, 0.5, 0.5]} />
-            <meshStandardMaterial color={color} />
-          </mesh>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <mesh key={i} position={[Math.sin(i * 1.5) * 0.4, 0.2, -i * 0.6]} castShadow>
+              <boxGeometry args={[0.4, 0.4, 0.5]} />
+              <meshStandardMaterial color={color} />
+              {i === 0 && (
+                <>
+                  <Eye pos={[0.15, 0.2, 0.2]} />
+                  <Eye pos={[-0.15, 0.2, 0.2]} />
+                  <mesh position={[0, 0, 0.3]}><boxGeometry args={[0.1, 0.05, 0.4]} /><meshStandardMaterial color="red" /></mesh>
+                </>
+              )}
+            </mesh>
+          ))}
         </group>
       )}
 
-      {/* Universal Eyes for all animals */}
-      <group position={[0, 0.2, 0]}>
-         <mesh position={[0.15, 0.9, 0.75]}>
-            <boxGeometry args={[0.1, 0.1, 0.1]} />
-            <meshStandardMaterial color="black" />
-          </mesh>
-          <mesh position={[-0.15, 0.9, 0.75]}>
-            <boxGeometry args={[0.1, 0.1, 0.1]} />
-            <meshStandardMaterial color="black" />
-          </mesh>
-      </group>
+      {name === 'Scorpion' && (
+        <group>
+          <mesh position={[0, 0.2, 0]} castShadow><boxGeometry args={[0.8, 0.4, 1.2]} /><meshStandardMaterial color={color} /></mesh>
+          <group position={[0, 0.4, -0.4]}>
+            {[0, 1, 2, 3].map(i => (
+              <mesh key={i} position={[0, i * 0.4, -i * 0.2]} rotation={[i * 0.4, 0, 0]}>
+                <boxGeometry args={[0.2, 0.4, 0.2]} /><meshStandardMaterial color={color} />
+                {i === 3 && <mesh position={[0, 0.3, 0.1]}><boxGeometry args={[0.1, 0.3, 0.1]} /><meshStandardMaterial color="black" /></mesh>}
+              </mesh>
+            ))}
+          </group>
+          <mesh position={[0.5, 0.2, 0.6]} rotation={[0, 0.5, 0]}><boxGeometry args={[0.3, 0.2, 0.4]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[-0.5, 0.2, 0.6]} rotation={[0, -0.5, 0]}><boxGeometry args={[0.3, 0.2, 0.4]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.2, 0.4, 0.5]} />
+          <Eye pos={[-0.2, 0.4, 0.5]} />
+        </group>
+      )}
+
+      {name === 'Alligator' && (
+        <group>
+          <mesh position={[0, 0.3, 0]} castShadow><boxGeometry args={[1, 0.5, 2.5]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.35, 1.8]} castShadow><boxGeometry args={[0.7, 0.3, 1.2]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.2, -1.8]} castShadow><boxGeometry args={[0.6, 0.3, 1.5]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.3, 0.6, 0.8]} />
+          <Eye pos={[-0.3, 0.6, 0.8]} />
+        </group>
+      )}
+
+      {name === 'Dragonfly' && (
+        <group>
+          <mesh position={[0, 0.1, 0]} castShadow><boxGeometry args={[0.2, 0.2, 2.5]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.2, 1.1]} castShadow><boxGeometry args={[0.4, 0.4, 0.4]} /><meshStandardMaterial color={color} /></mesh>
+          <group ref={wingRef1} position={[0.5, 0.2, 0.8]}><mesh><boxGeometry args={[1.5, 0.05, 0.4]} /><meshStandardMaterial color="white" transparent opacity={0.4} /></mesh></group>
+          <group ref={wingRef2} position={[-0.5, 0.2, 0.8]}><mesh><boxGeometry args={[1.5, 0.05, 0.4]} /><meshStandardMaterial color="white" transparent opacity={0.4} /></mesh></group>
+          <Eye pos={[0.2, 0.3, 1.3]} />
+          <Eye pos={[-0.2, 0.3, 1.3]} />
+        </group>
+      )}
+
+      {name === 'Camel' && (
+        <group>
+          <mesh position={[0, 0.8, 0]} castShadow><boxGeometry args={[1, 1, 2]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 1.5, 0.2]} castShadow><boxGeometry args={[0.8, 0.6, 0.8]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 1.2, 1.2]} castShadow rotation={[-0.5, 0, 0]}><boxGeometry args={[0.5, 1.5, 0.5]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.2, 1.8, 1.6]} />
+          <Eye pos={[-0.2, 1.8, 1.6]} />
+        </group>
+      )}
+
+      {name === 'Cat' && (
+        <group>
+          <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[0.7, 0.6, 1.2]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.9, 0.5]} castShadow><boxGeometry args={[0.5, 0.5, 0.5]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0.2, 1.2, 0.5]}><boxGeometry args={[0.2, 0.2, 0.1]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[-0.2, 1.2, 0.5]}><boxGeometry args={[0.2, 0.2, 0.1]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 0.4, -0.8]} rotation={[0.5, 0, 0]}><boxGeometry args={[0.1, 0.1, 0.8]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.15, 1.0, 0.75]} />
+          <Eye pos={[-0.15, 1.0, 0.75]} />
+        </group>
+      )}
+
+      {/* Fallback */}
+      {!['Cow', 'Pig', 'Sheep', 'Shark', 'Fish', 'Whale', 'Chicken', 'Duck', 'Frog', 'Snake', 'Scorpion', 'Alligator', 'Dragonfly', 'Camel', 'Cat'].includes(name) && (
+        <group>
+          <mesh position={[0, 0.5, 0]} castShadow><boxGeometry args={[0.8, 0.6, 1.2]} /><meshStandardMaterial color={color} /></mesh>
+          <mesh position={[0, 1, 0.5]} castShadow><boxGeometry args={[0.5, 0.5, 0.5]} /><meshStandardMaterial color={color} /></mesh>
+          <Eye pos={[0.15, 1.1, 0.75]} />
+          <Eye pos={[-0.15, 1.1, 0.75]} />
+        </group>
+      )}
     </group>
   );
 }
