@@ -11,7 +11,14 @@
 ### 🔤 Spelling Mode — "Spelling Quest"
 ### 🎉 Popping Level (Every 5 levels)
 ### 🧩 Pattern Path (Logic/Sequencing)
+- **Levels**: 10 levels of increasing complexity.
+- **Progression**: Simple ABAB -> ABCABC -> Palindromes -> Growing sequences.
+- **Dynamic Scenery**: Backgrounds and ambient decorations change based on level.
+
 ### 🌸 Memory Meadow (Concentration)
+- **Levels**: 5 levels with increasing difficulty.
+- **Grid Size**: 2x2 -> 2x3 -> 3x4 -> 4x4 -> 4x5.
+- **Thematic Sets**: Fruits, Animals, Space, Nature, Sweets.
 
 ---
 

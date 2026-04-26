@@ -54,25 +54,25 @@ function Pad({ position, color, note, synth, onTrigger }) {
 // --- Scene Setup ---
 
 function Scene() {
-  const [bgColor, setBgColor] = useState('#0f172a');
+  const [bgColor, setBgColor] = useState('#1e1b4b'); // Warmer, deeper initial blue
   const [lightColor, setLightColor] = useState('#ffffff');
   const [synth, setSynth] = useState(null);
   
   useEffect(() => {
     // Initialize Tone.js Synth
     const duoSynth = new Tone.DuoSynth({
-      vibratoAmount: 0.1,
-      vibratoRate: 5,
+      vibratoAmount: 0.2,
+      vibratoRate: 6,
       harmonicity: 1.5,
       voice0: {
-        volume: -10,
+        volume: -12,
         oscillator: { type: 'sine' },
-        envelope: { attack: 0.01, release: 0.5 }
+        envelope: { attack: 0.05, release: 0.8 }
       },
       voice1: {
-        volume: -10,
+        volume: -12,
         oscillator: { type: 'triangle' },
-        envelope: { attack: 0.01, release: 0.5 }
+        envelope: { attack: 0.05, release: 0.8 }
       }
     }).toDestination();
     
@@ -84,34 +84,36 @@ function Scene() {
   const handleTrigger = (color) => {
     setBgColor(color);
     setLightColor(color);
+    // Longer transition for more impact
     setTimeout(() => {
-      setBgColor('#0f172a');
+      setBgColor('#1e1b4b');
       setLightColor('#ffffff');
-    }, 300);
+    }, 500);
   };
 
   // C Major Pentatonic Scale: C, D, E, G, A
   const pads = [
-    { pos: [-2.5, 0, -2.5], color: '#f87171', note: 'C3' },
-    { pos: [0, 0, -2.5],    color: '#fbbf24', note: 'D3' },
-    { pos: [2.5, 0, -2.5],  color: '#4ade80', note: 'E3' },
-    { pos: [-2.5, 0, 0],    color: '#2dd4bf', note: 'G3' },
-    { pos: [0, 0, 0],       color: '#3b82f6', note: 'A3' },
-    { pos: [2.5, 0, 0],     color: '#818cf8', note: 'C4' },
-    { pos: [-2.5, 0, 2.5],  color: '#c084fc', note: 'D4' },
-    { pos: [0, 0, 2.5],     color: '#f472b6', note: 'E4' },
-    { pos: [2.5, 0, 2.5],   color: '#fb7185', note: 'G4' },
+    { pos: [-2.5, 0, -2.5], color: '#ff4444', note: 'C3' },
+    { pos: [0, 0, -2.5],    color: '#ffbb33', note: 'D3' },
+    { pos: [2.5, 0, -2.5],  color: '#00C851', note: 'E3' },
+    { pos: [-2.5, 0, 0],    color: '#33b5e5', note: 'G3' },
+    { pos: [0, 0, 0],       color: '#2BBBAD', note: 'A3' },
+    { pos: [2.5, 0, 0],     color: '#4285F4', note: 'C4' },
+    { pos: [-2.5, 0, 2.5],  color: '#aa66cc', note: 'D4' },
+    { pos: [0, 0, 2.5],     color: '#ffbb33', note: 'E4' },
+    { pos: [2.5, 0, 2.5],   color: '#ff4444', note: 'G4' },
   ];
 
   return (
     <>
       <color attach="background" args={[bgColor]} />
-      <fog attach="fog" args={[bgColor, 5, 20]} />
+      <fog attach="fog" args={[bgColor, 5, 25]} />
       
-      <ambientLight intensity={0.2} />
-      <pointLight position={[0, 10, 0]} intensity={2} color={lightColor} />
+      <ambientLight intensity={0.8} />
+      <pointLight position={[0, 10, 5]} intensity={5} color={lightColor} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} castShadow />
       
-      <group position={[0, -1, 0]}>
+      <group position={[0, -1.5, 0]}>
         {pads.map((pad, i) => (
           <Pad 
             key={i} 
@@ -123,23 +125,24 @@ function Scene() {
           />
         ))}
         
-        {/* Floor */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.3, 0]}>
-          <planeGeometry args={[20, 20]} />
-          <meshStandardMaterial color="#020617" roughness={0.1} metalness={0.8} />
+        {/* Floor - lighter color and grid helper for depth */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, 0]} receiveShadow>
+          <planeGeometry args={[50, 50]} />
+          <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.2} />
         </mesh>
+        <gridHelper args={[20, 10, "#ffffff", "#ffffff"]} position={[0, -0.19, 0]} opacity={0.1} transparent />
         
         <ContactShadows 
-          position={[0, -0.25, 0]} 
-          opacity={0.5} 
-          scale={15} 
-          blur={2.5} 
-          far={1} 
+          position={[0, -0.15, 0]} 
+          opacity={0.6} 
+          scale={20} 
+          blur={2} 
+          far={1.5} 
         />
       </group>
 
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-        <PerspectiveCamera makeDefault position={[0, 6, 8]} fov={50} />
+      <Float speed={1} rotationIntensity={0.1} floatIntensity={0.2}>
+        <PerspectiveCamera makeDefault position={[0, 8, 10]} fov={45} />
       </Float>
     </>
   );

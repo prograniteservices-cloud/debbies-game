@@ -5,7 +5,21 @@ import MagicalEffects from './MagicalEffects';
 import LevelCompleteOverlay from './LevelCompleteOverlay';
 import { playSound } from '../audio/soundEngine';
 
-const ITEMS = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍒', '🍑', '🍍'];
+const ITEM_SETS = {
+  fruits: ['🍎', '🍌', '🍇', '🍉', '🍓', '🍒', '🍑', '🍍', '🥝', '🍋'],
+  animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯'],
+  space: ['⭐', '🌙', '☀️', '🚀', '🛸', '🛰️', '🌎', '🪐', '☄️', '🌌'],
+  nature: ['🌸', '🌺', '🌻', '🌼', '🌿', '🌱', '🍃', '🍄', '🌳', '🌲'],
+  sweets: ['🍦', '🍩', '🍪', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮']
+};
+
+const LEVELS = [
+  { name: 'Tiny Garden', rows: 2, cols: 2, itemSet: 'fruits' },
+  { name: 'Animal Trail', rows: 2, cols: 3, itemSet: 'animals' },
+  { name: 'Starry Field', rows: 3, cols: 4, itemSet: 'space' },
+  { name: 'Floral Forest', rows: 4, cols: 4, itemSet: 'nature' },
+  { name: 'Sweet Valley', rows: 4, cols: 5, itemSet: 'sweets' }
+];
 
 const shuffle = (array) => {
   const newArr = [...array];
@@ -16,14 +30,16 @@ const shuffle = (array) => {
   return newArr;
 };
 
-const MemoryCard = ({ item, isFlipped, isMatched, onClick, index }) => {
+const MemoryCard = ({ item, isFlipped, isMatched, onClick, index, rows, cols }) => {
   return (
     <motion.div
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: index * 0.05 }}
       onClick={onClick}
-      className="relative w-16 h-20 sm:w-20 sm:h-24 md:w-24 md:h-28 perspective-1000 cursor-pointer group"
+      className={`relative perspective-1000 cursor-pointer group 
+        ${cols > 4 ? 'w-12 h-16 sm:w-16 sm:h-20' : 'w-16 h-20 sm:w-20 sm:h-24 md:w-24 md:h-28'}
+      `}
     >
       <motion.div
         className="w-full h-full relative preserve-3d transition-all duration-500 ease-out"
@@ -31,11 +47,11 @@ const MemoryCard = ({ item, isFlipped, isMatched, onClick, index }) => {
       >
         {/* Card Back */}
         <div className={`absolute w-full h-full backface-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-xl border-4 border-indigo-300 flex items-center justify-center group-hover:shadow-indigo-500/50 group-hover:-translate-y-1 transition-all`}>
-          <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-300/50" />
+          <Sparkles className={`${cols > 4 ? 'w-4 h-4' : 'w-6 h-6 sm:w-8 sm:h-8'} text-indigo-300/50`} />
         </div>
 
         {/* Card Front */}
-        <div className="absolute w-full h-full backface-hidden rounded-xl sm:rounded-2xl bg-white shadow-xl border-4 border-slate-200 flex items-center justify-center text-3xl sm:text-4xl md:text-5xl" style={{ transform: 'rotateY(180deg)' }}>
+        <div className="absolute w-full h-full backface-hidden rounded-xl sm:rounded-2xl bg-white shadow-xl border-4 border-slate-200 flex items-center justify-center text-2xl sm:text-3xl md:text-5xl" style={{ transform: 'rotateY(180deg)' }}>
           <span className={isMatched ? 'opacity-50 grayscale transition-all' : ''}>{item}</span>
           {isMatched && (
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute inset-0 flex items-center justify-center">
@@ -49,6 +65,7 @@ const MemoryCard = ({ item, isFlipped, isMatched, onClick, index }) => {
 };
 
 export default function MemoryMeadow({ onBack, theme, onComplete }) {
+  const [level, setLevel] = useState(0);
   const [cards, setCards] = useState([]);
   const [flippedIndices, setFlippedIndices] = useState([]);
   const [matchedIndices, setMatchedIndices] = useState([]);
@@ -56,13 +73,19 @@ export default function MemoryMeadow({ onBack, theme, onComplete }) {
   const [showReward, setShowReward] = useState(false);
   const [score, setScore] = useState(0);
 
-  useEffect(() => {
-    initGame();
-  }, []);
+  const currentLevel = LEVELS[level];
+  const bgGradient = theme?.bgThemes 
+    ? theme.bgThemes[level % theme.bgThemes.length]
+    : 'from-green-300 to-emerald-500 dark:from-green-900 dark:to-emerald-900';
 
-  const initGame = () => {
-    // Pick 6 pairs for a 3x4 grid
-    const selectedItems = ITEMS.slice(0, 6);
+  useEffect(() => {
+    initGame(level);
+  }, [level]);
+
+  const initGame = (lvlIdx) => {
+    const lvl = LEVELS[lvlIdx];
+    const numPairs = (lvl.rows * lvl.cols) / 2;
+    const selectedItems = ITEM_SETS[lvl.itemSet].slice(0, numPairs);
     const deck = shuffle([...selectedItems, ...selectedItems]);
     setCards(deck);
     setFlippedIndices([]);
@@ -110,25 +133,54 @@ export default function MemoryMeadow({ onBack, theme, onComplete }) {
 
   const handleNext = () => {
     setShowReward(false);
-    if (onComplete) onComplete();
-    else onBack();
+    if (level < LEVELS.length - 1) {
+      setLevel(l => l + 1);
+    } else {
+      if (onComplete) onComplete();
+      else onBack();
+    }
   };
 
   return (
-    <div className={`flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden bg-gradient-to-br ${theme?.spellingBg || 'from-green-300 to-emerald-500 dark:from-green-900 dark:to-emerald-900'}`}>
+    <div className={`flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden bg-gradient-to-br ${bgGradient} transition-colors duration-1000`}>
       <MagicalEffects isCelebrating={showReward} />
+
+      {/* Ambient Decorations */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`${level}-${i}`}
+            initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
+            animate={{ 
+              opacity: [0, 0.15, 0],
+              y: ['110%', '-10%'],
+              x: [((i * 15) % 100) + '%', (((i * 15) + 10) % 100) + '%'],
+              rotate: 360
+            }}
+            transition={{ 
+              duration: 15 + Math.random() * 15,
+              repeat: Infinity,
+              delay: i * 2,
+              ease: "easeInOut"
+            }}
+            className="absolute text-3xl sm:text-5xl opacity-10 blur-[2px]"
+          >
+            {ITEM_SETS[currentLevel.itemSet][i % ITEM_SETS[currentLevel.itemSet].length]}
+          </motion.div>
+        ))}
+      </div>
 
       <LevelCompleteOverlay
         show={showReward}
-        title="MEADOW CLEARED!"
-        subtitle="All pairs matched!"
+        title={level === LEVELS.length - 1 ? "GRAND CHAMPION!" : "MEADOW CLEARED!"}
+        subtitle={currentLevel.name}
         emoji="🌸"
-        stars={score >= 60 ? 5 : score >= 40 ? 4 : score >= 20 ? 3 : 2}
+        stars={5}
         score={score}
         theme={theme}
         onNext={handleNext}
-        onRetry={() => { setScore(0); setShowReward(false); initGame(); }}
-        nextLabel="DONE"
+        onRetry={() => { setScore(0); setShowReward(false); initGame(level); }}
+        nextLabel={level === LEVELS.length - 1 ? "DONE" : "NEXT LEVEL"}
       />
       
       {/* Top Bar */}
@@ -140,14 +192,17 @@ export default function MemoryMeadow({ onBack, theme, onComplete }) {
           <ArrowLeft className="w-6 h-6 text-slate-700 dark:text-slate-300" />
         </button>
         <div className="flex items-center gap-4">
-          <img
+          <motion.img
+            key={level}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             src={theme?.mascotImg || '/assets/unicorn_queen.png'}
             alt="Mascot"
             className="w-12 h-12 object-contain drop-shadow-lg"
           />
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-white drop-shadow-md tracking-wide">Memory Meadow</h2>
-            <p className="text-xs sm:text-sm text-white/80 font-bold uppercase tracking-widest">Match all pairs!</p>
+            <h2 className="text-xl sm:text-2xl font-black text-white drop-shadow-md tracking-wide">{currentLevel.name}</h2>
+            <p className="text-xs sm:text-sm text-white/80 font-bold uppercase tracking-widest">Level {level + 1}/{LEVELS.length}</p>
           </div>
         </div>
         <div className="flex bg-yellow-400/30 px-4 py-2 rounded-2xl items-center gap-2 border border-yellow-300/50">
@@ -156,16 +211,23 @@ export default function MemoryMeadow({ onBack, theme, onComplete }) {
         </div>
       </div>
 
-      <div className="flex-1 w-full max-w-3xl flex items-center justify-center z-10">
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-4 p-4 sm:p-8 bg-white/20 dark:bg-black/20 backdrop-blur-sm rounded-[2rem] sm:rounded-[3rem] shadow-2xl border-2 border-white/30">
+      <div className="flex-1 w-full max-w-4xl flex items-center justify-center z-10">
+        <div 
+          className="grid gap-2 sm:gap-4 p-4 sm:p-8 bg-white/20 dark:bg-black/20 backdrop-blur-sm rounded-[2rem] sm:rounded-[3rem] shadow-2xl border-2 border-white/30"
+          style={{ 
+            gridTemplateColumns: `repeat(${currentLevel.cols}, minmax(0, 1fr))`,
+          }}
+        >
           {cards.map((item, idx) => (
             <MemoryCard
-              key={idx}
+              key={`${level}-${idx}`}
               index={idx}
               item={item}
               isFlipped={flippedIndices.includes(idx)}
               isMatched={matchedIndices.includes(idx)}
               onClick={() => handleCardClick(idx)}
+              rows={currentLevel.rows}
+              cols={currentLevel.cols}
             />
           ))}
         </div>

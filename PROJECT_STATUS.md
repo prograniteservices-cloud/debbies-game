@@ -13,8 +13,14 @@
 -   [x] PWA & CI/CD Setup
 -   [x] Production Data Sync Fix (Hardened)
 -   [x] **Interactive Mascot Audio** (Phase 6 Polish) ✅
+-   [x] **Multi-Level Game Expansion** (Patterns & Memory) ✅
+-   [x] **Musical Color Room Visual Fix** (Rendering & Lighting) ✅
+-   [x] **Animal Hunt Multi-Level Expansion** (5 Unique Worlds) ✅
 
 ## 🚀 Recent Improvements
+-   **Animal Hunt 2.0**: Expanded to 5 levels with diverse environments (Forest, Underwater, Desert, Swamp, Pond), custom lighting, fog, and unique animal sets for each.
+-   **Musical Room Fix**: Resolved "black screen" rendering issues by increasing light intensities, adding dynamic spotlights, and improving material responsiveness.
+-   **Game Level Expansion**: 10 levels for Patterns and 5 levels for Memory with increasing difficulty and dynamic background scenery.
 -   **Interactive Mascot SFX**: Unique procedural audio sequences for each character on hover.
 -   **Vercel Env Vars**: Configured Supabase keys in production.
 -   **Resilient Scoring**: Added `localStorage` mirroring for scores.
@@ -22,4 +28,4 @@
 
 ---
 ## Last Updated
-2026-04-19 (Interactive Audio Update)
+2026-04-25 (Visual Fixes & Animal Hunt Expansion)

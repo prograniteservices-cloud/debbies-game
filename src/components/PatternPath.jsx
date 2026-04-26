@@ -10,31 +10,71 @@ const PATTERNS = [
   {
     sequence: ['🍎', '🍌', '🍎', '🍌', '🍎'],
     options: ['🍎', '🍌', '🍇'],
-    answer: '🍌'
+    answer: '🍌',
+    name: 'Fruit Fun'
   },
   // Level 2: Simple AABB
   {
     sequence: ['🐶', '🐶', '🐱', '🐱', '🐶'],
     options: ['🐱', '🐶', '🐭'],
-    answer: '🐶'
+    answer: '🐶',
+    name: 'Pet Parade'
   },
   // Level 3: ABCABC
   {
     sequence: ['🚗', '🚕', '🚙', '🚗', '🚕'],
     options: ['🚗', '🚙', '🚕'],
-    answer: '🚙'
+    answer: '🚙',
+    name: 'Traffic Jam'
   },
-  // Level 4: Color pattern
+  // Level 4: AABBAA
   {
-    sequence: ['🔴', '🔵', '🟡', '🔴', '🔵'],
-    options: ['🟡', '🟢', '🔴'],
-    answer: '🟡'
-  },
-  // Level 5: Harder sequence
-  {
-    sequence: ['⭐', '🌙', '⭐', '⭐', '🌙', '⭐'],
+    sequence: ['⭐', '⭐', '🌙', '🌙', '⭐'],
     options: ['⭐', '🌙', '☀️'],
-    answer: '⭐'
+    answer: '⭐',
+    name: 'Night Sky'
+  },
+  // Level 5: ABCCBA (Palindrome-ish)
+  {
+    sequence: ['🔴', '🔵', '🟢', '🟢', '🔵'],
+    options: ['🔴', '🔵', '🟡'],
+    answer: '🔴',
+    name: 'Rainbow Roll'
+  },
+  // Level 6: Growing Pattern (A, AA, AAA)
+  {
+    sequence: ['🦋', '🌸', '🦋', '🦋', '🌸', '🦋', '🦋'],
+    options: ['🦋', '🌸', '🐝'],
+    answer: '🦋',
+    name: 'Garden Growth'
+  },
+  // Level 7: ABC
+  {
+    sequence: ['🍦', '🍩', '🍪', '🍦', '🍩'],
+    options: ['🍦', '🍪', '🍩'],
+    answer: '🍪',
+    name: 'Sweet Treats'
+  },
+  // Level 8: Complex Sequence
+  {
+    sequence: ['🦁', '🐯', '🦁', '🐯', '🦁'],
+    options: ['🐯', '🦁', '🐻'],
+    answer: '🐯',
+    name: 'Jungle Beat'
+  },
+  // Level 9: Shape/Color Mix
+  {
+    sequence: ['📐', '📏', '📐', '📏', '📐'],
+    options: ['📐', '📏', '✂️'],
+    answer: '📏',
+    name: 'School Supplies'
+  },
+  // Level 10: Grand Finale
+  {
+    sequence: ['🚀', '🛸', '🛰️', '🚀', '🛸'],
+    options: ['🛰️', '🚀', '🌎'],
+    answer: '🛰️',
+    name: 'Space Mission'
   }
 ];
 
@@ -44,6 +84,11 @@ export default function PatternPath({ onBack, theme, onComplete }) {
   const [wrongShake, setWrongShake] = useState(null);
 
   const currentPattern = PATTERNS[level];
+  
+  // Scenery change based on level
+  const bgGradient = theme?.bgThemes 
+    ? theme.bgThemes[level % theme.bgThemes.length]
+    : 'from-indigo-300 to-purple-400 dark:from-indigo-900 dark:to-purple-900';
 
   const handleGuess = (guess) => {
     if (showReward) return;
@@ -70,13 +115,37 @@ export default function PatternPath({ onBack, theme, onComplete }) {
   };
 
   return (
-    <div className={`flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden bg-gradient-to-br ${theme?.spellingBg || 'from-indigo-300 to-purple-400 dark:from-indigo-900 dark:to-purple-900'}`}>
+    <div className={`flex flex-col items-center justify-between w-full h-full p-4 relative overflow-hidden bg-gradient-to-br ${bgGradient} transition-colors duration-1000`}>
       <MagicalEffects isCelebrating={showReward} />
+      
+      {/* Ambient Decorations */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={`${level}-${i}`}
+            initial={{ opacity: 0, x: Math.random() * 100 + '%', y: '110%' }}
+            animate={{ 
+              opacity: [0, 0.2, 0],
+              y: '-10%',
+              x: (Math.random() * 100) + '%'
+            }}
+            transition={{ 
+              duration: 10 + Math.random() * 10,
+              repeat: Infinity,
+              delay: i * 2,
+              ease: "linear"
+            }}
+            className="absolute text-4xl sm:text-6xl grayscale opacity-10 blur-[1px]"
+          >
+            {currentPattern.sequence[i % currentPattern.sequence.length]}
+          </motion.div>
+        ))}
+      </div>
 
       <LevelCompleteOverlay
         show={showReward}
         title="PERFECT!"
-        subtitle={`Pattern ${level + 1} solved!`}
+        subtitle={currentPattern.name}
         emoji="🧩"
         stars={5}
         score={level * 10 + 10}
@@ -93,13 +162,16 @@ export default function PatternPath({ onBack, theme, onComplete }) {
           <ArrowLeft className="w-6 h-6 text-slate-700 dark:text-slate-300" />
         </button>
         <div className="flex items-center gap-4">
-          <img
+          <motion.img
+            key={level}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             src={theme?.mascotImg || '/assets/unicorn_queen.png'}
             alt="Mascot"
             className="w-12 h-12 object-contain drop-shadow-lg"
           />
           <div>
-            <h2 className="text-2xl font-black text-white drop-shadow-md tracking-wide">Pattern Path</h2>
+            <h2 className="text-2xl font-black text-white drop-shadow-md tracking-wide">{currentPattern.name}</h2>
             <p className="text-sm text-white/80 font-bold uppercase tracking-widest">Level {level + 1}/{PATTERNS.length}</p>
           </div>
         </div>
@@ -122,7 +194,7 @@ export default function PatternPath({ onBack, theme, onComplete }) {
         <div className="flex flex-wrap justify-center gap-3 sm:gap-5 bg-white/20 dark:bg-black/20 p-4 sm:p-8 rounded-[3rem] shadow-2xl backdrop-blur-sm border-2 border-white/30">
           {currentPattern.sequence.map((item, index) => (
             <motion.div
-              key={index}
+              key={`${level}-${index}`}
               initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: index * 0.1, type: "spring", stiffness: 200 }}

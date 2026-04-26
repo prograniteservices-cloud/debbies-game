@@ -3,6 +3,7 @@
 ## ✅ Production Fixes (Phase 6.1)
 - [x] **TASK-25**: Added Vercel Environment Variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`).
 - [x] **TASK-26**: Implemented `localStorage` fallback and merged scoring logic for achievements.
+- [x] **TASK-27**: Expanded **Pattern Path** and **Memory Meadow** with multi-level progression and dynamic scenery.
 
 ## ✅ Project Foundations
 - [x] Workspace Initialization.

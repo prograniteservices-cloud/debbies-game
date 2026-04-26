@@ -7,6 +7,10 @@
 
 ## 1. Before You Start Any Task
 ## 2. Code Standards
+- Use functional components and hooks.
+- Prefer Tailwind CSS for styling.
+- **Multi-Level Scalability**: When adding game modes, always implement a level-based progression with dynamic scenery (`bgThemes`) to maintain engagement.
+- All new levels must include ambient decorative elements (`motion.div` floating effects) to feel "alive".
 ## 3. Audio Guidelines
 ## 4. Supabase & Persistence
 - All DB operations through the Supabase JS client.

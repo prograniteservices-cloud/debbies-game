@@ -17,6 +17,8 @@
 | **Mascot Hover SFX** | **Interactive procedural tones** ✅ |
 | **Mobile UX Polish** | Responsive grid active |
 | **PWA / Offline support** | Integrated |
+| **Multi-Level Progression** | **10 Pattern levels & 5 Memory levels** ✅ |
+| **Dynamic Scenery Engine** | Level-aware backgrounds & ambient VFX ✅ |
 | **GitHub CI/CD** | Automated |
 | **Vercel Deployment** | Live |
 
