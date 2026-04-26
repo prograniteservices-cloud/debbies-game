@@ -29,11 +29,13 @@ import ParentDashboard from './components/ParentDashboard';
 import PatternPath from './components/PatternPath';
 import MemoryMeadow from './components/MemoryMeadow';
 import ArtStudio from './components/ArtStudio';
+import AnimalHunt from './components/games/AnimalHunt';
+import MusicalRoom from './components/games/MusicalRoom';
 import { THEMES } from './themes';
 import { supabase } from './supabaseClient';
 
 function App() {
-  const [gameState, setGameState] = useState('PROFILE'); // PROFILE, LANDING, COUNTING, SPELLING, POPPING, ACHIEVEMENTS, PATTERNS, MEMORY
+  const [gameState, setGameState] = useState('PROFILE'); // PROFILE, LANDING, COUNTING, SPELLING, POPPING, ACHIEVEMENTS, PATTERNS, MEMORY, ART_STUDIO, ANIMAL_HUNT, MUSICAL_ROOM
   const [returnState, setReturnState] = useState(null); // the game to return to after POPPING
   const [levelInfo, setLevelInfo] = useState({ level: 1, score: 0 });
   const [themeId, setThemeId] = useState('unicorn'); // 'unicorn' | 'werecat'
@@ -298,14 +300,24 @@ function App() {
                   onClick={() => handleStartGame('MEMORY')} 
                   color="#2dd4bf"
                 />
-                <div className="col-span-2 mt-2">
-                  <MenuButton 
-                    icon={ImageIcon} 
-                    label="Magic Art Studio" 
-                    onClick={() => handleStartGame('ART_STUDIO')} 
-                    color="#ec4899"
-                  />
-                </div>
+                <MenuButton 
+                  icon={ImageIcon} 
+                  label="Art Studio" 
+                  onClick={() => handleStartGame('ART_STUDIO')} 
+                  color="#ec4899"
+                />
+                <MenuButton 
+                  icon={MapIcon} 
+                  label="Animal Hunt" 
+                  onClick={() => handleStartGame('ANIMAL_HUNT')} 
+                  color="#fb923c"
+                />
+                <MenuButton 
+                  icon={Music} 
+                  label="Music Room" 
+                  onClick={() => handleStartGame('MUSICAL_ROOM')} 
+                  color="#818cf8"
+                />
               </div>
             </div>
           </motion.div>
@@ -387,6 +399,36 @@ function App() {
             className="absolute inset-0 flex flex-col items-center z-10 w-full h-full bg-slate-900/5 backdrop-blur-3xl"
           >
             <ArtStudio onBack={() => setGameState('LANDING')} theme={theme} />
+          </motion.div>
+        )}
+
+        {gameState === 'ANIMAL_HUNT' && (
+          <motion.div
+            key="animal_hunt"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex flex-col items-center z-50 w-full h-full"
+          >
+            <AnimalHunt onBack={() => {
+              setGameState('LANDING');
+              playTheme(themeId);
+            }} />
+          </motion.div>
+        )}
+
+        {gameState === 'MUSICAL_ROOM' && (
+          <motion.div
+            key="musical_room"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex flex-col items-center z-50 w-full h-full"
+          >
+            <MusicalRoom onBack={() => {
+              setGameState('LANDING');
+              playTheme(themeId);
+            }} />
           </motion.div>
         )}
 
