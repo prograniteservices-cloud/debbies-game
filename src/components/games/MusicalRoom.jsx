@@ -177,14 +177,22 @@ function Scene({ onTrigger }) {
   ], []);
 
   useEffect(() => {
-    // Organic "Woody" Synth
-    const reverb = new Tone.Reverb({ decay: 3, wet: 0.5 }).toDestination();
-    const delay = new Tone.FeedbackDelay("8n", 0.3).connect(reverb);
+    // Organic "Woody" Synth with richer oscillator
+    const reverb = new Tone.Reverb({ decay: 4, wet: 0.4 }).toDestination();
+    const delay = new Tone.FeedbackDelay("8n", 0.2).connect(reverb);
     const polySynth = new Tone.PolySynth(Tone.Synth, {
       maxPolyphony: 32,
-      oscillator: { type: 'sine' },
-      envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 1 }
+      oscillator: { type: 'fatsine' }, // Richer sound than pure sine
+      envelope: { 
+        attack: 0.02, 
+        decay: 0.1, 
+        sustain: 0.1, 
+        release: 1.5 
+      }
     }).connect(delay);
+    
+    // Increase volume slightly for better audibility
+    polySynth.volume.value = -6; 
     
     setSynth(polySynth);
     return () => { polySynth.dispose(); reverb.dispose(); delay.dispose(); };
