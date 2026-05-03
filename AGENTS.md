@@ -1,35 +1,44 @@
-# Project Starry / Project Codex - Agent Index 🦄
+# Debbie's Game / Unicorn Island - Agent Instructions
 
-## 🏹 Master Skill Index
-All operations in this repository are governed by the following specialized skills. Activate these via `activate_skill` before performing related tasks.
+## Source Of Truth
+- The root Vite app is the active Debbie's Game product and deploy target.
+- Read `docs/NORTH_STAR.md`, `docs/PDD.md`, `docs/PFD.md`, and `docs/SOP.md` before product or code changes.
+- `gemini.md` contains the active global directives for this repository.
+- `games-app/` is a nested experimental Next app and is not part of the main deploy path unless explicitly revived.
+- `C:\Users\heath\Desktop\Projects\Nighttime Companion` is a separate Starry/Nighttime Companion project. Do not apply its sleep, story, or ambient-companion rules here.
 
-### 🎭 Project Core Skills
-- **🎨 Sensory Engine**: `.agents/skills/sensory-engine/SKILL.md` (Sleep hygiene & palettes)
-- **📖 Story Engine**: `.agents/skills/story-engine/SKILL.md` (Narrative sourcing)
-- **🛡️ IP Shield**: `.agents/skills/ip-shield/SKILL.md` (Copyright protection)
-- **🌌 Saga Mode**: `.agents/skills/saga-mode/SKILL.md` (Persistent world memory)
+## Active Product Rules
+- Build for young children ages 4-8 with a joyful educational game experience.
+- Primary modes include math, spelling, music/color, animal hunt, art studio, profiles, achievements, and the parent dashboard.
+- Difficulty increases every 5 levels. Every 5th level is a special popping/decompression level.
+- Use vibrant, playful visuals; satisfying sound effects; clear progress; and mobile/touch-friendly interactions.
+- Persist Debbie's Game data through Supabase `profiles` and `scores`, with localStorage fallback where the app already supports it.
+- Existing Starry/Nighttime Companion migrations are historical/separate unless intentionally migrated later.
+- Spelling Quest uses generated Google TTS audio for words, hints, and coaching. Do not use native browser TTS.
+- Spelling Quest v1 targets 60 levels; future work should expand the curriculum beyond 60.
+- Keep Spelling Quest v1 in React/Framer, but Phaser is an attractive future upgrade path if the spelling game becomes more engine-like.
 
-### 🧩 Ecosystem Skills (Auto-linked)
-This repository includes a comprehensive library of ~100 ecosystem skills (React, Three.js, Tone.js, etc.) located in `/.agents/skills/`.
+## Skills State
+- Active repo workflow skill: `.agents/skills/using-superpowers/SKILL.md`.
+- Starry-specific skills are retained only as inactive references for the separate Nighttime Companion project:
+  - `.agents/skills/sensory-engine/SKILL.md`
+  - `.agents/skills/story-engine/SKILL.md`
+  - `.agents/skills/ip-shield/SKILL.md`
+  - `.agents/skills/saga-mode/SKILL.md`
+- `.agents/skills/Pulling Updates from Skills Repository/SKILL.md` is for skills maintenance only.
+- Broken ecosystem skill junctions are quarantined under `.agents/skills-quarantine/` and should not be treated as installed skills.
 
----
-
-## 🤖 Specialized Personas
-
-### Ambient Orchestrator (Primary)
-- **Role**: Coordinates between Sensory and Story engines.
-- **Tone**: Minimalist, warm, zero-authority.
-
-### Sensory Guardian
-- **Role**: Enforces "Good Night Mode" and lighting constraints.
-- **Trigger**: Any change to `src/themes.js` or `src/index.css`.
-
----
-
-## 🛠️ File Structure (Antigravity Standard)
-- `/.agents/skills/` - Master library of agent capabilities.
-- `/docs/` - Product Design (PDD), Features (PFD), North Star.
-- `/src/` - Active Vite/React development.
+## File Structure
+- `.agents/skills/` - Real local skill folders only.
+- `.agents/skills-quarantine/` - Broken/unavailable ecosystem skill junctions.
+- `docs/` - Product design, features, North Star, and SOP.
+- `src/` - Active Vite/React application.
+- `supabase/migrations/` - Database history; do not delete migrations during setup cleanup.
 - `PROJECT_STATUS.md` - Live milestone tracking.
 - `HANDOFF.md` - Session state and context transfer.
-- `gemini.md` - **Global Directives (The Absolute Source of Truth)**.
+
+## Working Commands
+- Install dependencies with `npm ci`.
+- Run the development server with `npm run dev`.
+- Validate source/config changes with `npm run lint` and `npm run build`.
+- Use `npm.cmd` instead of `npm` in PowerShell if script execution policy blocks `npm.ps1`.

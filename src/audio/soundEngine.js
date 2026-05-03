@@ -6,7 +6,6 @@ let audioCtx = null;
 let masterGain = null;
 let bgmGain = null;
 let currentThemeId = null;
-let currentBGMBuffer = null;
 let currentBGMSource = null;
 let isMuted = false;
 let bgmVolume = 0.25; // Boosted for premium tracks
@@ -62,15 +61,15 @@ function playProceduralNote(freq, duration, type = 'sine', volume = 0.3) {
 
 // ─── SFX Implementation ─────────────────────────────────────────────────────
 const SFX_FILES = {
-  pop: '/assets/audio/pop.mp3',
-  ding: '/assets/audio/ding.mp3',
-  fail: '/assets/audio/fail.mp3',
-  sparkle: '/assets/audio/sparkle.mp3',
+  pop: '/assets/audio/pop.wav',
+  ding: '/assets/audio/ding.wav',
+  fail: '/assets/audio/fail.wav',
+  sparkle: '/assets/audio/sparkle.wav',
   levelUp: '/assets/audio/level_up.mp3',
   click: '/assets/audio/click.mp3',
 };
 
-export const playSound = async (type, param = null) => {
+export const playSound = async (type) => {
   if (isMuted) return;
   const ctx = getCtx();
 
@@ -112,7 +111,7 @@ export const playSound = async (type, param = null) => {
  * @param {string} filename - The name of the file without extension
  */
 export const playTTS = async (filename) => {
-  if (isMuted) return;
+  if (isMuted) return false;
   const ctx = getCtx();
   const url = `/assets/audio/tts/${filename}.mp3`;
 
@@ -125,7 +124,10 @@ export const playTTS = async (filename) => {
     source.buffer = sfxCache[url];
     source.connect(masterGain);
     source.start();
+    return true;
   }
+
+  return false;
 };
 
 // ─── Background Music (BGM) Implementation ──────────────────────────────────
@@ -135,6 +137,10 @@ const THEME_FILES = {
   werecat: '/assets/audio/werecat_theme.mp3',
   milo: '/assets/audio/milo_theme.mp3',
   luna: '/assets/audio/luna_theme.mp3',
+  spelling_factory_main: '/assets/audio/spelling_factory_main.mp3',
+  spelling_factory_focus: '/assets/audio/spelling_factory_focus.mp3',
+  spelling_factory_celebration: '/assets/audio/spelling_factory_celebration.mp3',
+  spelling_factory_pop: '/assets/audio/spelling_factory_pop.mp3',
 };
 
 export const playTheme = async (themeId) => {
@@ -148,7 +154,6 @@ export const playTheme = async (themeId) => {
   if (url) {
     const buffer = await loadAudio(url);
     if (buffer && currentThemeId === themeId) { // Check if theme didn't change during load
-      currentBGMBuffer = buffer;
       currentBGMSource = ctx.createBufferSource();
       currentBGMSource.buffer = buffer;
       currentBGMSource.loop = true;
@@ -164,7 +169,11 @@ export const playTheme = async (themeId) => {
 
 export const stopTheme = () => {
   if (currentBGMSource) {
-    try { currentBGMSource.stop(); } catch (e) {}
+    try {
+      currentBGMSource.stop();
+    } catch {
+      // Source may already be stopped.
+    }
     currentBGMSource = null;
   }
   currentThemeId = null;

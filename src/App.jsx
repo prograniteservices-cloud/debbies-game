@@ -1,7 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { v4 as uuidv4 } from 'uuid';
-import { animate } from 'animejs';
 import { 
   Gamepad2, 
   BookOpen, 
@@ -19,7 +17,7 @@ import {
   Music,
   Image as ImageIcon
 } from 'lucide-react';
-import { playTheme, stopTheme, resumeAudio, playSound, setMuted, isSoundMuted } from './audio/soundEngine';
+import { playTheme, stopTheme, resumeAudio, setMuted } from './audio/soundEngine';
 import CountingLevel from './components/CountingLevel';
 import SpellingGame from './components/SpellingGame';
 import CursorSparkles from './components/CursorSparkles';
@@ -67,7 +65,7 @@ function App() {
 
   const loadProfileData = async (id) => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', id)
@@ -169,9 +167,42 @@ function App() {
     }
   };
 
-  const bgTheme = useMemo(() => {
-    return theme.bgThemes[(levelInfo.level - 1) % theme.bgThemes.length];
-  }, [levelInfo.level, themeId]);
+  const handleSpellingLevelComplete = async ({ level, score }) => {
+    const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+    const maxLevel = Math.max(localScores.spelling?.max_level || 1, level);
+    const maxScore = Math.max(localScores.spelling?.max_score || 0, score);
+
+    setLevelInfo(prev => ({
+      ...prev,
+      level: Math.max(prev.level, maxLevel),
+      score: Math.max(prev.score, maxScore),
+    }));
+
+    localScores.spelling = {
+      game_mode: 'spelling',
+      profile_id: profileId,
+      max_level: maxLevel,
+      max_score: maxScore,
+      updated_at: new Date().toISOString(),
+    };
+    localStorage.setItem('debbies_game_local_scores', JSON.stringify(localScores));
+
+    if (!profileId) return;
+
+    supabase.from('scores').upsert({
+      profile_id: profileId,
+      game_mode: 'spelling',
+      max_level: maxLevel,
+      max_score: maxScore,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'profile_id,game_mode' }).then(({ error }) => {
+      if (error) {
+        console.error("Spelling score save failed:", error);
+      }
+    }).catch(err => {
+      console.error("Unexpected spelling save error:", err);
+    });
+  };
 
   const toggleMute = () => {
     const newMuted = !muted;
@@ -348,7 +379,14 @@ function App() {
             exit={{ opacity: 0, scale: 1.1 }}
             className="absolute inset-0 flex flex-col items-center z-10 w-full h-full"
           >
-            <SpellingGame onBack={() => setGameState('LANDING')} theme={theme} />
+            <SpellingGame
+              onBack={() => {
+                setGameState('LANDING');
+                playTheme(themeId);
+              }}
+              theme={theme}
+              onLevelComplete={handleSpellingLevelComplete}
+            />
           </motion.div>
         )}
 

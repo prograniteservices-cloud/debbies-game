@@ -20,6 +20,9 @@
 
 ## 🎮 Phase 4: Core Gameplay & Content
 - [x] TASK-12 to TASK-16.
+- [x] **TASK-28**: Revamp Spelling Quest into Magic Letter Factory v1 with 60 levels, tap-first controls, generated-audio contract, and inline 5-level celebrations.
+- [ ] **TASK-29**: Expand Spelling Quest curriculum beyond the 60-level v1 set.
+- [ ] **TASK-30**: Evaluate Phaser for a future richer Spelling Quest scene/runtime upgrade.
 
 ## 💾 Phase 5: Persistence & Deployment
 - [x] TASK-17 to TASK-19.

@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Sparkles, Image as ImageIcon, Music } from 'lucide-react';
 import { useState } from 'react';
+import { SPELLING_FACTORY_GALLERY_ITEMS } from '../data/spellingGallery';
 
-const GalleryItem = ({ title, type, src, index, theme }) => {
+const GalleryItem = ({ title, type, src, index }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (e) => {
@@ -37,7 +38,7 @@ const GalleryItem = ({ title, type, src, index, theme }) => {
         >
           {src ? (
             type === 'video' ? (
-              <video src={src} controls autoPlay loop muted playsInline className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+              <video src={src} controls loop muted playsInline preload="metadata" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
             ) : type === 'music' ? (
               <audio src={src} controls className="w-full px-2 mt-auto mb-4" />
             ) : (
@@ -77,6 +78,7 @@ export default function ArtStudio({ onBack, theme }) {
     { title: 'Milo Theme Music Video', type: 'video', src: '/assets/videos/milo_theme.mp4' },
     { title: 'Luna Theme Music Video', type: 'video', src: '/assets/videos/luna_theme.mp4' },
     { title: 'Bonus Beat', type: 'video', src: '/assets/videos/bonus_theme.mp4' },
+    ...SPELLING_FACTORY_GALLERY_ITEMS,
   ];
 
   return (
@@ -106,7 +108,7 @@ export default function ArtStudio({ onBack, theme }) {
           className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 max-w-6xl mx-auto pb-20"
         >
           {items.map((item, i) => (
-            <GalleryItem key={i} index={i} {...item} theme={theme} />
+            <GalleryItem key={i} index={i} {...item} />
           ))}
         </motion.div>
       </div>

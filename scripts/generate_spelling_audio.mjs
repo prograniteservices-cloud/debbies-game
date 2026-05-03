@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import * as dotenv from 'dotenv';
+import { SPELLING_LEVELS } from '../src/data/spellingFactory.js';
 
 dotenv.config({ path: '.env.local' });
 
@@ -8,130 +9,139 @@ const API_KEY = process.env.GOOGLE_TTS_API_KEY;
 const TTS_URL = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${API_KEY}`;
 
 const CHARACTERS = {
-  debbie: { 
-    name: "Debbie", 
+  debbie: {
     voice: { languageCode: 'en-US', name: 'en-US-Studio-O', ssmlGender: 'FEMALE' },
     correct: [
-      "Magical job, Debbie! You're a spelling star!",
-      "Sparkle on, Debbie! That's exactly right!",
-      "Wow, Debbie! You found all the letters!"
+      "Magical job, Debbie! You powered the word machine!",
+      "Sparkle on, Debbie! That word is exactly right!",
+      "Wow, Debbie! The factory is glowing because of you!"
     ],
     incorrect: [
-      "Almost there, Debbie! Try one more time!",
-      "Not quite, but I believe in you, Debbie!",
-      "Oops! Let's find the right letter together, Debbie."
-    ]
+      "Almost there, Debbie. Try a different socket.",
+      "Not quite, Debbie. Look for the glowing clue.",
+      "Good try, Debbie. Let's find the next letter together."
+    ],
+    hint: [
+      "Listen closely and look for the next helpful letter.",
+      "The machine is giving you a clue.",
+      "Try the glowing letter first."
+    ],
   },
-  bubba: { 
-    name: "Bubba", 
+  bubba: {
     voice: { languageCode: 'en-US', name: 'en-US-Studio-Q', ssmlGender: 'MALE' },
     correct: [
-      "Boom! Great job, Bubba! You're a total hero!",
-      "Roar! Bubba, you're a spelling champion!",
-      "Bubba! That was super fast! Perfect!"
+      "Boom, Bubba! You fixed that word machine!",
+      "Roar, Bubba! That spelling was powerful!",
+      "Bubba, you stamped that word perfectly!"
     ],
     incorrect: [
-      "Almost, Bubba! Try again, big hero!",
-      "So close, Bubba! You've got this!",
-      "Oops! Even heroes need a second try, Bubba!"
-    ]
+      "Almost, Bubba. Try one more letter.",
+      "So close, Bubba. Check the glowing socket.",
+      "Good try, hero. Let's test another tile."
+    ],
+    hint: [
+      "The factory lights are showing the next step.",
+      "Listen to the clue and try again.",
+      "Look for the letter that matches the glowing socket."
+    ],
   },
-  milo: { 
-    name: "Milo", 
+  milo: {
     voice: { languageCode: 'en-US', name: 'en-US-Neural2-D', ssmlGender: 'MALE' },
     correct: [
-      "Incredible discovery, Milo! You spelled it!",
-      "You're a spelling explorer, Milo! Great work!",
-      "Milo, you found the right path! Perfect!"
+      "Incredible discovery, Milo! The word machine is fixed!",
+      "Great exploring, Milo. You spelled it!",
+      "Milo, that word badge is ready to stamp!"
     ],
     incorrect: [
-      "Almost, Milo! Let's explore another letter!",
-      "Not quite, but keep searching, Milo!",
-      "Oops! Let's find the right way, Milo!"
-    ]
+      "Almost, Milo. Let's explore another tile.",
+      "Not quite, Milo. The machine has another clue.",
+      "Good search, Milo. Try the glowing spot."
+    ],
+    hint: [
+      "The next clue is lighting up.",
+      "Listen again and follow the machine lights.",
+      "Try the letter that belongs in the glowing socket."
+    ],
   },
-  luna: { 
-    name: "Luna", 
+  luna: {
     voice: { languageCode: 'en-US', name: 'en-US-Neural2-H', ssmlGender: 'FEMALE' },
     correct: [
-      "How wise, Luna! You spelled it perfectly!",
-      "Brilliant work, Luna! You're so smart!",
-      "Luna, your spelling is wonderful!"
+      "Brilliant work, Luna! The word machine is shining!",
+      "Wonderful spelling, Luna. The factory is brighter now!",
+      "Luna, you found the perfect word pattern!"
     ],
     incorrect: [
-      "Almost, Luna! Think for a moment and try again.",
-      "Not quite, but I know you can do it, Luna.",
-      "Oops! Let's try that one more time, Luna."
-    ]
-  }
+      "Almost, Luna. Think for a moment and try again.",
+      "Not quite, Luna. Watch the glowing clue.",
+      "Good try, Luna. The next letter is close."
+    ],
+    hint: [
+      "The machine is sharing a helpful clue.",
+      "Listen again and follow the glowing letters.",
+      "Try the letter that fits the next space."
+    ],
+  },
 };
 
-const WORDS = [
-  "CAT", "DOG", "SUN", "BEE", "CAR", "HAT", "BAT", "COW", "PIG", "BOX", "CUP", "BUS",
-  "STAR", "FROG", "CAKE", "BIRD", "FISH", "DUCK", "MOON", "BEAR", "TREE", "BOAT", "DOOR", "SHOE"
-];
-
 async function speak(text, filename, voiceOptions) {
-  console.log(`🎙️ Synthesizing: "${text}" -> ${filename}.mp3`);
-  
+  console.log(`Synthesizing "${text}" -> ${filename}.mp3`);
+
   const body = {
     input: { text },
-    voice: voiceOptions || { languageCode: 'en-US', ssmlGender: 'NEUTRAL' },
+    voice: voiceOptions || { languageCode: 'en-US', name: 'en-US-Studio-O' },
     audioConfig: { audioEncoding: 'MP3' },
   };
 
-  try {
-    const response = await fetch(TTS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+  const response = await fetch(TTS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`TTS API Error: ${JSON.stringify(errorData)}`);
-    }
-
-    const data = await response.json();
-    const audioBuffer = Buffer.from(data.audioContent, 'base64');
-    
-    const outputDir = path.join(process.cwd(), 'public', 'assets', 'audio', 'tts');
-    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-    
-    fs.writeFileSync(path.join(outputDir, `${filename}.mp3`), audioBuffer);
-    console.log(`✅ Saved ${filename}.mp3`);
-  } catch (error) {
-    console.error(`❌ Error synthesizing ${filename}:`, error.message);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`TTS API error for ${filename}: ${JSON.stringify(errorData)}`);
   }
+
+  const data = await response.json();
+  const audioBuffer = Buffer.from(data.audioContent, 'base64');
+  const outputDir = path.join(process.cwd(), 'public', 'assets', 'audio', 'tts');
+
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, `${filename}.mp3`), audioBuffer);
 }
 
 async function main() {
   if (!API_KEY) {
-    console.error("❌ No GOOGLE_TTS_API_KEY found in .env.local");
-    return;
+    throw new Error('No GOOGLE_TTS_API_KEY found in .env.local');
   }
 
-  console.log("🚀 Starting TTS Generation for Spelling Game...");
+  const generatedWords = new Set();
 
-  // 1. Generate Words
-  for (const word of WORDS) {
-    await speak(word, `word_${word.toLowerCase()}`, { languageCode: 'en-US', name: 'en-US-Studio-O' });
-  }
-
-  // 2. Generate Character Phrases
-  for (const [key, char] of Object.entries(CHARACTERS)) {
-    // Correct phrases
-    for (let i = 0; i < char.correct.length; i++) {
-      await speak(char.correct[i], `${key}_correct_${i + 1}`, char.voice);
+  for (const level of SPELLING_LEVELS) {
+    if (!generatedWords.has(level.wordAudio)) {
+      await speak(level.word, level.wordAudio, { languageCode: 'en-US', name: 'en-US-Studio-O' });
+      generatedWords.add(level.wordAudio);
     }
-    
-    // Incorrect phrases
-    for (let i = 0; i < char.incorrect.length; i++) {
-      await speak(char.incorrect[i], `${key}_incorrect_${i + 1}`, char.voice);
+    await speak(level.hint, level.hintAudio, { languageCode: 'en-US', name: 'en-US-Studio-O' });
+  }
+
+  for (const [key, character] of Object.entries(CHARACTERS)) {
+    for (let i = 0; i < character.correct.length; i += 1) {
+      await speak(character.correct[i], `${key}_correct_${i + 1}`, character.voice);
+    }
+    for (let i = 0; i < character.incorrect.length; i += 1) {
+      await speak(character.incorrect[i], `${key}_incorrect_${i + 1}`, character.voice);
+    }
+    for (let i = 0; i < character.hint.length; i += 1) {
+      await speak(character.hint[i], `${key}_hint_${i + 1}`, character.voice);
     }
   }
 
-  console.log("✨ TTS Generation Complete!");
+  console.log('Spelling TTS generation complete.');
 }
 
-main();
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, BarChart, Clock, RefreshCw, Activity } from 'lucide-react';
+import { ArrowLeft, User, Clock, RefreshCw, Activity } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { THEMES } from '../themes';
 
@@ -46,6 +46,7 @@ export default function ParentDashboard({ onBack }) {
       // Use Supabase data if available, otherwise fall back to local
       let finalProfiles = profilesData || [];
       let finalScores = scoresData || [];
+      const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
       
       // If Supabase returned empty, try to reconstruct from localStorage
       if (finalProfiles.length === 0) {
@@ -80,6 +81,19 @@ export default function ParentDashboard({ onBack }) {
           }
         }
       }
+
+      Object.values(localScores).forEach(localScore => {
+        if (!localScore?.game_mode) return;
+        const existingIndex = finalScores.findIndex(score =>
+          score.profile_id === localScore.profile_id && score.game_mode === localScore.game_mode
+        );
+
+        if (existingIndex === -1) {
+          finalScores.push(localScore);
+        } else if ((localScore.max_score || 0) > (finalScores[existingIndex].max_score || 0)) {
+          finalScores[existingIndex] = localScore;
+        }
+      });
       
       setProfiles(finalProfiles);
       setScores(finalScores);
@@ -163,8 +177,6 @@ export default function ParentDashboard({ onBack }) {
               const profileScores = getProfileScores(profile.id);
               const mathScore = profileScores.find(s => s.game_mode === 'counting');
               const spellScore = profileScores.find(s => s.game_mode === 'spelling');
-              const themeColors = getThemeColors(profile.theme_id);
-
               return (
                 <motion.div 
                   key={profile.id}

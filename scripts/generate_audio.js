@@ -50,6 +50,10 @@ async function main() {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
   await generateAudio('A highly polished, premium UI sound effect for a successful action. Bright, magical, with a satisfying chime.', 'ding');
+  await generateAudio('Whimsical toy workshop soundtrack for a premium children spelling puzzle game. Marimba, pizzicato strings, glockenspiel, soft brushed drums, tiny magical machine ticks, upbeat but not frantic, 112 BPM, seamless loop.', 'spelling_factory_main');
+  await generateAudio('Light focus puzzle loop for a children spelling game. Gentle marimba pulse, soft pizzicato strings, airy glockenspiel accents, minimal percussion, calm concentration mood, 96 BPM, seamless loop.', 'spelling_factory_focus');
+  await generateAudio('Short celebration music bed for completing a magical word machine. Bright glockenspiel flourish, pizzicato strings, warm toy percussion, joyful child-safe reward energy, loopable 20 second stinger.', 'spelling_factory_celebration');
+  await generateAudio('Playful pop celebration music for a children spelling game bonus moment. Bouncy marimba, bubble pops, toy percussion, sparkly glockenspiel, 120 BPM, seamless loop.', 'spelling_factory_pop');
 }
 
 main();
