@@ -2,6 +2,13 @@ import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../supabaseClient';
 import { Sparkles, Map, Star, Award, Zap, Trophy, Goal, ArrowLeft, RotateCw } from 'lucide-react';
+import { normalizeScoreRecord } from '../utils/countingProgress';
+
+function normalizeScoreMap(scores) {
+  return Object.fromEntries(
+    Object.entries(scores).map(([mode, score]) => [mode, normalizeScoreRecord(score)])
+  );
+}
 
 const ACHIEVEMENTS_DATA = [
   {
@@ -79,10 +86,13 @@ export default function Achievements({ profileId, onBack, theme }) {
           
         if (!error && data) {
           const scoreDict = {};
-          data.forEach(s => scoreDict[s.game_mode] = s);
+          data.forEach(s => {
+            const score = normalizeScoreRecord(s);
+            scoreDict[score.game_mode] = score;
+          });
           
           // Merge with local fallback
-          const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+          const localScores = normalizeScoreMap(JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}'));
           Object.keys(localScores).forEach(mode => {
             if (!scoreDict[mode] || localScores[mode].max_score > (scoreDict[mode].max_score || 0)) {
               scoreDict[mode] = localScores[mode];
@@ -93,12 +103,12 @@ export default function Achievements({ profileId, onBack, theme }) {
         } else if (error) {
           console.error('Error fetching scores:', error);
           // Pure local fallback
-          const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+          const localScores = normalizeScoreMap(JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}'));
           setScores(localScores);
         }
       } catch (err) {
         console.error('Error in fetchScores:', err);
-        const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+        const localScores = normalizeScoreMap(JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}'));
         setScores(localScores);
       }
       setLoading(false);

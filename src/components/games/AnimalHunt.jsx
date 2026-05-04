@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, Suspense, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky, PointerLockControls, Stars, RoundedBox, Float, Text } from '@react-three/drei';
-import { ArrowLeft } from 'lucide-react';
+import { Sky, Stars, Float, Text } from '@react-three/drei';
+import { ArrowLeft, Heart, RotateCcw, Utensils } from 'lucide-react';
 import * as THREE from 'three';
+import { playSound } from '../../audio/soundEngine';
 
 const LEVELS = [
   {
@@ -79,13 +80,55 @@ const LEVELS = [
   }
 ];
 
+const WORLD_LIMIT = 34;
+const BIOME_SIZE = 30;
+const BIOMES = [
+  { ...LEVELS[0], center: [-18, 0, -18] },
+  { ...LEVELS[1], center: [18, 0, -18] },
+  { ...LEVELS[2], center: [-18, 0, 18] },
+  { ...LEVELS[3], center: [18, 0, 18] },
+  { ...LEVELS[4], center: [0, 0, 0] },
+];
+
+const WORLD_ANIMALS = BIOMES.flatMap((biome) =>
+  biome.animals.map((animal) => ({
+    ...animal,
+    id: `${biome.name}-${animal.name}`,
+    biome: biome.name,
+    position: [
+      animal.position[0] + biome.center[0],
+      animal.position[1],
+      animal.position[2] + biome.center[2],
+    ],
+  }))
+);
+
+const CARE_ACTIONS = {
+  feed: {
+    label: 'Feed',
+    completeLabel: 'Fed',
+    Icon: Utensils,
+    sound: 'ding',
+  },
+  pet: {
+    label: 'Pet',
+    completeLabel: 'Petted',
+    Icon: Heart,
+    sound: 'sparkle',
+  },
+};
+
+function isBefriended(care) {
+  return Boolean(care?.feed && care?.pet);
+}
+
 // --- Environment Components ---
 
-function Environment({ type, groundColor }) {
+function Environment({ type, groundColor, position = [0, 0, 0], size = 100 }) {
   return (
-    <>
+    <group position={position}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.5, 0]}>
-        <planeGeometry args={[100, 100]} />
+        <planeGeometry args={[size, size]} />
         <meshStandardMaterial color={groundColor} />
       </mesh>
 
@@ -144,7 +187,7 @@ function Environment({ type, groundColor }) {
           <BlockyReed position={[-15, 0, 5]} />
         </>
       )}
-    </>
+    </group>
   );
 }
 
@@ -484,27 +527,93 @@ function AnimalShape({ name, color }) {
   );
 }
 
+function CareBurst({ type, seed }) {
+  const groupRef = useRef();
+
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    const t = state.clock.getElapsedTime() + seed;
+    groupRef.current.rotation.y = t * 0.9;
+    groupRef.current.position.y = 1.8 + Math.sin(t * 3) * 0.18;
+  });
+
+  const color = type === 'feed' ? '#fbbf24' : '#fb7185';
+  const items = [0, 1, 2, 3, 4, 5];
+
+  return (
+    <group ref={groupRef}>
+      {items.map((item) => {
+        const angle = (item / items.length) * Math.PI * 2;
+        const x = Math.cos(angle) * 1.4;
+        const z = Math.sin(angle) * 1.4;
+
+        return (
+          <mesh key={`${type}-${seed}-${item}`} position={[x, item * 0.08, z]} castShadow>
+            {type === 'feed' ? (
+              <boxGeometry args={[0.24, 0.24, 0.24]} />
+            ) : (
+              <sphereGeometry args={[0.16, 12, 12]} />
+            )}
+            <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.35} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
 // --- Animal Component ---
 
-function BlockyAnimal({ position, color, name, onFind, found }) {
+function BlockyAnimal({ position, color, name, onSelect, care, selected, burst }) {
   const [hovered, setHover] = useState(false);
-  
-  if (found) return null;
+  const befriended = isBefriended(care);
 
   return (
     <group 
       position={position} 
       onPointerOver={() => setHover(true)}
       onPointerOut={() => setHover(false)}
-      onClick={() => onFind(name)}
+      onClick={(event) => {
+        event.stopPropagation();
+        onSelect();
+      }}
     >
       <Float speed={3} rotationIntensity={0.2} floatIntensity={0.5}>
-        <AnimalShape name={name} color={color} />
+        <group scale={selected ? 1.15 : 1}>
+          <AnimalShape name={name} color={color} />
+        </group>
       </Float>
+
+      {(selected || befriended) && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+          <torusGeometry args={[1.35, 0.05, 8, 40]} />
+          <meshStandardMaterial
+            color={befriended ? '#facc15' : '#38bdf8'}
+            emissive={befriended ? '#facc15' : '#38bdf8'}
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+      )}
+
+      {care?.feed && (
+        <mesh position={[-0.45, 2.35, 0]}>
+          <boxGeometry args={[0.32, 0.32, 0.32]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.2} />
+        </mesh>
+      )}
+
+      {care?.pet && (
+        <mesh position={[0.45, 2.35, 0]}>
+          <sphereGeometry args={[0.2, 12, 12]} />
+          <meshStandardMaterial color="#fb7185" emissive="#fb7185" emissiveIntensity={0.2} />
+        </mesh>
+      )}
+
+      {burst && <CareBurst type={burst.type} seed={burst.seed} />}
         
-      {hovered && (
+      {(hovered || selected || befriended) && (
         <Text
-          position={[0, 2.5, 0]}
+          position={[0, 2.85, 0]}
           fontSize={0.6}
           color="white"
           anchorX="center"
@@ -512,7 +621,7 @@ function BlockyAnimal({ position, color, name, onFind, found }) {
           outlineWidth={0.05}
           outlineColor="#000000"
         >
-          {name}!
+          {befriended ? `${name} friend!` : `${name}!`}
         </Text>
       )}
     </group>
@@ -521,103 +630,348 @@ function BlockyAnimal({ position, color, name, onFind, found }) {
 
 // --- Camera Controller ---
 
-function Rig() {
-  const { camera, mouse } = useThree();
-  const pitchRef = useRef(0);
-  const yawRef = useRef(0);
+function PlayerAvatar({ playerRef }) {
+  const groupRef = useRef();
 
   useFrame(() => {
-    const targetYaw = -mouse.x * Math.PI;
-    const targetPitch = mouse.y * Math.PI * 0.15;
-
-    yawRef.current = THREE.MathUtils.lerp(yawRef.current, targetYaw, 0.05);
-    pitchRef.current = THREE.MathUtils.lerp(pitchRef.current, targetPitch, 0.05);
-
-    camera.rotation.set(0, 0, 0);
-    camera.rotation.order = 'YXZ';
-    camera.rotation.y = yawRef.current;
-    camera.rotation.x = pitchRef.current;
+    if (!groupRef.current) return;
+    groupRef.current.position.copy(playerRef.current);
   });
+
+  return (
+    <group ref={groupRef}>
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <boxGeometry args={[0.8, 1.1, 0.6]} />
+        <meshStandardMaterial color="#fb7185" />
+      </mesh>
+      <mesh position={[0, 1.35, 0]} castShadow>
+        <boxGeometry args={[0.55, 0.55, 0.55]} />
+        <meshStandardMaterial color="#fde68a" />
+      </mesh>
+      <mesh position={[0, 1.8, 0]} castShadow>
+        <coneGeometry args={[0.28, 0.8, 4]} />
+        <meshStandardMaterial color="#fef3c7" />
+      </mesh>
+    </group>
+  );
+}
+
+function Rig({ controlsRef, playerRef }) {
+  const { camera } = useThree();
+
+  useFrame((_, delta) => {
+    const controls = controlsRef.current;
+    const keys = controls.keys;
+    const keyX = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    const keyY = (keys.forward ? 1 : 0) - (keys.back ? 1 : 0);
+    const moveX = controls.moveX || keyX;
+    const moveY = controls.moveY || keyY;
+
+    const forward = new THREE.Vector3(-Math.sin(controls.yaw), 0, -Math.cos(controls.yaw));
+    const right = new THREE.Vector3(Math.cos(controls.yaw), 0, -Math.sin(controls.yaw));
+    const movement = new THREE.Vector3()
+      .addScaledVector(forward, moveY)
+      .addScaledVector(right, moveX);
+
+    if (movement.lengthSq() > 0) {
+      movement.normalize().multiplyScalar(8 * delta);
+      playerRef.current.add(movement);
+      playerRef.current.x = THREE.MathUtils.clamp(playerRef.current.x, -WORLD_LIMIT, WORLD_LIMIT);
+      playerRef.current.z = THREE.MathUtils.clamp(playerRef.current.z, -WORLD_LIMIT, WORLD_LIMIT);
+    }
+
+    const lookTarget = playerRef.current.clone().addScaledVector(forward, 3);
+    lookTarget.y = 1.1 + controls.pitch * 3;
+    const cameraTarget = playerRef.current.clone().addScaledVector(forward, -8);
+    cameraTarget.y = 4.5;
+
+    camera.position.lerp(cameraTarget, 0.14);
+    camera.lookAt(lookTarget);
+  });
+
   return null;
 }
 
-export default function AnimalHunt({ onBack }) {
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [foundAnimals, setFoundAnimals] = useState([]);
-  
-  const level = LEVELS[currentLevel];
-  const animals = level.animals;
+function Joystick({ controlsRef }) {
+  const baseRef = useRef(null);
+  const pointerIdRef = useRef(null);
+  const [knob, setKnob] = useState({ x: 0, y: 0 });
 
-  const handleFind = (name) => {
-    if (!foundAnimals.includes(name)) {
-      setFoundAnimals([...foundAnimals, name]);
+  const updateMove = (event) => {
+    const rect = baseRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const radius = rect.width / 2;
+    const centerX = rect.left + radius;
+    const centerY = rect.top + radius;
+    const dx = THREE.MathUtils.clamp(event.clientX - centerX, -radius, radius);
+    const dy = THREE.MathUtils.clamp(event.clientY - centerY, -radius, radius);
+    const length = Math.min(radius, Math.hypot(dx, dy));
+    const angle = Math.atan2(dy, dx);
+    const x = Math.cos(angle) * length;
+    const y = Math.sin(angle) * length;
+
+    setKnob({ x, y });
+    controlsRef.current.moveX = x / radius;
+    controlsRef.current.moveY = -y / radius;
+  };
+
+  const resetMove = () => {
+    pointerIdRef.current = null;
+    setKnob({ x: 0, y: 0 });
+    controlsRef.current.moveX = 0;
+    controlsRef.current.moveY = 0;
+  };
+
+  return (
+    <div
+      ref={baseRef}
+      data-animal-hud
+      className="absolute bottom-6 left-5 z-20 h-28 w-28 rounded-full border-2 border-white/35 bg-white/15 shadow-2xl backdrop-blur-md touch-none sm:h-32 sm:w-32"
+      onPointerDown={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        pointerIdRef.current = event.pointerId;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        updateMove(event);
+      }}
+      onPointerMove={(event) => {
+        if (pointerIdRef.current !== event.pointerId) return;
+        event.preventDefault();
+        event.stopPropagation();
+        updateMove(event);
+      }}
+      onPointerUp={resetMove}
+      onPointerCancel={resetMove}
+    >
+      <div
+        className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300 shadow-lg shadow-black/20"
+        style={{ transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))` }}
+      />
+    </div>
+  );
+}
+
+export default function AnimalHunt({ onBack }) {
+  const [animalCare, setAnimalCare] = useState({});
+  const [selectedAnimalId, setSelectedAnimalId] = useState(null);
+  const [careBurst, setCareBurst] = useState(null);
+  const controlsRef = useRef({
+    moveX: 0,
+    moveY: 0,
+    yaw: 0,
+    pitch: 0,
+    keys: {
+      forward: false,
+      back: false,
+      left: false,
+      right: false,
+    },
+  });
+  const playerRef = useRef(new THREE.Vector3(0, 0, 10));
+  const lookDragRef = useRef(null);
+  const animals = useMemo(() => WORLD_ANIMALS, []);
+
+  useEffect(() => {
+    const setKey = (event, isDown) => {
+      const keys = controlsRef.current.keys;
+      if (['ArrowUp', 'w', 'W'].includes(event.key)) keys.forward = isDown;
+      if (['ArrowDown', 's', 'S'].includes(event.key)) keys.back = isDown;
+      if (['ArrowLeft', 'a', 'A'].includes(event.key)) keys.left = isDown;
+      if (['ArrowRight', 'd', 'D'].includes(event.key)) keys.right = isDown;
+    };
+
+    const handleKeyDown = (event) => setKey(event, true);
+    const handleKeyUp = (event) => setKey(event, false);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  const selectedAnimal = animals.find((animal) => animal.id === selectedAnimalId);
+  const selectedCare = selectedAnimal ? animalCare[selectedAnimal.id] || {} : {};
+
+  const handleSelectAnimal = (id) => {
+    setSelectedAnimalId(id);
+    playSound('click');
+  };
+
+  const handleCareAction = (action) => {
+    if (!selectedAnimal) return;
+
+    const nextCare = {
+      ...(animalCare[selectedAnimal.id] || {}),
+      [action]: true,
+    };
+    const wasBefriended = isBefriended(animalCare[selectedAnimal.id]);
+    const nowBefriended = isBefriended(nextCare);
+
+    setAnimalCare((current) => ({
+      ...current,
+      [selectedAnimal.id]: nextCare,
+    }));
+    setCareBurst({ id: selectedAnimal.id, type: action, seed: Date.now() });
+    playSound(CARE_ACTIONS[action].sound);
+    setTimeout(() => {
+      setCareBurst((current) => current?.id === selectedAnimal.id && current.type === action ? null : current);
+    }, 1300);
+
+    if (!wasBefriended && nowBefriended) {
+      setTimeout(() => playSound('levelUp'), 180);
     }
   };
 
-  const nextLevel = () => {
-    setFoundAnimals([]);
-    setCurrentLevel((currentLevel + 1) % LEVELS.length);
+  const resetWorld = () => {
+    setAnimalCare({});
+    setSelectedAnimalId(null);
+    setCareBurst(null);
+    playerRef.current.set(0, 0, 10);
+    controlsRef.current.yaw = 0;
+    controlsRef.current.pitch = 0;
   };
 
   const totalAnimals = animals.length;
-  const animalsLeft = totalAnimals - foundAnimals.length;
+  const befriendedCount = animals.filter((animal) => isBefriended(animalCare[animal.id])).length;
+  const animalsLeft = totalAnimals - befriendedCount;
 
   return (
-    <div className="relative w-full h-screen bg-slate-900 overflow-hidden">
-      {/* UI Overlay */}
-      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-10">
-        <div className="flex items-center gap-4 pointer-events-none">
+    <div
+      className="relative h-screen w-full overflow-hidden bg-sky-700 touch-none"
+      onPointerDownCapture={(event) => {
+        if (event.target instanceof HTMLElement && event.target.closest('[data-animal-hud]')) return;
+        if (event.clientX < window.innerWidth * 0.42) return;
+        lookDragRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      }}
+      onPointerMoveCapture={(event) => {
+        const drag = lookDragRef.current;
+        if (!drag || drag.id !== event.pointerId) return;
+
+        const dx = event.clientX - drag.x;
+        const dy = event.clientY - drag.y;
+        controlsRef.current.yaw -= dx * 0.006;
+        controlsRef.current.pitch = THREE.MathUtils.clamp(controlsRef.current.pitch - dy * 0.002, -0.35, 0.18);
+        lookDragRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      }}
+      onPointerUpCapture={(event) => {
+        if (lookDragRef.current?.id === event.pointerId) lookDragRef.current = null;
+      }}
+      onPointerCancelCapture={() => {
+        lookDragRef.current = null;
+      }}
+    >
+      <div className="pointer-events-none absolute left-0 top-0 z-10 flex w-full items-start justify-between gap-3 p-3 sm:p-5">
+        <div className="flex min-w-0 items-center gap-3">
           <button 
             onClick={onBack}
-            className="pointer-events-auto bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all"
+            className="pointer-events-auto rounded-full border border-white/25 bg-white/15 p-3 text-white shadow-xl backdrop-blur-md transition-all hover:bg-white/25"
+            aria-label="Back"
           >
             <ArrowLeft size={24} />
           </button>
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-3 border border-white/20 shadow-2xl">
-            <h1 className="text-2xl font-bold text-white mb-1">{level.name} Hunt</h1>
-            <p className="text-amber-200 font-medium">
-              {animalsLeft === 0 ? "Level Complete! 🎉" : `Find the animals: ${foundAnimals.length} / ${totalAnimals}`}
+          <div className="rounded-2xl border border-white/25 bg-slate-950/35 px-4 py-3 shadow-2xl backdrop-blur-md sm:px-5">
+            <h1 className="text-lg font-black text-white sm:text-2xl">Blocky Animal Island</h1>
+            <p className="text-sm font-bold text-amber-100 sm:text-base">
+              {animalsLeft === 0 ? "All animals are friends!" : `Friends ${befriendedCount} / ${totalAnimals}`}
             </p>
           </div>
         </div>
         {animalsLeft === 0 && (
           <button 
-            onClick={nextLevel}
+            onClick={resetWorld}
             className="pointer-events-auto bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold py-3 px-8 rounded-2xl transition-all transform hover:scale-105 active:scale-95 shadow-xl"
           >
-            Next Level
+            Play Again
           </button>
         )}
       </div>
 
-      <Canvas shadows camera={{ position: [0, 2, 0], fov: 75 }}>
+      <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 5, 16], fov: 65 }}>
         <Suspense fallback={null}>
-          <color attach="background" args={[level.skyColor]} />
-          <fog attach="fog" args={[level.fogColor, 1, 30]} />
+          <color attach="background" args={['#8bd3ff']} />
+          <fog attach="fog" args={['#8bd3ff', 28, 86]} />
           
-          <Sky sunPosition={[100, 20, 100]} />
-          <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-          <ambientLight intensity={0.6} />
-          <pointLight position={[10, 10, 10]} intensity={1.5} castShadow />
+          <Sky sunPosition={[100, 40, 100]} turbidity={5} rayleigh={0.8} />
+          <Stars radius={120} depth={50} count={1200} factor={4} saturation={0} fade speed={0.4} />
+          <ambientLight intensity={0.75} />
+          <directionalLight position={[12, 18, 10]} intensity={1.8} castShadow />
           
-          <Environment type={level.decorations} groundColor={level.groundColor} />
-
-          {/* Animals */}
-          {animals.map((animal) => (
-            <BlockyAnimal 
-              key={`${level.name}-${animal.name}`}
-              {...animal} 
-              onFind={handleFind}
-              found={foundAnimals.includes(animal.name)}
+          {BIOMES.map((biome) => (
+            <Environment
+              key={biome.name}
+              type={biome.decorations}
+              groundColor={biome.groundColor}
+              position={biome.center}
+              size={BIOME_SIZE}
             />
           ))}
 
-          <Rig />
+          {animals.map((animal) => (
+            <BlockyAnimal 
+              key={animal.id}
+              {...animal} 
+              onSelect={() => handleSelectAnimal(animal.id)}
+              care={animalCare[animal.id]}
+              selected={selectedAnimalId === animal.id}
+              burst={careBurst?.id === animal.id ? careBurst : null}
+            />
+          ))}
+
+          <PlayerAvatar playerRef={playerRef} />
+          <Rig controlsRef={controlsRef} playerRef={playerRef} />
         </Suspense>
       </Canvas>
+      <Joystick controlsRef={controlsRef} />
+
+      <div data-animal-hud className="pointer-events-none absolute bottom-5 right-4 z-20 flex w-[min(22rem,calc(100vw-9.5rem))] flex-col gap-3 sm:bottom-6 sm:right-6 sm:w-80">
+        {selectedAnimal ? (
+          <div className="pointer-events-auto rounded-3xl border border-white/25 bg-slate-950/55 p-4 text-white shadow-2xl backdrop-blur-xl">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">{selectedAnimal.biome}</p>
+                <h2 className="truncate text-2xl font-black leading-none">{selectedAnimal.name}</h2>
+              </div>
+              {isBefriended(selectedCare) && (
+                <span className="rounded-full bg-amber-300 px-3 py-1 text-xs font-black uppercase text-amber-950 shadow-lg">
+                  Friend
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(CARE_ACTIONS).map(([action, config]) => {
+                const Icon = config.Icon;
+                const complete = Boolean(selectedCare[action]);
+
+                return (
+                  <button
+                    key={action}
+                    onClick={() => handleCareAction(action)}
+                    className={`flex min-h-14 items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-base font-black shadow-lg transition active:scale-95 ${
+                      complete
+                        ? 'border-emerald-200/70 bg-emerald-300 text-emerald-950'
+                        : 'border-white/25 bg-white text-slate-900 hover:bg-amber-100'
+                    }`}
+                  >
+                    <Icon size={22} />
+                    {complete ? config.completeLabel : config.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="hidden rounded-full border border-white/20 bg-slate-950/30 px-4 py-3 text-center text-sm font-bold text-white/85 shadow-xl backdrop-blur-md sm:block">
+            Tap an animal to feed or pet it.
+          </div>
+        )}
+      </div>
       
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40 text-sm font-medium animate-pulse pointer-events-none text-center">
-        {level.decorations === 'underwater' ? 'Float through the ocean' : 'Look around the ' + level.name} • Click animals to find them
+      <div className="pointer-events-none absolute bottom-7 left-1/2 z-10 hidden -translate-x-1/2 rounded-full border border-white/20 bg-slate-950/25 px-4 py-2 text-center text-sm font-bold text-white/80 backdrop-blur-md sm:block">
+        Walk with the left stick or WASD. Drag the right side to look. Tap animals.
       </div>
     </div>
   );

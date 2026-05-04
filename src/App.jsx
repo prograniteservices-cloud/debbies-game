@@ -32,6 +32,22 @@ import AnimalHunt from './components/games/AnimalHunt';
 import MusicalRoom from './components/games/MusicalRoom';
 import { THEMES } from './themes';
 import { supabase } from './supabaseClient';
+import { getCountingLevelForScore, normalizeCountingProgress, toCountingLevelInfo } from './utils/countingProgress';
+
+function getLocalScores() {
+  try {
+    return JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+  } catch (err) {
+    console.error('Error reading local scores:', err);
+    return {};
+  }
+}
+
+function saveLocalScore(mode, score) {
+  const localScores = getLocalScores();
+  localScores[mode] = score;
+  localStorage.setItem('debbies_game_local_scores', JSON.stringify(localScores));
+}
 
 function App() {
   const [gameState, setGameState] = useState('PROFILE'); // PROFILE, LANDING, COUNTING, SPELLING, POPPING, ACHIEVEMENTS, PATTERNS, MEMORY, ART_STUDIO, ANIMAL_HUNT, MUSICAL_ROOM
@@ -82,11 +98,22 @@ function App() {
           .eq('game_mode', 'counting')
           .single();
         if (scoreData) {
-          setLevelInfo({ level: scoreData.max_level, score: scoreData.max_score });
+          const normalizedScore = normalizeCountingProgress(scoreData);
+          setLevelInfo(toCountingLevelInfo(normalizedScore));
+          saveLocalScore('counting', normalizedScore);
+        } else {
+          const localCountingScore = getLocalScores().counting;
+          if (localCountingScore) {
+            setLevelInfo(toCountingLevelInfo(localCountingScore));
+          }
         }
       }
     } catch (err) {
       console.error('Error loading profile', err);
+      const localCountingScore = getLocalScores().counting;
+      if (localCountingScore) {
+        setLevelInfo(toCountingLevelInfo(localCountingScore));
+      }
     }
   };
 
@@ -130,7 +157,7 @@ function App() {
   const handleLevelComplete = async () => {
     const prev = levelInfo;
     const newScore = prev.score + 1;
-    const newLevel = Math.floor(newScore / 5) + 1;
+    const newLevel = getCountingLevelForScore(newScore);
     const isLevelUp = newLevel > prev.level;
 
     // Update level info
@@ -145,19 +172,29 @@ function App() {
     // Upsert score to Supabase
     if (profileId) {
       const gameMode = (gameState === 'COUNTING' || returnState === 'COUNTING') ? 'counting' : 'spelling';
-      console.log(`Saving score for ${profileId} in mode ${gameMode}: Level ${newLevel}, Score ${newScore}`);
+      const scorePayload = gameMode === 'counting'
+        ? normalizeCountingProgress({
+          profile_id: profileId,
+          max_score: newScore,
+        })
+        : {
+          profile_id: profileId,
+          game_mode: gameMode,
+          max_level: newLevel,
+          max_score: newScore,
+        };
+      const scoreRecord = {
+        ...scorePayload,
+        updated_at: new Date().toISOString()
+      };
+      console.log(`Saving score for ${profileId} in mode ${gameMode}: Level ${scoreRecord.max_level}, Score ${scoreRecord.max_score}`);
+      saveLocalScore(gameMode, scoreRecord);
       
       supabase.from('scores').upsert({
-        profile_id: profileId,
-        game_mode: gameMode,
-        max_level: newLevel,
-        max_score: newScore,
-        updated_at: new Date().toISOString()
+        ...scoreRecord,
       }, { onConflict: 'profile_id,game_mode' }).then(({ error }) => {
         if (error) {
           console.error("❌ Supabase Save Failed:", error);
-          // Fallback: save to localStorage
-          localStorage.setItem(`score_${profileId}_${gameMode}`, JSON.stringify({ level: newLevel, score: newScore }));
         } else {
           console.log("✅ Score saved successfully!");
         }
@@ -168,7 +205,7 @@ function App() {
   };
 
   const handleSpellingLevelComplete = async ({ level, score }) => {
-    const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
+    const localScores = getLocalScores();
     const maxLevel = Math.max(localScores.spelling?.max_level || 1, level);
     const maxScore = Math.max(localScores.spelling?.max_score || 0, score);
 
@@ -185,7 +222,7 @@ function App() {
       max_score: maxScore,
       updated_at: new Date().toISOString(),
     };
-    localStorage.setItem('debbies_game_local_scores', JSON.stringify(localScores));
+    saveLocalScore('spelling', localScores.spelling);
 
     if (!profileId) return;
 

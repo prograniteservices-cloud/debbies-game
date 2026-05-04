@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, User, Clock, RefreshCw, Activity } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { THEMES } from '../themes';
+import { normalizeScoreRecord } from '../utils/countingProgress';
 
 export default function ParentDashboard({ onBack }) {
   const [profiles, setProfiles] = useState([]);
@@ -45,7 +46,7 @@ export default function ParentDashboard({ onBack }) {
       
       // Use Supabase data if available, otherwise fall back to local
       let finalProfiles = profilesData || [];
-      let finalScores = scoresData || [];
+      let finalScores = (scoresData || []).map(normalizeScoreRecord);
       const localScores = JSON.parse(localStorage.getItem('debbies_game_local_scores') || '{}');
       
       // If Supabase returned empty, try to reconstruct from localStorage
@@ -68,7 +69,7 @@ export default function ParentDashboard({ onBack }) {
               .select('*')
               .eq('profile_id', savedId);
             
-            if (singleScores) finalScores = singleScores;
+            if (singleScores) finalScores = singleScores.map(normalizeScoreRecord);
           } else {
             // Profile exists in localStorage but not in Supabase — show local info
             finalProfiles = [{
@@ -83,15 +84,16 @@ export default function ParentDashboard({ onBack }) {
       }
 
       Object.values(localScores).forEach(localScore => {
-        if (!localScore?.game_mode) return;
+        const normalizedLocalScore = normalizeScoreRecord(localScore);
+        if (!normalizedLocalScore?.game_mode) return;
         const existingIndex = finalScores.findIndex(score =>
-          score.profile_id === localScore.profile_id && score.game_mode === localScore.game_mode
+          score.profile_id === normalizedLocalScore.profile_id && score.game_mode === normalizedLocalScore.game_mode
         );
 
         if (existingIndex === -1) {
-          finalScores.push(localScore);
-        } else if ((localScore.max_score || 0) > (finalScores[existingIndex].max_score || 0)) {
-          finalScores[existingIndex] = localScore;
+          finalScores.push(normalizedLocalScore);
+        } else if ((normalizedLocalScore.max_score || 0) > (finalScores[existingIndex].max_score || 0)) {
+          finalScores[existingIndex] = normalizedLocalScore;
         }
       });
       
